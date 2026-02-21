@@ -101,6 +101,12 @@ const foodPackages = [
 ]
 
 const EventManagement=()=>{
+    const [step, setStep] = useState(1)
+    const [selectedEventType, setSelectedEventType] = useState(null)
+    const handleEventTypeSelect = (type) => {
+                                            setSelectedEventType(type)
+                                                setStep(2)
+                                            }
     return(
         <div className="pt-24 pb-16 min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -113,9 +119,44 @@ const EventManagement=()=>{
                     <p className="text-lg text-gray-600 max-w-2xl mx-auto animate-fade-in-up delay-100">
                         Plan your perfect event with us. Select your event type, then customise your decoration and dining options.
                     </p>
+                    {/*step 1*/}
+                    {step === 1 && (
+                    <div className="animate-fade-in-up">
+                        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">What are you celebrating?</h2>
+                        <p className="text-center text-gray-500 mb-8">Choose your event type to get started</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {eventTypes.map((event) => (
+                                <button
+                                    key={event.id}
+                                    onClick={() => handleEventTypeSelect(event)}
+                                    className={`group relative rounded-2xl overflow-hidden shadow-lg text-left transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl focus:outline-none
+                                        ${selectedEventType?.id === event.id ? 'ring-4 ring-teal-400 ring-offset-2' : ''}`}
+                                >
+                                    <div className="aspect-[4/3] overflow-hidden">
+                                        <img
+                                            src={event.image}
+                                            alt={event.name}
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                        />
+                                    </div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                                        <div className="text-3xl mb-1">{event.icon}</div>
+                                        <h3 className="text-xl font-bold text-white">{event.name}</h3>
+                                        <p className="text-white/80 text-sm mt-1 leading-snug">{event.description}</p>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 </div>
             </div>
         </div>
+
+        
     )
+
+
 }
 export default EventManagement
