@@ -151,10 +151,10 @@ const EventManagement=()=>{
                         </div>
                     </div>
                 )}
-                {/* ── STEP 2: Customise ──────────────────────────────────────── */}
+                {/*STEP 2:*/}
                 {step === 2 && selectedEventType && (
                     <div className="animate-fade-in-up">
-                        {/* Selected event badge */}
+                        {/*Select event ttypes*/}
                         <div className="flex items-center gap-3 mb-8">
                             <button
                                 onClick={() => setStep(1)}
@@ -168,13 +168,13 @@ const EventManagement=()=>{
                         </div>
 
                         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                            {/* Left Column: Options */}
+                            {/*Options */}
                             <div className="xl:col-span-2 space-y-10">
 
-                                {/* Guest Count */}
+                                {/*Gettting guest count*/}
                                 <div className="bg-white rounded-2xl shadow-md p-6">
                                     <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                        <span className="text-2xl">👥</span> Number of Guests
+                                    Number of Guests
                                     </h3>
                                     <div className="flex items-center gap-4">
                                         <button
@@ -200,7 +200,7 @@ const EventManagement=()=>{
                                 {/* Decoration Selection */}
                                 <div>
                                     <h3 className="text-xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-                                        <span className="text-2xl">✨</span> Decoration Style
+                                    Decoration Style
                                     </h3>
                                     <p className="text-gray-500 text-sm mb-5">Choose a decoration package that sets the mood</p>
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -249,11 +249,11 @@ const EventManagement=()=>{
                                     </div>
                                 </div>
 
-                                {/* Food Package Selection */}
+                                {/*need to add food selection here*/}
                                  
                             </div>
 
-                            {/* Right Column: Summary */}
+                            {/*summery*/}
                              
                         </div>
                     </div>
