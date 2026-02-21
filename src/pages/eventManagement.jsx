@@ -107,6 +107,8 @@ const EventManagement=()=>{
                                             setSelectedEventType(type)
                                                 setStep(2)
                                             }
+    const [guestCount, setGuestCount] = useState(50)
+    const [decorationType, setDecorationType] = useState('simple')
     return(
         <div className="pt-24 pb-16 min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -149,6 +151,114 @@ const EventManagement=()=>{
                         </div>
                     </div>
                 )}
+                {/* ── STEP 2: Customise ──────────────────────────────────────── */}
+                {step === 2 && selectedEventType && (
+                    <div className="animate-fade-in-up">
+                        {/* Selected event badge */}
+                        <div className="flex items-center gap-3 mb-8">
+                            <button
+                                onClick={() => setStep(1)}
+                                className="text-sm text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1 transition-colors"
+                            >
+                                ← Change Event
+                            </button>
+                            <span className="text-gray-300">|</span>
+                            <span className="text-2xl">{selectedEventType.icon}</span>
+                            <span className="font-semibold text-gray-700">{selectedEventType.name}</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                            {/* Left Column: Options */}
+                            <div className="xl:col-span-2 space-y-10">
+
+                                {/* Guest Count */}
+                                <div className="bg-white rounded-2xl shadow-md p-6">
+                                    <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                        <span className="text-2xl">👥</span> Number of Guests
+                                    </h3>
+                                    <div className="flex items-center gap-4">
+                                        <button
+                                            onClick={() => setGuestCount(g => Math.max(1, g - 5))}
+                                            className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-lg flex items-center justify-center transition-colors"
+                                        ></button>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={guestCount}
+                                            onChange={(e) => setGuestCount(Math.max(1, parseInt(e.target.value) || 0))}
+                                            className="w-24 text-center text-2xl font-bold px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:outline-none"
+                                            style={{ '--tw-ring-color': '#14b8a6' }}
+                                        />
+                                        <button
+                                            onClick={() => setGuestCount(g => g + 5)}
+                                            className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-lg flex items-center justify-center transition-colors"
+                                        >+</button>
+                                        <span className="text-gray-500 text-sm">guests</span>
+                                    </div>
+                                </div>
+
+                                {/* Decoration Selection */}
+                                <div>
+                                    <h3 className="text-xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+                                        <span className="text-2xl">✨</span> Decoration Style
+                                    </h3>
+                                    <p className="text-gray-500 text-sm mb-5">Choose a decoration package that sets the mood</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                                        {decorationOptions.map((deco) => (
+                                            <button
+                                                key={deco.id}
+                                                onClick={() => setDecorationType(deco.id)}
+                                                className={`group rounded-2xl overflow-hidden text-left transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 focus:outline-none
+                                                    ${decorationType === deco.id
+                                                        ? 'ring-4 ring-teal-400 ring-offset-2'
+                                                        : 'ring-2 ring-transparent'
+                                                    }`}
+                                            >
+                                                <div className="relative aspect-[4/3] overflow-hidden">
+                                                    <img
+                                                        src={deco.image}
+                                                        alt={deco.name}
+                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                    />
+                                                    {decorationType === deco.id && (
+                                                        <div className="absolute top-3 right-3 w-7 h-7 bg-teal-500 rounded-full flex items-center justify-center shadow-md">
+                                                            <span className="text-white text-xs font-bold">✓</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="p-4 bg-white">
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <span className="font-bold text-gray-900 capitalize">{deco.name}</span>
+                                                        <span className="text-teal-600 font-bold">${deco.price}</span>
+                                                    </div>
+                                                    <p className="text-gray-500 text-xs mb-3">{deco.description}</p>
+                                                    <div>
+                                                        <p className="text-xs font-semibold text-gray-700 mb-1.5">What's included:</p>
+                                                        <ul className="space-y-1">
+                                                            {deco.includes.map((item, i) => (
+                                                                <li key={i} className="text-xs text-gray-600 flex items-start gap-1.5">
+                                                                    <span className="text-teal-500 mt-0.5 flex-shrink-0">•</span>
+                                                                    {item}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Food Package Selection */}
+                                 
+                            </div>
+
+                            {/* Right Column: Summary */}
+                             
+                        </div>
+                    </div>
+                )}
+                
                 </div>
             </div>
         </div>
