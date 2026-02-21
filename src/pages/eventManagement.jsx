@@ -151,10 +151,10 @@ const EventManagement=()=>{
                         </div>
                     </div>
                 )}
-                {/*STEP 2 */}
+                {/* ── STEP 2: Customise ──────────────────────────────────────── */}
                 {step === 2 && selectedEventType && (
                     <div className="animate-fade-in-up">
-                        {/*event types*/}
+                        {/* Selected event badge */}
                         <div className="flex items-center gap-3 mb-8">
                             <button
                                 onClick={() => setStep(1)}
@@ -168,13 +168,13 @@ const EventManagement=()=>{
                         </div>
 
                         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                            {/*Options*/}
+                            {/* Left Column: Options */}
                             <div className="xl:col-span-2 space-y-10">
 
-                                {/*select guest count*/}
+                                {/* Guest Count */}
                                 <div className="bg-white rounded-2xl shadow-md p-6">
                                     <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                        Number of Guests
+                                        <span className="text-2xl">👥</span> Number of Guests
                                     </h3>
                                     <div className="flex items-center gap-4">
                                         <button
@@ -249,11 +249,11 @@ const EventManagement=()=>{
                                     </div>
                                 </div>
 
-                                {/*Food selection*/}
+                                {/* Food Package Selection */}
                                  
                             </div>
 
-                        
+                            {/* Right Column: Summary */}
                              
                         </div>
                     </div>
