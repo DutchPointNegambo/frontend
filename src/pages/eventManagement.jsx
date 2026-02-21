@@ -5,25 +5,25 @@ const eventTypes = [
     {
         id: 'birthday',
         name: 'Birthday Party',
-        image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&q=80',
+        image:'',
         description: '-----------------------',
     },
     {
         id: 'wedding',
         name: 'Wedding',
-        image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&q=80',
+        image: '',
         description: '-----------------------',
     },
     {
         id: 'anniversary',
         name: 'Anniversary',
-        image: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=600&q=80',
+        image: '',
         description: '--------------------------',
     },
     {
         id: 'corporate',
         name: 'Corporate Event',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80',
+        image: '',
         description: '-----------------------------',
     },
 ]
@@ -33,7 +33,7 @@ const decorationOptions = [
         id: 'simple',
         name: 'Simple',
         price: 500,
-        image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&q=80',
+        image: '',
         description: '------------------------------',
         includes: [
             'Balloon clusters (10 pcs)',
@@ -44,7 +44,7 @@ const decorationOptions = [
         id: 'elegant',
         name: 'Elegant',
         price: 1000,
-        image: 'https://images.unsplash.com/photo-1478146059778-26e0a2309283?w=600&q=80',
+        image: '',
         description: 'Sophisticated styling with premium floral arrangements.',
         includes: [
             'Premium floral arches',
@@ -55,7 +55,7 @@ const decorationOptions = [
         id: 'royal',
         name: 'Royal',
         price: 2000,
-        image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600&q=80',
+        image: '',
         description: 'Opulent, show-stopping luxury befitting royalty.',
         includes: [
             'Grand floral installations',
@@ -69,7 +69,7 @@ const foodPackages = [
         id: 'standard',
         name: 'Standard',
         pricePerHead: 25,
-        image: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=600&q=80',
+        image: '',
         description: 'A satisfying spread of classic favourites for every guest.',
         includes: [
             '3-course set menu',
@@ -80,7 +80,7 @@ const foodPackages = [
         id: 'premium',
         name: 'Premium',
         pricePerHead: 45,
-        image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80',
+        image: '',
         description: 'Elevated dining with richer ingredients and wider choices.',
         includes: [
             '4-course gourmet menu',
@@ -91,7 +91,7 @@ const foodPackages = [
         id: 'luxury',
         name: 'Luxury',
         pricePerHead: 75,
-        image: 'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600&q=80',
+        image: '',
         description: 'A full fine-dining experience with live cooking stations.',
         includes: [
             '5-course signature menu',
@@ -151,10 +151,10 @@ const EventManagement=()=>{
                         </div>
                     </div>
                 )}
-                {/* ── STEP 2: Customise ──────────────────────────────────────── */}
+                {/*STEP 2 */}
                 {step === 2 && selectedEventType && (
                     <div className="animate-fade-in-up">
-                        {/* Selected event badge */}
+                        {/*event types*/}
                         <div className="flex items-center gap-3 mb-8">
                             <button
                                 onClick={() => setStep(1)}
@@ -168,13 +168,13 @@ const EventManagement=()=>{
                         </div>
 
                         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                            {/* Left Column: Options */}
+                            {/*Options*/}
                             <div className="xl:col-span-2 space-y-10">
 
-                                {/* Guest Count */}
+                                {/*select guest count*/}
                                 <div className="bg-white rounded-2xl shadow-md p-6">
                                     <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                        <span className="text-2xl">👥</span> Number of Guests
+                                        Number of Guests
                                     </h3>
                                     <div className="flex items-center gap-4">
                                         <button
@@ -197,10 +197,10 @@ const EventManagement=()=>{
                                     </div>
                                 </div>
 
-                                {/* Decoration Selection */}
+                                {/*Select decoration types*/}
                                 <div>
                                     <h3 className="text-xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-                                        <span className="text-2xl">✨</span> Decoration Style
+                                    Decoration Style
                                     </h3>
                                     <p className="text-gray-500 text-sm mb-5">Choose a decoration package that sets the mood</p>
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -249,11 +249,11 @@ const EventManagement=()=>{
                                     </div>
                                 </div>
 
-                                {/* Food Package Selection */}
+                                {/*Food selection*/}
                                  
                             </div>
 
-                            {/* Right Column: Summary */}
+                        
                              
                         </div>
                     </div>
