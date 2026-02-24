@@ -7,7 +7,7 @@ const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const location = useLocation();
 
-    // Handle scroll effect
+    
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 50) {
@@ -25,7 +25,7 @@ const Navbar = () => {
         { name: 'Home', path: '/' },
         { name: 'Events', path: '/events' },
         { name: 'Sign In', path: '/signin' },
-        { name: 'Admin', path: '/admin' } // Keeping this for easy navigation
+        { name: 'Admin', path: '/admin' } 
     ];
 
     const isActive = (path) => location.pathname === path;
@@ -36,7 +36,7 @@ const Navbar = () => {
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center">
-                    {/* Logo */}
+                    
                     <Link to="/" className="flex items-center group">
                          <div className={`p-2 rounded-lg mr-3 transition-colors ${isScrolled ? 'bg-blue-600 text-white' : 'bg-white/20 text-white backdrop-blur-sm'}`}>
                             <Hotel size={24} />
@@ -46,7 +46,7 @@ const Navbar = () => {
                         </span>
                     </Link>
 
-                    {/* Desktop Navigation */}
+                    
                     <div className="hidden md:flex items-center space-x-8">
                         {navLinks.map((link) => (
                             <Link
