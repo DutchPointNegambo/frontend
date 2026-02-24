@@ -185,7 +185,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Gallery Preview Section */}
+      {/* Gallery  Section */}
+
       <section className="py-12 bg-gradient-to-b from-white to-navy-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-navy-800 mb-8 text-xl">
