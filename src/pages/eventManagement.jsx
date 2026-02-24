@@ -484,7 +484,7 @@ const EventManagement = () => {
                                         <button
                                             onClick={() => setGuestCount(g => Math.max(1, g - 5))}
                                             className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-lg flex items-center justify-center transition-colors"
-                                        ></button>
+                                        >-</button>
                                         <input
                                             type="number"
                                             min="1"
