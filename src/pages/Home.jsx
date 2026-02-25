@@ -11,6 +11,11 @@ const Home = () => {
     navigate('/rooms')
   }
 
+  const openDayOutingRooms = (e) => {
+    e.stopPropagation()
+    navigate('/day-outing-rooms')
+  }
+
   return (
     <div className="w-full">
       
@@ -122,6 +127,43 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Room 0 - Day out packeges */}
+            <div className="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-navy-50 group">
+              <div className="h-64 relative overflow-hidden">
+                {/*<img
+                  src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+                  alt="Deluxe Room"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />*/}
+                <div className="absolute top-4 left-4 bg-teal-600 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">
+                  Special Package
+                </div>
+              </div>
+              <div className="p-8">
+                <h3 className="text-2xl font-bold text-navy-900 mb-2 italic">Day Outing Rooms</h3>
+                <div className="flex gap-2 mb-4">
+                  <span className="px-2 py-1 bg-navy-50 text-navy-600 text-[10px] font-bold uppercase tracking-wider rounded border border-navy-100 italic">Full Day</span>
+                  <span className="px-2 py-1 bg-gold-50 text-gold-700 text-[10px] font-bold uppercase tracking-wider rounded border border-gold-100 italic">Inclusive</span>
+                </div>
+                <p className="text-navy-600 mb-6 line-clamp-2">
+                  Day out with your loved ones. Enjoy lunch, refreshments, and a relaxing day by the beach with our special day outing package.
+                </p>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-t border-navy-50 pt-4">
+                    <div>
+                      <span className="text-sm text-navy-500 block">Package Price</span>
+                      <span className="text-2xl font-extrabold text-navy-900 italic">LKR 13,000/-</span>
+                    </div>
+                    <button
+                      onClick={openDayOutingRooms}
+                      className="bg-teal-600 text-white px-6 py-3 rounded-2xl hover:bg-teal-500 transition-all duration-300 font-bold text-sm shadow-md hover:shadow-lg italic"
+                    >
+                      View Day Outing Rooms
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
             {/* Room 1 */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-navy-100">
                
