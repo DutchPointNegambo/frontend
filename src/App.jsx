@@ -11,6 +11,8 @@ import UserManagement from './pages/admin/UserManagement';
 import Home from './pages/Home';
 import SignIn from './pages/SignIn';
 import EventManagement from './pages/eventManagement';
+import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/ContactUs';
 
 
 // TEMPLATE FOR ROUTES ARE NOT CONFIGURES UP TO THIS POINT IN OUR PROJECT
@@ -48,6 +50,8 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
         <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />
+        <Route path="/about-us" element={<PublicLayout><AboutUs /></PublicLayout>} />
+        <Route path="/contact-us" element={<PublicLayout><ContactUs /></PublicLayout>} />
         <Route path="/signin" element={<PublicLayout><SignIn /></PublicLayout>} />
         <Route path="/events" element={<PublicLayout><EventManagement /></PublicLayout>} />
 
