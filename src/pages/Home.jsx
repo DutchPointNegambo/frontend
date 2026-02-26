@@ -3,6 +3,7 @@ import beach from "../assets/images/beach.jpeg";
 import room4 from "../assets/images/room4.jpeg";
 import beach2 from "../assets/images/beach2.jpeg";
 import room5 from "../assets/images/room5.jpeg";
+import semiLuxuryRooms from './semiLuxuryRooms';
 
 const Home = () => {
   const navigate = useNavigate()
@@ -13,7 +14,22 @@ const Home = () => {
 
   const openDayOutingRooms = (e) => {
     e.stopPropagation()
-    navigate('/day-outing-rooms')
+    navigate('/DayOutingRooms')
+  }
+
+  const openDeluxeRooms = (e) => {
+    e.stopPropagation()
+    navigate('/deluxeRooms')
+  }
+
+  const openSemiLuxuryRooms = (e) => {
+    e.stopPropagation()
+    navigate('/semiLuxuryRooms')
+  }
+
+    const openLuxuryRooms = (e) => {
+    e.stopPropagation()
+    navigate('/luxuryRooms')
   }
 
   return (
@@ -175,7 +191,7 @@ const Home = () => {
                 <div className="flex items-center justify-between">
                   {/* <span className="text-2xl font-bold text-navy-900"></span> */}
                   <button 
-                    onClick={handleViewDetails}
+                    onClick={openDeluxeRooms}
                     className="bg-gradient-to-r from-blue-700 to-blue-900 text-white px-6 py-2 rounded-xl hover:from-blue-800 hover:to-blue-950 transition-all duration-300 font-semibold"
                   >
                     View Details
@@ -195,7 +211,7 @@ const Home = () => {
                 <div className="flex items-center justify-between">
                   {/* <span className="text-2xl font-bold text-navy-900">Price</span> */}
                   <button 
-                    onClick={handleViewDetails}
+                    onClick={openSemiLuxuryRooms}
                     className="bg-gradient-to-r from-blue-700 to-blue-900 text-white px-6 py-2 rounded-xl hover:from-blue-800 hover:to-blue-950 transition-all duration-300 font-semibold"
                   >
                     View Details
@@ -215,7 +231,7 @@ const Home = () => {
                 <div className="flex items-center justify-between">
                   {/* <span className="text-2xl font-bold text-navy-900">Price</span> */}
                   <button 
-                    onClick={handleViewDetails}
+                    onClick={openLuxuryRooms}
                     className="bg-gradient-to-r from-blue-700 to-blue-900 text-white px-6 py-2 rounded-xl hover:from-blue-800 hover:to-blue-950 transition-all duration-300 font-semibold"
                   >
                     View Details
