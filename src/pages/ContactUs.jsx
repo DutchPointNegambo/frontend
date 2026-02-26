@@ -8,6 +8,7 @@ const ContactUs = () => {
     subject: '',
     message: '',
   })
+  const [status, setStatus] = useState({ loading: false, error: '', success: '' });
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -17,16 +18,41 @@ const ContactUs = () => {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    alert('Thank you for your message! We will get back to you soon.')
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: '',
-    })
+    setStatus({ loading: true, error: '', success: '' });
+
+    try {
+      const response = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong');
+      }
+
+      setStatus({ loading: false, error: '', success: 'Thank you for your message! We will get back to you soon.' });
+      
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
+      })
+
+      setTimeout(() => setStatus(prev => ({ ...prev, success: '' })), 5000);
+
+    } catch (err) {
+      console.error(err);
+      setStatus({ loading: false, error: err.message || 'Failed to send message. Please try again.', success: '' });
+    }
   }
 
   return (
@@ -37,6 +63,18 @@ const ContactUs = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
               <h2 className="text-3xl font-bold text-navy-900 mb-6">Send us a Message</h2>
+              
+              {status.error && (
+                <div className="mb-4 p-4 text-red-700 bg-red-100 rounded-lg border border-red-200">
+                  {status.error}
+                </div>
+              )}
+              {status.success && (
+                <div className="mb-4 p-4 text-green-700 bg-green-100 rounded-lg border border-green-200">
+                  {status.success}
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-semibold text-navy-900 mb-2">
@@ -119,9 +157,10 @@ const ContactUs = () => {
 
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-navy-700 to-navy-900 text-white px-6 py-4 rounded-xl font-bold text-lg hover:from-navy-800 hover:to-navy-950 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  disabled={status.loading}
+                  className={`w-full bg-gradient-to-r from-navy-700 to-navy-900 text-white px-6 py-4 rounded-xl font-bold text-lg hover:from-navy-800 hover:to-navy-950 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${status.loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
-                  Send Message
+                  {status.loading ? 'Sending...' : 'Send Message'}
                 </button>
               </form>
             </div>
