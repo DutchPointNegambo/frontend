@@ -34,7 +34,7 @@ const SignIn = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-50 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <Link to="/" className="inline-block mb-6 mt-4">
@@ -66,7 +66,7 @@ const SignIn = () => {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all border-gray-300"
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all border-gray-300"
                 />
               </div>
 
@@ -83,7 +83,7 @@ const SignIn = () => {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all border-gray-300"
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all border-gray-300"
                   
                 />
               </div>
@@ -102,7 +102,7 @@ const SignIn = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all border-gray-300"
+                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all border-gray-300"
                 
               />
             </div>
@@ -120,7 +120,7 @@ const SignIn = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all border-gray-300"
+                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all border-gray-300"
                 
               />
             </div>
@@ -139,7 +139,7 @@ const SignIn = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all border-gray-300"
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all border-gray-300"
                   
                 />
                 <p className="mt-1 text-xs text-gray-500">
@@ -160,7 +160,7 @@ const SignIn = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all border-gray-300"
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all border-gray-300"
                   
                 />
               </div>
@@ -169,7 +169,7 @@ const SignIn = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold text-lg hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {isSubmitting ? 'Creating Account...' : 'Create Account'}
             </button>
@@ -191,7 +191,7 @@ const SignIn = () => {
               Already have an account?{' '}
               <Link
                 to="/login"
-                className="text-blue-600 font-semibold hover:text-blue-700 transition-colors"
+                className="text-primary-600 font-semibold hover:text-primary-700 transition-colors"
               >
                 Log In
               </Link>
@@ -202,7 +202,7 @@ const SignIn = () => {
         <div className="mt-6 text-center">
           <Link
             to="/"
-            className="text-gray-600 hover:text-blue-600 transition-colors inline-flex items-center"
+            className="text-gray-600 hover:text-primary-600 transition-colors inline-flex items-center"
           >
             <svg
               className="w-5 h-5 mr-2"

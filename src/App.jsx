@@ -10,7 +10,6 @@ import Reports from './pages/admin/Reports';
 import UserManagement from './pages/admin/UserManagement';
 import Home from './pages/Home';
 import SignIn from './pages/SignIn';
-import Login from './pages/Login';
 import EventManagement from './pages/eventManagement';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
@@ -54,7 +53,6 @@ function App() {
         <Route path="/about-us" element={<PublicLayout><AboutUs /></PublicLayout>} />
         <Route path="/contact-us" element={<PublicLayout><ContactUs /></PublicLayout>} />
         <Route path="/signin" element={<PublicLayout><SignIn /></PublicLayout>} />
-        <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
         <Route path="/events" element={<PublicLayout><EventManagement /></PublicLayout>} />
 
         {/* Admin Routes */}
