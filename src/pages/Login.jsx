@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Reveal from "../components/Reveal"
+import { loginUser } from '../utils/api'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -23,19 +24,7 @@ const Login = () => {
     setError('')
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed')
-      }
+      const data = await loginUser(formData)
 
       // Success
       localStorage.setItem('userInfo', JSON.stringify(data))
