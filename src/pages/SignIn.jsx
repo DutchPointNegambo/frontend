@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import Reveal from "../components/Reveal"
 
 const SignIn = () => {
   const navigate = useNavigate()
@@ -15,17 +16,12 @@ const SignIn = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-
     setIsSubmitting(true)
-
     setTimeout(() => {
       setIsSubmitting(false)
       alert('Account created successfully! Please log in.')
@@ -34,192 +30,180 @@ const SignIn = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-50 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block mb-6 mt-4">
-            <div className="flex items-center justify-center space-x-2">
-              <span className="text-4xl"></span>
-              <div className="text-left">
-              </div>
+    <div className="h-screen flex selection:bg-teal-500 selection:text-white overflow-hidden">
+
+      <div className="hidden lg:flex lg:w-5/12 relative overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center scale-105 transition-transform duration-[20000ms] hover:scale-100"
+          style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
+          }}
+        />
+
+        <div className="absolute inset-0 bg-gradient-to-br from-navy-950/90 via-navy-900/60 to-teal-900/40" />
+
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full h-full">
+          <Link to="/" className="group inline-flex items-center gap-2">
+            <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/20 group-hover:bg-white/20 transition-all">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
             </div>
+            <span className="text-white font-bold tracking-widest text-xs uppercase">Return Home</span>
           </Link>
-          <h2 className="text-4xl font-bold text-gray-900 mb-2">
-            Create Your Account
-          </h2>
 
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label
-                  htmlFor="firstName"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  First Name 
-                </label>
-                <input
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all border-gray-300"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="lastName"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Last Name 
-                </label>
-                <input
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all border-gray-300"
-                  
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Email Address 
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all border-gray-300"
-                
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Phone Number 
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all border-gray-300"
-                
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Password 
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all border-gray-300"
-                  
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  Must be at least 8 characters
-                </p>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="confirmPassword"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Confirm Password 
-                </label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all border-gray-300"
-                  
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold text-lg hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              {isSubmitting ? 'Creating Account...' : 'Create Account'}
-            </button>
-          </form>
-
-          <div className="mt-6 mb-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center">
-            <p className="text-gray-600">
-              Already have an account?{' '}
-              <Link
-                to="/login"
-                className="text-primary-600 font-semibold hover:text-primary-700 transition-colors"
-              >
-                Log In
-              </Link>
+          <div>
+            <span className="text-sand-400 font-bold text-[10px] tracking-[0.3em] uppercase block mb-3 px-1 border-l-2 border-sand-500">
+              The Society
+            </span>
+            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight font-serif" style={{ fontFamily: 'var(--font-serif)' }}>
+              Join the <br />
+              <span className="text-sand-400 italic">Circle.</span>
+            </h2>
+            <p className="text-white/70 text-base max-w-sm font-light leading-relaxed">
+              Unlock a world of coastal luxury at Dutch Point Negombo.
             </p>
           </div>
-        </div>
 
-        <div className="mt-6 text-center">
-          <Link
-            to="/"
-            className="text-gray-600 hover:text-primary-600 transition-colors inline-flex items-center"
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            Back to Home
-          </Link>
+          <p className="text-white/30 text-[10px] uppercase tracking-widest">
+            © 2026 Dutch Point Negombo
+          </p>
         </div>
+      </div>
+
+
+      <div className="flex-1 flex flex-col items-center justify-center bg-sand-50 px-6 relative overflow-hidden">
+
+        <div className="absolute top-0 right-0 w-64 h-64 bg-navy-100/30 rounded-full -mr-32 -mt-32 blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-100/30 rounded-full -ml-32 -mb-32 blur-3xl" />
+
+        <Reveal width="100%" className="max-w-xl w-full relative z-10 text-center">
+          <div className="mb-4">
+            <Link to="/" className="inline-block mb-2 group">
+              <img
+                src="https://res.cloudinary.com/dtdgufs9u/image/upload/v1772345832/ChatGPT_Image_Feb_13_2026_02_11_36_PM_jgcxnu.png"
+                alt="Dutch Point Negombo"
+                className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
+              />
+            </Link>
+            <h2 className="text-2xl font-bold text-navy-950 mb-0.5 font-serif" style={{ fontFamily: 'var(--font-serif)' }}>
+              Create Account
+            </h2>
+            <p className="text-navy-500 font-light text-[10px] uppercase tracking-[0.2em]">Join our Exclusive Society</p>
+          </div>
+
+          <div className="bg-white rounded-3xl p-5 shadow-xl shadow-navy-950/5 border border-navy-50 relative group">
+            <form onSubmit={handleSubmit} className="space-y-3 text-left">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="signup-firstName" className="block text-xs font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    id="signup-firstName"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-sand-50/50 border border-navy-100 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-navy-900 text-sm placeholder:text-navy-300"
+                    placeholder="John"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="signup-lastName" className="block text-xs font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    id="signup-lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-sand-50/50 border border-navy-100 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-navy-900 text-sm placeholder:text-navy-300"
+                    placeholder="Doe"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="signup-email" className="block text-xs font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    id="signup-email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-sand-50/50 border border-navy-100 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-navy-900 text-sm placeholder:text-navy-300"
+                    placeholder="name@email.com"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="signup-phone" className="block text-xs font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    id="signup-phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-sand-50/50 border border-navy-100 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-navy-900 text-sm placeholder:text-navy-300"
+                    placeholder="+94 7X XXX XXXX"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="signup-password" className="block text-xs font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    id="signup-password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-sand-50/50 border border-navy-100 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-navy-900 text-sm placeholder:text-navy-300"
+                    placeholder="••••••••"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="signup-confirmPassword" className="block text-xs font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">
+                    Confirm Key
+                  </label>
+                  <input
+                    type="password"
+                    id="signup-confirmPassword"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-sand-50/50 border border-navy-100 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-navy-900 text-sm placeholder:text-navy-300"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-navy-950 text-white py-3 rounded-xl font-bold text-sm tracking-[0.15em] uppercase hover:bg-navy-900 transition-all shadow-lg shadow-navy-950/20 transform hover:-translate-y-0.5 disabled:opacity-60"
+              >
+                {isSubmitting ? 'Creating ID...' : 'Join the Society'}
+              </button>
+            </form>
+          </div>
+
+          <p className="mt-4 text-navy-400 font-light text-sm">
+            Already a member?{' '}
+            <Link to="/login" className="text-teal-600 font-bold hover:text-teal-700 transition-colors">
+              Sign In
+            </Link>
+          </p>
+        </Reveal>
       </div>
     </div>
   )
