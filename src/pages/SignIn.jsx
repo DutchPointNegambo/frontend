@@ -14,19 +14,54 @@ const SignIn = () => {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const [error, setError] = useState('')
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('')
+
+    // Basic validation
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+
     setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
-      alert('Account created successfully! Please log in.')
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed')
+      }
+
+      // Success
+      localStorage.setItem('userInfo', JSON.stringify(data))
+      alert('Account created successfully!')
       navigate('/login')
-    }, 1500)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -91,6 +126,12 @@ const SignIn = () => {
             </h2>
             <p className="text-navy-500 font-light text-[10px] uppercase tracking-[0.2em]">Join our Exclusive Society</p>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl font-bold uppercase tracking-wider">
+              {error}
+            </div>
+          )}
 
           <div className="bg-white rounded-3xl p-5 shadow-xl shadow-navy-950/5 border border-navy-50 relative group">
             <form onSubmit={handleSubmit} className="space-y-3 text-left">
