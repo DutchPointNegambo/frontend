@@ -53,8 +53,8 @@ function App() {
         <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />
         <Route path="/about-us" element={<PublicLayout><AboutUs /></PublicLayout>} />
         <Route path="/contact-us" element={<PublicLayout><ContactUs /></PublicLayout>} />
-        <Route path="/signin" element={<PublicLayout><SignIn /></PublicLayout>} />
-        <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/events" element={<PublicLayout><EventManagement /></PublicLayout>} />
 
         {/* Admin Routes */}
