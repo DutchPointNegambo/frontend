@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/admin_components/Sidebar';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -44,6 +44,16 @@ const PublicLayout = ({ children }) => (
   </div>
 );
 
+const ProtectedAdminRoute = ({ children }) => {
+  const userInfoStr = localStorage.getItem('userInfo');
+  const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
+  
+  if (!userInfo || (userInfo.role !== 'admin' && userInfo.role !== 'staff')) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
 function App() {
   return (
     <Router>
@@ -58,14 +68,14 @@ function App() {
         <Route path="/events" element={<PublicLayout><EventManagement /></PublicLayout>} />
 
         {/* Admin Routes */}
-        <Route path="/admin" element={<AdminLayout><Dashboard /></AdminLayout>} />
-        <Route path="/admin/rooms" element={<AdminLayout><PlaceholderPage title="Room Management" /></AdminLayout>} />
-        <Route path="/admin/bookings" element={<AdminLayout><PlaceholderPage title="Booking Management" /></AdminLayout>} />
-        <Route path="/admin/users" element={<AdminLayout><UserManagement /></AdminLayout>} />
-        <Route path="/admin/food" element={<AdminLayout><FoodOrdering /></AdminLayout>} />
-        <Route path="/admin/staff" element={<AdminLayout><Staff /></AdminLayout>} />
-        <Route path="/admin/finance" element={<AdminLayout><Reports /></AdminLayout>} />
-        <Route path="/admin/reports" element={<AdminLayout><Reports /></AdminLayout>} />
+        <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout><Dashboard /></AdminLayout></ProtectedAdminRoute>} />
+        <Route path="/admin/rooms" element={<ProtectedAdminRoute><AdminLayout><PlaceholderPage title="Room Management" /></AdminLayout></ProtectedAdminRoute>} />
+        <Route path="/admin/bookings" element={<ProtectedAdminRoute><AdminLayout><PlaceholderPage title="Booking Management" /></AdminLayout></ProtectedAdminRoute>} />
+        <Route path="/admin/users" element={<ProtectedAdminRoute><AdminLayout><UserManagement /></AdminLayout></ProtectedAdminRoute>} />
+        <Route path="/admin/food" element={<ProtectedAdminRoute><AdminLayout><FoodOrdering /></AdminLayout></ProtectedAdminRoute>} />
+        <Route path="/admin/staff" element={<ProtectedAdminRoute><AdminLayout><Staff /></AdminLayout></ProtectedAdminRoute>} />
+        <Route path="/admin/finance" element={<ProtectedAdminRoute><AdminLayout><Reports /></AdminLayout></ProtectedAdminRoute>} />
+        <Route path="/admin/reports" element={<ProtectedAdminRoute><AdminLayout><Reports /></AdminLayout></ProtectedAdminRoute>} />
       </Routes>
     </Router>
   );
