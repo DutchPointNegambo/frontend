@@ -3,10 +3,7 @@ import beach from "../assets/images/beach.jpeg";
 import room4 from "../assets/images/room4.jpeg";
 import beach2 from "../assets/images/beach2.jpeg";
 import room5 from "../assets/images/room5.jpeg";
-import Reveal from "../components/Reveal";
-import QuickBookingBar from "../components/QuickBookingBar";
-import { ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import semiLuxuryRooms from './semiLuxuryRooms';
 
 const Home = () => {
   const navigate = useNavigate()
@@ -16,82 +13,25 @@ const Home = () => {
     navigate('/contact-us')
   }
 
-  const [placeData, setPlaceData] = useState({ rating: 4.8, userRatingCount: 0 });
-  const [reviews, setReviews] = useState([]);
-  const [loadingReviews, setLoadingReviews] = useState(true);
+  const openDayOutingRooms = (e) => {
+    e.stopPropagation()
+    navigate('/DayOutingRooms')
+  }
 
-  useEffect(() => {
-    const fetchGoogleReviews = async () => {
-      setLoadingReviews(true);
-      try {
-        const response = await fetch('https://places.googleapis.com/v1/places/ChIJSeTqBADt4joRdyZCz1Dwf28?fields=displayName,rating,userRatingCount,reviews&key=AIzaSyAWyxrYDOrYFET60TsVZ_yCBZTpL-yc5QE');
-        const data = await response.json();
+  const openDeluxeRooms = (e) => {
+    e.stopPropagation()
+    navigate('/deluxeRooms')
+  }
 
-        if (data.rating) {
-          setPlaceData({
-            rating: data.rating,
-            userRatingCount: data.userRatingCount || 0
-          });
-        }
+  const openSemiLuxuryRooms = (e) => {
+    e.stopPropagation()
+    navigate('/semiLuxuryRooms')
+  }
 
-        if (data.reviews && data.reviews.length > 0) {
-          // Filter reviews with rating between 3.8 and 5.0
-          const filtered = data.reviews
-            .filter(r => r.rating >= 3.8)
-            .map(r => ({
-              author_name: r.authorAttribution?.displayName || "Guest",
-              profile_photo_url: r.authorAttribution?.photoUri || "https://i.pravatar.cc/150",
-              rating: r.rating,
-              text: r.text?.text || "",
-              relative_time_description: r.relativePublishTimeDescription || "Recently"
-            }));
-
-          // Sort by length of text to get the most substantial ones first, then take top 3
-          const top3 = filtered
-            .sort((a, b) => b.text.length - a.text.length)
-            .slice(0, 3);
-
-          setReviews(top3);
-        } else {
-          // Fallback if no reviews or API error
-          throw new Error("No reviews found");
-        }
-      } catch (error) {
-        console.error("Error fetching reviews:", error);
-        setReviews([
-          {
-            author_name: "Sarah Thompson",
-            profile_photo_url: "https://i.pravatar.cc/150?u=sarah",
-            rating: 5,
-            text: "An absolute paradise! The sound of the waves waking you up is something I will never forget. The staff at Dutch Point were incredibly attentive.",
-            relative_time_description: "a week ago"
-          },
-          {
-            author_name: "Marcus Chen",
-            profile_photo_url: "https://i.pravatar.cc/150?u=marcus",
-            rating: 5,
-            text: "Exceptional service and the food at the beach restaurant was world-class. Highly recommend for anyone looking for a quiet luxury escape.",
-            relative_time_description: "2 weeks ago"
-          },
-          {
-            author_name: "Elena Rodriguez",
-            profile_photo_url: "https://i.pravatar.cc/150?u=elena",
-            rating: 5,
-            text: "The perfect spot for our honeymoon. Private, luxurious, and the most beautiful sunsets in Negombo. We will definitely be back!",
-            relative_time_description: "1 month ago"
-          }
-        ]);
-      } finally {
-        setLoadingReviews(false);
-      }
-    };
-
-    fetchGoogleReviews();
-  }, []);
-
-  const toggleFaq = (index) => {
-    setOpenFaq(openFaq === index ? null : index);
-  };
+    const openLuxuryRooms = (e) => {
+    e.stopPropagation()
+    navigate('/luxuryRooms')
+  }
 
   return (
     <div className="w-full">
@@ -362,70 +302,60 @@ const Home = () => {
             </p>
           </Reveal>
 
-          <Reveal delay={0.2} width="100%">
-            <div className="max-w-6xl mx-auto">
-              <QuickBookingBar />
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* GALLERY SECTION */}
-      <section className="py-24 bg-navy-50/50 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            
-            <div className="text-left">
-              <Reveal>
-                <span className="text-teal-600 font-bold text-sm tracking-[0.3em] uppercase block mb-4">
-                  Visual Journey
-                </span>
-                <h2 className="text-4xl md:text-5xl font-bold text-navy-950 mb-8 leading-tight font-serif" style={{ fontFamily: 'var(--font-serif)' }}>
-                  Captured Moments at <br />
-                  <span className="text-sand-600 italic">Dutch Point</span>
-                </h2>
-                <p className="text-navy-600 text-lg leading-relaxed mb-10 max-w-md">
-                  Discover the exquisite beauty and tranquil atmosphere of our resort through these curated glimpses of paradise, from golden sunsets to luxury interiors.
-                </p>
-                <button
-                  onClick={() => navigate('/gallery')}
-                  className="group flex items-center gap-3 text-navy-950 font-bold uppercase tracking-widest text-xs hover:text-teal-600 transition-colors"
-                >
-                  View Full Gallery
-                  <span className="w-10 h-10 border border-navy-200 rounded-full flex items-center justify-center group-hover:bg-teal-600 group-hover:border-teal-600 group-hover:text-white transition-all duration-300">
-                    <ChevronRight size={18} />
-                  </span>
-                </button>
-              </Reveal>
-            </div>
-
-            
-            <div className="relative">
-              <div className="grid grid-cols-2 gap-4 h-[500px]">
-                
-                <div className="row-span-2">
-                  <Reveal delay={0.2} width="100%" className="h-full">
-                    <div className="relative h-full rounded-2xl overflow-hidden shadow-2xl group">
-                      <img src={beach} alt="Beachfront View" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                      <div className="absolute inset-0 bg-navy-950/20 group-hover:bg-transparent transition-colors duration-500" />
-                    </div>
-                  </Reveal>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Room 0 - Day out packeges */}
+            <div className="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-navy-50 group">
+              <div className="h-64 relative overflow-hidden">
+                {/*<img
+                  src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+                  alt="Deluxe Room"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />*/}
+                <div className="absolute top-4 left-4 bg-teal-600 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">
+                  Special Package
                 </div>
-
-              
-                <div className="flex flex-col gap-4 h-full">
-                  <Reveal delay={0.4} width="100%" className="h-1/2">
-                    <div className="relative h-full rounded-2xl overflow-hidden shadow-xl group">
-                      <img src={room4} alt="Luxury Suite" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                      <div className="absolute inset-0 bg-navy-950/10 group-hover:bg-transparent transition-colors duration-500" />
+              </div>
+              <div className="p-8">
+                <h3 className="text-2xl font-bold text-navy-900 mb-2 italic">Day Outing Rooms</h3>
+                <div className="flex gap-2 mb-4">
+                  <span className="px-2 py-1 bg-navy-50 text-navy-600 text-[10px] font-bold uppercase tracking-wider rounded border border-navy-100 italic">Full Day</span>
+                  <span className="px-2 py-1 bg-gold-50 text-gold-700 text-[10px] font-bold uppercase tracking-wider rounded border border-gold-100 italic">Inclusive</span>
+                </div>
+                <p className="text-navy-600 mb-6 line-clamp-2">
+                  Day out with your loved ones. Enjoy lunch, refreshments, and a relaxing day by the beach with our special day outing package.
+                </p>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-t border-navy-50 pt-4">
+                    <div>
+                      <span className="text-sm text-navy-500 block">Package Price</span>
+                      <span className="text-2xl font-extrabold text-navy-900 italic">LKR 13,000/-</span>
                     </div>
-                  </Reveal>
-                  <Reveal delay={0.6} width="100%" className="h-1/2">
-                    <div className="relative h-full rounded-2xl overflow-hidden shadow-xl group">
-                      <img src={beach2} alt="Resort Activities" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                      <div className="absolute inset-0 bg-navy-950/10 group-hover:bg-transparent transition-colors duration-500" />
-                    </div>
-                  </Reveal>
+                    <button
+                      onClick={openDayOutingRooms}
+                      className="bg-teal-600 text-white px-6 py-3 rounded-2xl hover:bg-teal-500 transition-all duration-300 font-bold text-sm shadow-md hover:shadow-lg italic"
+                    >
+                      View Day Outing Rooms
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Room 1 */}
+            <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-navy-100">
+               
+              <div className="p-6">
+                <h3 className="text-2xl font-bold text-navy-900 mb-2">Deluxe Rooms</h3>
+                {/* <p className="text-navy-600 mb-4">
+                  Spacious rooms with modern amenities and breathtaking city views
+                </p> */}
+                <div className="flex items-center justify-between">
+                  {/* <span className="text-2xl font-bold text-navy-900"></span> */}
+                  <button 
+                    onClick={openDeluxeRooms}
+                    className="bg-gradient-to-r from-blue-700 to-blue-900 text-white px-6 py-2 rounded-xl hover:from-blue-800 hover:to-blue-950 transition-all duration-300 font-semibold"
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
 
@@ -436,32 +366,43 @@ const Home = () => {
         </div>
       </section>
 
-      {/* reviews section */}
-      <section className="py-24 bg-sand-50 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <Reveal width="100%">
-            <div className="flex flex-col items-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-navy-950 mb-4 font-serif" style={{ fontFamily: 'var(--font-serif)' }}>
-                Guest Experiences
-              </h2>
-              <div className="flex items-center gap-2 text-navy-600 bg-navy-50 px-4 py-2 rounded-full border border-navy-100">
-                <svg className="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.92 3.32-2.12 4.52-1.48 1.48-3.32 2.24-5.72 2.24-4.48 0-8.08-3.6-8.08-8.08s3.6-8.08 8.08-8.08c2.44 0 4.28.96 5.64 2.28L20.52 4.6C18.6 2.76 15.96 1.5 12.48 1.5 6.44 1.5 1.5 6.44 1.5 12.48s4.94 10.98 10.98 10.98c3.28 0 5.76-1.08 7.8-3.16 2.12-2.12 2.8-5.12 2.8-7.56 0-.72-.04-1.4-.16-2H12.48z" />
-                </svg>
-                <span className="text-sm font-bold uppercase tracking-widest">{placeData.rating} Rating on Google</span>
+            {/* Room 2 */}
+            <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-navy-100">
+               
+              <div className="p-6">
+                <h3 className="text-2xl font-bold text-navy-900 mb-2">Semi Luxury</h3>
+                {/* <p className="text-navy-600 mb-4">
+                  Ultimate luxury with private balconies,premium services and direct beach view
+                </p> */}
+                <div className="flex items-center justify-between">
+                  {/* <span className="text-2xl font-bold text-navy-900">Price</span> */}
+                  <button 
+                    onClick={openSemiLuxuryRooms}
+                    className="bg-gradient-to-r from-blue-700 to-blue-900 text-white px-6 py-2 rounded-xl hover:from-blue-800 hover:to-blue-950 transition-all duration-300 font-semibold"
+                  >
+                    View Details
+                  </button>
+                </div>
               </div>
             </div>
           </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
-            {loadingReviews ? (
-             
-              [1, 2, 3].map((i) => (
-                <div key={i} className="bg-navy-50/50 border border-navy-100 p-10 rounded-3xl animate-pulse h-64">
-                  <div className="w-24 h-4 bg-navy-200 rounded mb-6"></div>
-                  <div className="w-full h-4 bg-navy-100 rounded mb-4"></div>
-                  <div className="w-full h-4 bg-navy-100 rounded mb-4"></div>
-                  <div className="w-2/3 h-4 bg-navy-100 rounded"></div>
+            {/* Room 3 */}
+            <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-navy-100">
+               
+              <div className="p-6">
+                <h3 className="text-2xl font-bold text-navy-900 mb-2">Luxury</h3>
+                {/* <p className="text-navy-600 mb-4">
+                  Stunning ocean views with premium amenities and direct beach access
+                </p> */}
+                <div className="flex items-center justify-between">
+                  {/* <span className="text-2xl font-bold text-navy-900">Price</span> */}
+                  <button 
+                    onClick={openLuxuryRooms}
+                    className="bg-gradient-to-r from-blue-700 to-blue-900 text-white px-6 py-2 rounded-xl hover:from-blue-800 hover:to-blue-950 transition-all duration-300 font-semibold"
+                  >
+                    View Details
+                  </button>
                 </div>
               ))
             ) : (
