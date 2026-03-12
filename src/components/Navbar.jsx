@@ -10,6 +10,7 @@ const Navbar = () => {
   const leftNavItems = [
     { name: 'Home', path: '/' },
     { name: 'Rooms', path: '#' },
+    { name: 'Dining', path: '/foods' },
     { name: 'Offers', path: '#' },
     { name: 'Gallery', path: '#' },
     { name: 'Events', path: '/events' },
