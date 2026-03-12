@@ -14,6 +14,7 @@ import Login from './pages/Login';
 import EventManagement from './pages/eventManagement';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
+import FoodItems from './pages/other/foods/FoodItems';
 
 
 // TEMPLATE FOR ROUTES ARE NOT CONFIGURES UP TO THIS POINT IN OUR PROJECT
@@ -56,6 +57,7 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/login" element={<Login />} />
         <Route path="/events" element={<PublicLayout><EventManagement /></PublicLayout>} />
+        <Route path="/foods" element={<PublicLayout><FoodItems /></PublicLayout>} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout><Dashboard /></AdminLayout>} />
