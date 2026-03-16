@@ -6,6 +6,8 @@ import DayOutingRooms from './pages/DayOutingRooms'
 import DeluxeRooms from './pages/deluxeRooms' 
 import SemiLuxuryRooms from './pages/semiLuxuryRooms'
 import LuxuryRooms from './pages/luxuryRooms'
+import AddRoomForm from './components/admin_components/AddRoomForm'
+
 
 function App() {
   return (
@@ -17,6 +19,9 @@ function App() {
       <Route path="/deluxeRooms" element={<DeluxeRooms />} />
       <Route path="/semiLuxuryRooms" element={<SemiLuxuryRooms />} />
       <Route path="/luxuryRooms" element={<LuxuryRooms />} />
+      <Route path="/addRoom" element={<AddRoomForm />} />
+
+
     </Routes>
   )
 }
