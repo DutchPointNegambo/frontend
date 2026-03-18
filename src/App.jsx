@@ -8,6 +8,8 @@ import FoodOrdering from './pages/admin/FoodOrdering';
 import Staff from './pages/admin/Staff';
 import Reports from './pages/admin/Reports';
 import UserManagement from './pages/admin/UserManagement';
+import RoomManagement from './pages/admin/RoomManagement';
+import BookingManagement from './pages/admin/BookingManagement';
 import Home from './pages/Home';
 import SignIn from './pages/SignIn';
 import Login from './pages/Login';
@@ -59,8 +61,8 @@ function App() {
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout><Dashboard /></AdminLayout>} />
-        <Route path="/admin/rooms" element={<AdminLayout><PlaceholderPage title="Room Management" /></AdminLayout>} />
-        <Route path="/admin/bookings" element={<AdminLayout><PlaceholderPage title="Booking Management" /></AdminLayout>} />
+        <Route path="/admin/rooms" element={<AdminLayout><RoomManagement /></AdminLayout>} />
+        <Route path="/admin/bookings" element={<AdminLayout><BookingManagement /></AdminLayout>} />
         <Route path="/admin/users" element={<AdminLayout><UserManagement /></AdminLayout>} />
         <Route path="/admin/food" element={<AdminLayout><FoodOrdering /></AdminLayout>} />
         <Route path="/admin/staff" element={<AdminLayout><Staff /></AdminLayout>} />
