@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Reveal from '../../../components/Reveal';
-import { ChevronRight, Star, Clock, Utensils } from 'lucide-react';
+import { ChevronRight, Star, Clock, Utensils, ShoppingCart, Check } from 'lucide-react';
+import { useCart } from '../../../context/CartContext';
 
 const FoodItems = () => {
+  const { addToCart } = useCart();
+  const [addedItems, setAddedItems] = useState({});
+
+  const handleAddToCart = (item) => {
+    addToCart(item);
+    setAddedItems((prev) => ({ ...prev, [item.id]: true }));
+    setTimeout(() => {
+      setAddedItems((prev) => ({ ...prev, [item.id]: false }));
+    }, 1500);
+  };
+
   const foodCategories = [
     {
       name: "Signature Dishes & Global Cuisine",
@@ -218,9 +230,25 @@ const FoodItems = () => {
                           <Clock size={14} />
                           {item.prepTime}
                         </div>
-                        <button className="flex items-center gap-2 text-teal-600 font-bold text-xs uppercase tracking-widest hover:text-teal-700 transition-colors">
-                          Order Now
-                          <ChevronRight size={16} />
+                        <button
+                          onClick={() => handleAddToCart(item)}
+                          className={`flex items-center gap-2 font-bold text-xs uppercase tracking-widest transition-all duration-300 px-4 py-2.5 rounded-xl ${
+                            addedItems[item.id]
+                              ? 'bg-green-500 text-white scale-105'
+                              : 'bg-teal-500 text-white hover:bg-teal-600 hover:scale-105 hover:shadow-lg hover:shadow-teal-500/25'
+                          }`}
+                        >
+                          {addedItems[item.id] ? (
+                            <>
+                              <Check size={16} />
+                              Added
+                            </>
+                          ) : (
+                            <>
+                              <ShoppingCart size={16} />
+                              Add to Cart
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
