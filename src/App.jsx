@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { CartProvider } from './context/CartContext';
 import Sidebar from './components/admin_components/Sidebar';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -47,6 +48,7 @@ const PublicLayout = ({ children }) => (
 
 function App() {
   return (
+    <CartProvider>
     <Router>
       <Routes>
         {/* Public Routes */}
@@ -70,6 +72,7 @@ function App() {
         <Route path="/admin/reports" element={<AdminLayout><Reports /></AdminLayout>} />
       </Routes>
     </Router>
+    </CartProvider>
   );
 }
 
