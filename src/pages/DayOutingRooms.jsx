@@ -15,9 +15,25 @@ const DayOutingRooms = () => {
     const [bookingSuccess, setBookingSuccess] = useState(false)
     const navigate = useNavigate()
 
+    const normalizeRoom = (room) => ({
+        ...room,
+        tagline: room.tagline || room.description || '',
+        tags: room.tags?.length ? room.tags : (room.features?.length ? room.features.slice(0, 4) : []),
+        capacity: room.capacity || `${room.guests || 2} Guests`,
+        size: room.size || '',
+        badge: room.badge || (room.view ? `${room.view} view` : 'Day Outing'),
+        badgeColor: room.badgeColor || 'bg-teal-500',
+        facilities: room.facilities?.length
+            ? room.facilities
+            : (room.features || []).map(f => ({ icon: '✦', label: f })),
+        includes: room.includes?.length
+            ? room.includes
+            : ['Pool access', 'Day use amenities', 'Complimentary lunch'],
+    })
+
     useEffect(() => {
         fetchRoomsByCategory('dayouting')
-            .then(data => setRooms(data))
+            .then(data => setRooms(data.map(normalizeRoom)))
             .catch(() => setError('Unable to load rooms. Please try again.'))
             .finally(() => setLoading(false))
     }, [])
@@ -35,7 +51,7 @@ const DayOutingRooms = () => {
             const result = await checkRoomAvailability(
                 selectedRoom._id,
                 outingDate,
-                outingDate  // same day for day outing
+                outingDate  
             )
             setAvailability(result.available)
         } catch {
@@ -80,7 +96,7 @@ const DayOutingRooms = () => {
                 </div>
             </section>
 
-            {/* Date Picker Bar */}
+            
             <section className="bg-white border-b border-navy-100 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
                     <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -120,7 +136,7 @@ const DayOutingRooms = () => {
                 </div>
             </section>
 
-            {/* Main Content */}
+            
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Left: Room Cards */}
@@ -130,7 +146,7 @@ const DayOutingRooms = () => {
                             Click a room card to preview facilities and package details.
                         </p>
 
-                        {/* Loading Skeletons */}
+                        {/* Loading */}
                         {loading && (
                             <div className="space-y-4">
                                 {[1, 2, 3].map(i => (
@@ -149,14 +165,14 @@ const DayOutingRooms = () => {
                             </div>
                         )}
 
-                        {/* Error */}
+                        
                         {error && (
                             <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
                                 <p className="text-red-600 font-semibold">{error}</p>
                             </div>
                         )}
 
-                        {/* Room Cards */}
+                        {/* Crds */}
                         {!loading && !error && rooms.map((room, idx) => (
                             <div
                                 key={room._id}
@@ -225,7 +241,7 @@ const DayOutingRooms = () => {
                         ))}
                     </div>
 
-                    {/* Right: Summary Panel */}
+                    {/* Summary*/}
                     <div className="lg:w-2/5">
                         <div className="sticky top-28">
                             {selectedRoom ? (
@@ -241,7 +257,7 @@ const DayOutingRooms = () => {
                                     </div>
 
                                     <div className="p-6 space-y-5">
-                                        {/* Price + Meta */}
+                                        
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <span className="text-xs text-navy-400 block">Package Price</span>
@@ -256,7 +272,7 @@ const DayOutingRooms = () => {
                                             </div>
                                         </div>
 
-                                        {/* Selected Date */}
+                                        
                                         {outingDate && (
                                             <div className="flex items-center gap-3 bg-teal-50 rounded-xl px-4 py-3 border border-teal-100">
                                                 <span className="text-xl">📅</span>
@@ -269,7 +285,7 @@ const DayOutingRooms = () => {
                                             </div>
                                         )}
 
-                                        {/* Availability result */}
+                                    
                                         {availability === true && (
                                             <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
                                                 <span className="text-green-500 text-xl">✅</span>
@@ -285,7 +301,7 @@ const DayOutingRooms = () => {
 
                                         <hr className="border-navy-100" />
 
-                                        {/* Facilities */}
+                                    
                                         <div>
                                             <h4 className="text-sm font-bold text-navy-900 uppercase tracking-widest mb-3">Room Facilities</h4>
                                             <div className="grid grid-cols-2 gap-2">
@@ -300,7 +316,7 @@ const DayOutingRooms = () => {
 
                                         <hr className="border-navy-100" />
 
-                                        {/* Package Includes */}
+                                    
                                         <div>
                                             <h4 className="text-sm font-bold text-navy-900 uppercase tracking-widest mb-3">Package Includes</h4>
                                             <ul className="space-y-1.5">
@@ -313,7 +329,7 @@ const DayOutingRooms = () => {
                                             </ul>
                                         </div>
 
-                                        {/* Confirm Booking */}
+                                        
                                         {bookingSuccess ? (
                                             <div className="bg-teal-50 border border-teal-200 rounded-2xl p-4 text-center">
                                                 <p className="text-teal-700 font-bold">Booking Confirmed!</p>

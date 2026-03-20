@@ -11,13 +11,30 @@ const DeluxeRooms = () => {
     const [selectedRoom, setSelectedRoom] = useState(null)
     const [checkIn, setCheckIn] = useState('')
     const [checkOut, setCheckOut] = useState('')
-    const [availability, setAvailability] = useState(null) // null | 'checking' | true | false
+    const [availability, setAvailability] = useState(null) 
     const [bookingSuccess, setBookingSuccess] = useState(false)
     const navigate = useNavigate()
 
+     
+    const normalizeRoom = (room) => ({
+        ...room,
+        tagline: room.tagline || room.description || '',
+        tags: room.tags?.length ? room.tags : (room.features?.length ? room.features.slice(0, 4) : []),
+        capacity: room.capacity || `${room.guests || 2} Guests`,
+        size: room.size || '',
+        badge: room.badge || (room.view ? `${room.view} view` : 'Deluxe'),
+        badgeColor: room.badgeColor || 'bg-blue-500',
+        facilities: room.facilities?.length
+            ? room.facilities
+            : (room.features || []).map(f => ({ icon: '✦', label: f })),
+        includes: room.includes?.length
+            ? room.includes
+            : ['Complimentary breakfast', 'Free Wi-Fi', 'Daily housekeeping'],
+    })
+
     useEffect(() => {
         fetchRoomsByCategory('deluxe')
-            .then(data => setRooms(data))
+            .then(data => setRooms(data.map(normalizeRoom)))
             .catch(() => setError('Unable to load rooms. Please try again.'))
             .finally(() => setLoading(false))
     }, [])
@@ -87,7 +104,7 @@ const DeluxeRooms = () => {
                 </div>
             </section>
 
-            {/* Date Picker Bar */}
+             
             <section className="bg-white border-b border-navy-100 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
                     <div className="flex flex-col sm:flex-row items-end gap-4 flex-wrap">
@@ -139,7 +156,7 @@ const DeluxeRooms = () => {
             {/* Main Content */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Left: Room Cards */}
+                     
                     <div className="lg:w-3/5 space-y-6">
                         <h2 className="text-2xl font-bold text-navy-900 mb-2">Select Your Room</h2>
                         <p className="text-navy-500 text-sm mb-6">Click a room card to preview facilities and package details.</p>
@@ -228,7 +245,7 @@ const DeluxeRooms = () => {
                         ))}
                     </div>
 
-                    {/* Right: Summary Panel */}
+                     
                     <div className="lg:w-2/5">
                         <div className="sticky top-28">
                             {selectedRoom ? (
@@ -255,7 +272,7 @@ const DeluxeRooms = () => {
                                             </div>
                                         </div>
 
-                                        {/* Dates summary */}
+                                         
                                         {checkIn && checkOut && calcNights() > 0 && (
                                             <div className="grid grid-cols-2 gap-2">
                                                 <div className="bg-blue-50 rounded-xl px-3 py-2 border border-blue-100">
@@ -273,7 +290,7 @@ const DeluxeRooms = () => {
                                             </div>
                                         )}
 
-                                        {/* Availability */}
+                                        
                                         {availability === true && (
                                             <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
                                                 <span className="text-green-500 text-xl">✅</span>

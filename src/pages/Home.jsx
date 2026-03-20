@@ -131,7 +131,7 @@ const Home = () => {
       </section>
 
 
-      {/* WHY CHOOSE US  section */}
+      
       <section className="py-24 bg-navy-50/30 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
@@ -181,7 +181,7 @@ const Home = () => {
 
 
 
-      {/* OFFER SECTION  */}
+       
       <section className="py-24 bg-sand-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-16">
@@ -278,7 +278,7 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
 
-            {/* Semi-Luxury Room Card */}
+             
             <Reveal delay={0.1}>
               <div className="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer" onClick={openSemiLuxuryRooms}>
                 <img src={room4} alt="Semi-Luxury Room" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
@@ -291,7 +291,7 @@ const Home = () => {
               </div>
             </Reveal>
 
-            {/* Luxury Room Card */}
+             
             <Reveal delay={0.2}>
               <div className="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer" onClick={openLuxuryRooms}>
                 <img src={room5} alt="Luxury Room" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
@@ -304,7 +304,7 @@ const Home = () => {
               </div>
             </Reveal>
 
-            {/* Deluxe Room Card */}
+             
             <Reveal delay={0.3}>
               <div className="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer" onClick={openDeluxeRooms}>
                 <img src={beach} alt="Deluxe Room" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
@@ -317,7 +317,7 @@ const Home = () => {
               </div>
             </Reveal>
 
-            {/* Day Outing Room Card */}
+             
             <Reveal delay={0.4} >
               <div className="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer md:col-span-2 lg:col-span-3" onClick={openDayOutingRooms}>
                 <img src={beach2} alt="Day Outing" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
@@ -358,132 +358,7 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Room 0 - Day out packages */}
-            <Reveal delay={0.1} width="100%">
-              <div className="group bg-white/10 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/20 hover:border-teal-400/50 transition-all duration-500 shadow-2xl flex flex-col h-full">
-                <div className="h-48 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-teal-600/20 to-navy-950/40 z-10" />
-                  <img
-                    src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-                    alt="Day Outing"
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                  />
-                  <div className="absolute top-4 left-4 z-20 bg-teal-500 text-white px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-lg">
-                    Best Value
-                  </div>
-                </div>
-                <div className="p-6 flex-grow flex flex-col">
-                  <h3 className="text-xl font-bold text-white mb-2 font-serif" style={{ fontFamily: 'var(--font-serif)' }}>Day Outing Rooms</h3>
-                  <div className="flex gap-2 mb-4">
-                    <span className="text-[9px] text-teal-300 font-bold uppercase tracking-widest px-2 py-0.5 border border-teal-500/30 rounded">Full Day</span>
-                  </div>
-                  <div className="mt-auto pt-6 border-t border-white/10 flex items-center justify-between">
-                    <div>
-                      <span className="text-3xl font-bold text-white">LKR 13,000</span>
-                      <p className="text-[10px] text-white/40 uppercase tracking-widest mt-1">Net Package</p>
-                    </div>
-                    <button
-                      onClick={openDayOutingRooms}
-                      className="w-12 h-12 bg-teal-500 rounded-2xl flex items-center justify-center text-white hover:bg-teal-400 hover:rotate-90 transition-all duration-500 shadow-lg shadow-teal-500/20"
-                    >
-                      <Plus size={20} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="group bg-white/10 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/20 hover:border-teal-400/50 transition-all duration-500 shadow-2xl flex flex-col h-full">
-                <div className="h-48 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-teal-600/20 to-navy-950/40 z-10" />
-                  <img
-                    src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-                    alt="Day Outing"
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                  />
-                  <div className="absolute top-4 left-4 z-20 bg-teal-500 text-white px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-lg">
-                    Best Value
-                  </div>
-                </div>
-                <div className="p-6 flex-grow flex flex-col">
-                  <h3 className="text-xl font-bold text-white mb-2 font-serif" style={{ fontFamily: 'var(--font-serif)' }}>Day Outing Rooms</h3>
-                  <div className="flex gap-2 mb-4">
-                    <span className="text-[9px] text-teal-300 font-bold uppercase tracking-widest px-2 py-0.5 border border-teal-500/30 rounded">Full Day</span>
-                  </div>
-                  <div className="mt-auto pt-6 border-t border-white/10 flex items-center justify-between">
-                    <div>
-                      <span className="text-3xl font-bold text-white">LKR 13,000</span>
-                      <p className="text-[10px] text-white/40 uppercase tracking-widest mt-1">Net Package</p>
-                    </div>
-                    <button
-                      onClick={openDayOutingRooms}
-                      className="w-12 h-12 bg-teal-500 rounded-2xl flex items-center justify-center text-white hover:bg-teal-400 hover:rotate-90 transition-all duration-500 shadow-lg shadow-teal-500/20"
-                    >
-                      <Plus size={20} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="group bg-white/10 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/20 hover:border-teal-400/50 transition-all duration-500 shadow-2xl flex flex-col h-full">
-                <div className="h-48 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-teal-600/20 to-navy-950/40 z-10" />
-                  <img
-                    src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-                    alt="Day Outing"
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                  />
-                  <div className="absolute top-4 left-4 z-20 bg-teal-500 text-white px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-lg">
-                    Best Value
-                  </div>
-                </div>
-                <div className="p-6 flex-grow flex flex-col">
-                  <h3 className="text-xl font-bold text-white mb-2 font-serif" style={{ fontFamily: 'var(--font-serif)' }}>Day Outing Rooms</h3>
-                  <div className="flex gap-2 mb-4">
-                    <span className="text-[9px] text-teal-300 font-bold uppercase tracking-widest px-2 py-0.5 border border-teal-500/30 rounded">Full Day</span>
-                  </div>
-                  <div className="mt-auto pt-6 border-t border-white/10 flex items-center justify-between">
-                    <div>
-                      <span className="text-3xl font-bold text-white">LKR 13,000</span>
-                      <p className="text-[10px] text-white/40 uppercase tracking-widest mt-1">Net Package</p>
-                    </div>
-                    <button
-                      onClick={openDayOutingRooms}
-                      className="w-12 h-12 bg-teal-500 rounded-2xl flex items-center justify-center text-white hover:bg-teal-400 hover:rotate-90 transition-all duration-500 shadow-lg shadow-teal-500/20"
-                    >
-                      <Plus size={20} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="group bg-white/10 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/20 hover:border-teal-400/50 transition-all duration-500 shadow-2xl flex flex-col h-full">
-                <div className="h-48 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-teal-600/20 to-navy-950/40 z-10" />
-                  <img
-                    src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-                    alt="Day Outing"
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                  />
-                  <div className="absolute top-4 left-4 z-20 bg-teal-500 text-white px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-lg">
-                    Best Value
-                  </div>
-                </div>
-                <div className="p-6 flex-grow flex flex-col">
-                  <h3 className="text-xl font-bold text-white mb-2 font-serif" style={{ fontFamily: 'var(--font-serif)' }}>Day Outing Rooms</h3>
-                  <div className="flex gap-2 mb-4">
-                    <span className="text-[9px] text-teal-300 font-bold uppercase tracking-widest px-2 py-0.5 border border-teal-500/30 rounded">Full Day</span>
-                  </div>
-                  <div className="mt-auto pt-6 border-t border-white/10 flex items-center justify-between">
-                    <div>
-                      <span className="text-3xl font-bold text-white">LKR 13,000</span>
-                      <p className="text-[10px] text-white/40 uppercase tracking-widest mt-1">Net Package</p>
-                    </div>
-                    <button
-                      onClick={openDayOutingRooms}
-                      className="w-12 h-12 bg-teal-500 rounded-2xl flex items-center justify-center text-white hover:bg-teal-400 hover:rotate-90 transition-all duration-500 shadow-lg shadow-teal-500/20"
-                    >
-                      <Plus size={20} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </Reveal>
+            
 
             {/* {[
               { name: 'Deluxe', price: '25k', color: 'teal', action: openDeluxeRooms },
@@ -543,7 +418,7 @@ const Home = () => {
             ))}
           </Reveal>
 
-          {/* FAQ SECTION  */}
+           
           <div className="max-w-4xl mx-auto py-24 border-t border-navy-100">
             <Reveal width="100%">
               <h2 className="text-3xl md:text-4xl font-bold text-navy-950 mb-12 font-serif" style={{ fontFamily: 'var(--font-serif)' }}>

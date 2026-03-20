@@ -15,9 +15,26 @@ const SemiLuxuryRooms = () => {
     const [bookingSuccess, setBookingSuccess] = useState(false)
     const navigate = useNavigate()
 
+    
+    const normalizeRoom = (room) => ({
+        ...room,
+        tagline: room.tagline || room.description || '',
+        tags: room.tags?.length ? room.tags : (room.features?.length ? room.features.slice(0, 4) : []),
+        capacity: room.capacity || `${room.guests || 2} Guests`,
+        size: room.size || '',
+        badge: room.badge || (room.view ? `${room.view} view` : 'Semi-Luxury'),
+        badgeColor: room.badgeColor || 'bg-teal-500',
+        facilities: room.facilities?.length
+            ? room.facilities
+            : (room.features || []).map(f => ({ icon: '✦', label: f })),
+        includes: room.includes?.length
+            ? room.includes
+            : ['Complimentary breakfast', 'Free Wi-Fi', 'Daily housekeeping'],
+    })
+
     useEffect(() => {
         fetchRoomsByCategory('semiluxury')
-            .then(data => setRooms(data))
+            .then(data => setRooms(data.map(normalizeRoom)))
             .catch(() => setError('Unable to load rooms. Please try again.'))
             .finally(() => setLoading(false))
     }, [])

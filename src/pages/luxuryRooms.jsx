@@ -15,9 +15,26 @@ const LuxuryRooms = () => {
     const [bookingSuccess, setBookingSuccess] = useState(false)
     const navigate = useNavigate()
 
+  
+    const normalizeRoom = (room) => ({
+        ...room,
+        tagline: room.tagline || room.description || '',
+        tags: room.tags?.length ? room.tags : (room.features?.length ? room.features.slice(0, 4) : []),
+        capacity: room.capacity || `${room.guests || 2} Guests`,
+        size: room.size || '',
+        badge: room.badge || (room.view ? `${room.view} view` : 'Luxury'),
+        badgeColor: room.badgeColor || 'bg-amber-500',
+        facilities: room.facilities?.length
+            ? room.facilities
+            : (room.features || []).map(f => ({ icon: '✦', label: f })),
+        includes: room.includes?.length
+            ? room.includes
+            : ['Complimentary breakfast', 'Free Wi-Fi', 'Daily housekeeping'],
+    })
+
     useEffect(() => {
         fetchRoomsByCategory('luxury')
-            .then(data => setRooms(data))
+            .then(data => setRooms(data.map(normalizeRoom)))
             .catch(() => setError('Unable to load rooms. Please try again.'))
             .finally(() => setLoading(false))
     }, [])
@@ -74,7 +91,7 @@ const LuxuryRooms = () => {
                 </div>
             </section>
 
-            {/* Date Picker Bar */}
+             
             <section className="bg-white border-b border-navy-100 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
                     <div className="flex flex-col sm:flex-row items-end gap-4 flex-wrap">
