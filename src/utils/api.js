@@ -24,8 +24,10 @@ export async function loginUser(payload) {
   return data;
 }
 
-export async function fetchRoomsByCategory(category) {
-  const response = await fetch(`${API_URL}/rooms/category/${category}`);
+export async function fetchRoomsByCategory(category, packageType) {
+  let url = `${API_URL}/rooms/category/${category}`;
+  if (packageType) url += `?package=${packageType}`;
+  const response = await fetch(url);
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || 'Failed to fetch rooms');
   return data;
