@@ -9,6 +9,7 @@ const LuxuryRooms = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [selectedRoom, setSelectedRoom] = useState(null)
+    const [selectedPackage, setSelectedPackage] = useState('full-board')
     const [checkIn, setCheckIn] = useState('')
     const [checkOut, setCheckOut] = useState('')
     const [availability, setAvailability] = useState(null)
@@ -33,11 +34,16 @@ const LuxuryRooms = () => {
     })
 
     useEffect(() => {
-        fetchRoomsByCategory('luxury')
+        setLoading(true)
+        setError(null)
+        setSelectedRoom(null)
+        setAvailability(null)
+        setBookingSuccess(false)
+        fetchRoomsByCategory('luxury', selectedPackage)
             .then(data => setRooms(data.map(normalizeRoom)))
             .catch(() => setError('Unable to load rooms. Please try again.'))
             .finally(() => setLoading(false))
-    }, [])
+    }, [selectedPackage])
 
     const handleSelectRoom = (room) => {
         setSelectedRoom(room)
@@ -48,7 +54,11 @@ const LuxuryRooms = () => {
     const handleCheckInChange = (val) => {
         setCheckIn(val)
         setAvailability(null)
-        if (checkOut && checkOut <= val) setCheckOut('')
+        if (selectedPackage === 'day-use') {
+            setCheckOut(val)
+        } else if (checkOut && checkOut <= val) {
+            setCheckOut('')
+        }
     }
 
     const handleCheckAvailability = async () => {
@@ -91,32 +101,89 @@ const LuxuryRooms = () => {
                 </div>
             </section>
 
+            {/* Package Selector */}
+            <section className="bg-white border-b border-navy-100 shadow-sm">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <label className="block text-xs font-bold text-navy-500 uppercase tracking-widest mb-2">
+                        📦 Select Package
+                    </label>
+                    <div className="inline-flex rounded-2xl bg-navy-50 p-1 border border-navy-100">
+                        <button
+                            onClick={() => setSelectedPackage('full-board')}
+                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                                selectedPackage === 'full-board'
+                                    ? 'bg-amber-500 text-white shadow-lg shadow-amber-200'
+                                    : 'text-navy-600 hover:text-navy-900 hover:bg-white/60'
+                            }`}
+                        >
+                            🍽️ Full Board
+                        </button>
+                        <button
+                            onClick={() => setSelectedPackage('day-use')}
+                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                                selectedPackage === 'day-use'
+                                    ? 'bg-amber-500 text-white shadow-lg shadow-amber-200'
+                                    : 'text-navy-600 hover:text-navy-900 hover:bg-white/60'
+                            }`}
+                        >
+                            ☀️ Day Use
+                        </button>
+                    </div>
+                </div>
+            </section>
+
              
             <section className="bg-white border-b border-navy-100 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
                     <div className="flex flex-col sm:flex-row items-end gap-4 flex-wrap">
                         <div>
-                            <label className="block text-xs font-bold text-navy-500 uppercase tracking-widest mb-1">📅 Check-In</label>
-                            <input type="date" value={checkIn} min={today} onChange={(e) => handleCheckInChange(e.target.value)}
-                                className="border border-navy-200 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 bg-navy-50 text-sm" />
+                            <label className="block text-xs font-bold text-navy-500 uppercase tracking-widest mb-1">
+                                📅 {selectedPackage === 'day-use' ? 'Select Date' : 'Check-In'}
+                            </label>
+                            <input
+                                type="date"
+                                value={checkIn}
+                                min={today}
+                                onChange={(e) => handleCheckInChange(e.target.value)}
+                                className="border border-navy-200 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 bg-navy-50 text-sm w-full sm:w-auto"
+                            />
                         </div>
-                        <div>
-                            <label className="block text-xs font-bold text-navy-500 uppercase tracking-widest mb-1">📅 Check-Out</label>
-                            <input type="date" value={checkOut} min={checkIn || today} onChange={(e) => { setCheckOut(e.target.value); setAvailability(null) }}
-                                className="border border-navy-200 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 bg-navy-50 text-sm" />
-                        </div>
-                        {checkIn && checkOut && calcNights() > 0 && (
+                        {selectedPackage !== 'day-use' && (
+                            <div>
+                                <label className="block text-xs font-bold text-navy-500 uppercase tracking-widest mb-1">
+                                    📅 Check-Out
+                                </label>
+                                <input
+                                    type="date"
+                                    value={checkOut}
+                                    min={checkIn || today}
+                                    onChange={(e) => { setCheckOut(e.target.value); setAvailability(null) }}
+                                    className="border border-navy-200 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 bg-navy-50 text-sm w-full sm:w-auto"
+                                />
+                            </div>
+                        )}
+                        {checkIn && checkOut && selectedPackage !== 'day-use' && calcNights() > 0 && (
                             <div className="px-4 py-2 bg-amber-50 rounded-xl border border-amber-100">
                                 <span className="text-amber-700 font-bold text-sm">{calcNights()} Night{calcNights() > 1 ? 's' : ''}</span>
                             </div>
                         )}
-                        {checkIn && checkOut && calcNights() > 0 && selectedRoom && (
+                        {selectedPackage === 'day-use' && checkIn && (
+                            <div className="px-4 py-2 bg-amber-50 rounded-xl border border-amber-100">
+                                <span className="text-amber-700 font-bold text-sm">One Day Visit</span>
+                            </div>
+                        )}
+                        {checkIn && (selectedPackage === 'day-use' || (checkOut && calcNights() > 0)) && selectedRoom && (
                             <button onClick={handleCheckAvailability} disabled={availability === 'checking'}
                                 className="px-6 py-2.5 bg-navy-900 text-white rounded-xl font-bold text-sm hover:bg-navy-700 transition-all duration-200 shadow-md disabled:opacity-60">
                                 {availability === 'checking' ? '⏳ Checking…' : '🔍 Check Availability'}
                             </button>
                         )}
-                        {(!checkIn || !checkOut) && <p className="text-sm text-navy-400 italic">Select check-in and check-out dates</p>}
+                        {!checkIn && (
+                            <p className="text-sm text-navy-400 italic">Select stay date</p>
+                        )}
+                        {checkIn && !checkOut && selectedPackage !== 'day-use' && (
+                            <p className="text-sm text-navy-400 italic">Select check-out date</p>
+                        )}
                     </div>
                 </div>
             </section>
@@ -207,19 +274,25 @@ const LuxuryRooms = () => {
                                                 <span className="text-navy-400 text-xs block">{selectedRoom.size}</span>
                                             </div>
                                         </div>
-                                        {checkIn && checkOut && calcNights() > 0 && (
+                                        {checkIn && (selectedPackage === 'day-use' || (checkOut && calcNights() > 0)) && (
                                             <div className="grid grid-cols-2 gap-2">
-                                                <div className="bg-amber-50 rounded-xl px-3 py-2 border border-amber-100">
-                                                    <span className="text-xs text-amber-600 font-bold block">Check-In</span>
+                                                <div className={`rounded-xl px-3 py-2 border ${selectedPackage === 'day-use' ? 'col-span-2 bg-amber-50 border-amber-100' : 'bg-amber-50 border-amber-100'}`}>
+                                                    <span className="text-xs text-amber-600 font-bold block">{selectedPackage === 'day-use' ? 'Visit Date' : 'Check-In'}</span>
                                                     <span className="text-navy-800 font-semibold text-sm">{new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                                 </div>
-                                                <div className="bg-amber-50 rounded-xl px-3 py-2 border border-amber-100">
-                                                    <span className="text-xs text-amber-600 font-bold block">Check-Out</span>
-                                                    <span className="text-navy-800 font-semibold text-sm">{new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                                </div>
+                                                {selectedPackage !== 'day-use' && (
+                                                    <div className="bg-amber-50 rounded-xl px-3 py-2 border border-amber-100">
+                                                        <span className="text-xs text-amber-600 font-bold block">Check-Out</span>
+                                                        <span className="text-navy-800 font-semibold text-sm">{new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                    </div>
+                                                )}
                                                 <div className="col-span-2 bg-navy-50 rounded-xl px-3 py-2 flex justify-between">
-                                                    <span className="text-navy-500 text-sm">{calcNights()} Night{calcNights() > 1 ? 's' : ''}</span>
-                                                    <span className="text-navy-900 font-bold text-sm">{formatPrice(selectedRoom.price * calcNights())} Total</span>
+                                                    <span className="text-navy-500 text-sm">
+                                                        {selectedPackage === 'day-use' ? 'Day Use' : `${calcNights()} Night${calcNights() > 1 ? 's' : ''}`}
+                                                    </span>
+                                                    <span className="text-navy-900 font-bold text-sm">
+                                                        {formatPrice(selectedRoom.price * (selectedPackage === 'day-use' ? 1 : calcNights()))} Total
+                                                    </span>
                                                 </div>
                                             </div>
                                         )}
@@ -264,10 +337,10 @@ const LuxuryRooms = () => {
                                                 <p className="text-teal-500 text-xs">Redirecting…</p>
                                             </div>
                                         ) : (
-                                            <button onClick={handleConfirmBooking}
-                                                disabled={!checkIn || !checkOut || calcNights() <= 0 || availability === false || availability === 'checking'}
+                                        <button onClick={handleConfirmBooking}
+                                                disabled={!checkIn || (selectedPackage !== 'day-use' && (!checkOut || calcNights() <= 0)) || availability === false || availability === 'checking'}
                                                 className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
-                                                {!checkIn || !checkOut ? 'Select Dates First' : 'Confirm Booking'}
+                                                {!checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
                                             </button>
                                         )}
                                         <p className="text-center text-navy-400 text-xs">Free cancellation up to 72 hours before check-in.</p>
