@@ -104,84 +104,23 @@ export async function createRoom(payload) {
     return handleResponse(res);
 }
 
-export async function updateRoom(id, payload) {
-    const res = await fetch(`${API_URL}/admin/rooms/${id}`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify(payload),
-    });
-    return handleResponse(res);
+export async function fetchRoomsByCategory(category, packageType) {
+  let url = `${API_URL}/rooms/category/${category}`;
+  if (packageType) url += `?package=${packageType}`;
+  const response = await fetch(url);
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to fetch rooms');
+  return data;
 }
 
-export async function deleteRoom(id) {
-    const res = await fetch(`${API_URL}/admin/rooms/${id}`, {
-        method: 'DELETE',
-        headers: authHeaders(),
-    });
-    return handleResponse(res);
+export async function checkRoomAvailability(roomId, checkIn, checkOut) {
+  const response = await fetch(`${API_URL}/rooms/check-availability`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ roomId, checkIn, checkOut }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to check availability');
+  return data;
 }
-
-// ── Admin: Bookings ───────────────────────────────────────────
-
-export async function fetchBookings(params = {}) {
-    const qs = new URLSearchParams(params).toString();
-    const res = await fetch(`${API_URL}/admin/bookings?${qs}`, { headers: authHeaders() });
-    return handleResponse(res);
-}
-
-export async function updateBookingStatus(id, status) {
-    const res = await fetch(`${API_URL}/admin/bookings/${id}/status`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify({ status }),
-    });
-    return handleResponse(res);
-}
-
-// ── Admin: Staff ──────────────────────────────────────────────
-
-export async function fetchStaff(params = {}) {
-    const qs = new URLSearchParams(params).toString();
-    const res = await fetch(`${API_URL}/admin/staff?${qs}`, { headers: authHeaders() });
-    return handleResponse(res);
-}
-
-export async function createStaff(payload) {
-    const res = await fetch(`${API_URL}/admin/staff`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify(payload),
-    });
-    return handleResponse(res);
-}
-
-export async function updateStaff(id, payload) {
-    const res = await fetch(`${API_URL}/admin/staff/${id}`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify(payload),
-    });
-    return handleResponse(res);
-}
-
-export async function deleteStaff(id) {
-    const res = await fetch(`${API_URL}/admin/staff/${id}`, {
-        method: 'DELETE',
-        headers: authHeaders(),
-    });
-    return handleResponse(res);
-}
-
-// ── Admin: Reports ────────────────────────────────────────────
-
-export async function fetchReportSummary(params = {}) {
-    const qs = new URLSearchParams(params).toString();
-    const res = await fetch(`${API_URL}/admin/reports/summary?${qs}`, { headers: authHeaders() });
-    return handleResponse(res);
-}
-
-export async function fetchMonthlyReport(year) {
-    const res = await fetch(`${API_URL}/admin/reports/monthly?year=${year || new Date().getFullYear()}`, { headers: authHeaders() });
-    return handleResponse(res);
-}
-
