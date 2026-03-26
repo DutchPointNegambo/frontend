@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     UserPlus,
     Search,
-    MoreVertical,
     Mail,
     Phone,
     Shield,
@@ -17,9 +16,34 @@ import {
     CheckCircle,
     XCircle,
     Clock,
+    RefreshCw,
 } from 'lucide-react';
+import { fetchUsers, createUser as apiCreateUser, updateUser as apiUpdateUser, deleteUser as apiDeleteUser } from '../../utils/api';
+import Toast from '../../components/admin_components/Toast';
+import { useToast } from '../../components/admin_components/useToast';
+
+// Map backend role to display label
+const ROLE_MAP = { guest: 'Guest', admin: 'Admin', staff: 'Staff' };
+const ROLE_TO_API = { 'Guest': 'guest', 'Admin': 'admin', 'Staff': 'staff', 'VIP Guest': 'guest', 'Corporate': 'guest' };
+
+// Normalise a raw API user to the shape this component expects
+const normalise = (u) => ({
+    id: u._id,
+    name: `${u.firstName} ${u.lastName}`,
+    email: u.email,
+    phone: u.phone || '',
+    role: ROLE_MAP[u.role] || 'Guest',
+    status: 'Active',
+    joinDate: u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '',
+    location: '',
+    totalBookings: 0,
+    totalSpent: 0,
+    avatar: `${u.firstName?.[0] || ''}${u.lastName?.[0] || ''}`.toUpperCase(),
+    _raw: u,
+});
 
 const UserManagement = () => {
+    const { toast, showToast, clearToast } = useToast();
     const [users, setUsers] = useState([
         {
             id: 1,
@@ -101,6 +125,7 @@ const UserManagement = () => {
         },
     ]);
 
+    const [apiLoading, setApiLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterRole, setFilterRole] = useState('all');
     const [filterStatus, setFilterStatus] = useState('all');
@@ -108,6 +133,7 @@ const UserManagement = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [newUser, setNewUser] = useState({
         name: '',
         email: '',
@@ -118,8 +144,24 @@ const UserManagement = () => {
         password: '',
     });
 
-    const roles = ['Guest', 'VIP Guest', 'Corporate', 'Admin'];
+    const roles = ['Guest', 'Staff', 'Admin'];
     const statuses = ['Active', 'Inactive', 'Suspended'];
+
+    // Load users from API
+    const loadUsers = useCallback(async () => {
+        setApiLoading(true);
+        try {
+            const data = await fetchUsers({ limit: 100 });
+            setUsers(data.users.map(normalise));
+        } catch (e) {
+            // silently keep mock data if API is not ready
+            console.warn('API not available, using local state:', e.message);
+        } finally {
+            setApiLoading(false);
+        }
+    }, []);
+
+    useEffect(() => { loadUsers(); }, [loadUsers]);
 
     // Filtered users
     const filteredUsers = users.filter(user => {
@@ -138,24 +180,40 @@ const UserManagement = () => {
     const vipUsers = users.filter(u => u.role === 'VIP Guest').length;
     const suspendedUsers = users.filter(u => u.status === 'Suspended').length;
 
-    const handleAddUser = (e) => {
+    const handleAddUser = async (e) => {
         e.preventDefault();
-        const user = {
-            id: users.length + 1,
-            ...newUser,
-            joinDate: new Date().toISOString().split('T')[0],
-            totalBookings: 0,
-            totalSpent: 0,
-            avatar: newUser.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
-        };
-        setUsers([...users, user]);
-        setIsModalOpen(false);
-        setNewUser({ name: '', email: '', phone: '', role: 'Guest', status: 'Active', location: '', password: '' });
+        setSaving(true);
+        try {
+            const [firstName, ...rest] = newUser.name.trim().split(' ');
+            const lastName = rest.join(' ') || '';
+            const created = await apiCreateUser({
+                firstName,
+                lastName,
+                email: newUser.email,
+                phone: newUser.phone,
+                password: newUser.password,
+                role: ROLE_TO_API[newUser.role] || 'guest',
+            });
+            setUsers(prev => [normalise(created), ...prev]);
+            showToast('User created successfully');
+            setIsModalOpen(false);
+            setNewUser({ name: '', email: '', phone: '', role: 'Guest', status: 'Active', location: '', password: '' });
+        } catch (err) {
+            showToast(err.message, 'error');
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const handleDelete = (id) => {
-        if (window.confirm('Are you sure you want to delete this user?')) {
-            setUsers(users.filter(u => u.id !== id));
+    const handleDelete = async (id) => {
+        const user = users.find(u => u.id === id);
+        if (!window.confirm(`Delete ${user?.name}? This cannot be undone.`)) return;
+        try {
+            if (user?._raw?._id) await apiDeleteUser(user._raw._id);
+            setUsers(prev => prev.filter(u => u.id !== id));
+            showToast('User deleted');
+        } catch (err) {
+            showToast(err.message, 'error');
         }
     };
 
@@ -204,19 +262,25 @@ const UserManagement = () => {
 
     return (
         <div className="space-y-6">
+            {toast && <Toast message={toast.message} type={toast.type} onClose={clearToast} />}
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold text-navy-900">User Management</h1>
-                    <p className="text-navy-500 mt-1">Manage guests, VIPs, and user accounts</p>
+                    <h1 className="text-2xl font-bold text-navy-900">User Management</h1>
+                    <p className="text-navy-400 mt-0.5 text-sm">Manage guests and user accounts</p>
                 </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="bg-blue-600 text-white px-5 py-2.5 rounded-xl flex items-center hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5"
-                >
-                    <UserPlus size={20} className="mr-2" />
-                    Add New User
-                </button>
+                <div className="flex gap-2">
+                    <button onClick={loadUsers} disabled={apiLoading} className="flex items-center gap-2 px-3 py-2 bg-white border border-navy-200 text-navy-600 rounded-xl hover:bg-navy-50 transition-colors text-sm font-medium shadow-sm disabled:opacity-50">
+                        <RefreshCw size={14} className={apiLoading ? 'animate-spin' : ''} /> Refresh
+                    </button>
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="bg-navy-900 text-white px-5 py-2.5 rounded-xl flex items-center hover:bg-teal-700 transition-all duration-300 shadow-sm"
+                    >
+                        <UserPlus size={18} className="mr-2" />
+                        Add New User
+                    </button>
+                </div>
             </div>
 
             {/* Stats Cards */}
@@ -378,6 +442,7 @@ const UserManagement = () => {
                                                     <Eye size={16} />
                                                 </button>
                                                 <button
+                                                    onClick={() => handleViewDetails(user)}
                                                     className="p-2 hover:bg-navy-100 rounded-lg text-navy-400 hover:text-navy-600 transition-colors"
                                                     title="Edit User"
                                                 >
@@ -531,8 +596,10 @@ const UserManagement = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg shadow-blue-500/30"
+                                    disabled={saving}
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-navy-900 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium shadow-sm disabled:opacity-60"
                                 >
+                                    {saving && <RefreshCw size={14} className="animate-spin" />}
                                     Create User
                                 </button>
                             </div>
