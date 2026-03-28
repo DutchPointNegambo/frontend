@@ -40,12 +40,12 @@ const Navbar = () => {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${shouldShowSolidNavbar
-        ? 'bg-white shadow-xl border-b border-navy-100/50 py-2'
-        : 'bg-transparent py-4'
+        ? 'bg-white shadow-xl border-b border-navy-100/50 py-1'
+        : 'bg-transparent py-2'
         }`}
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
-        <div className="flex justify-between items-center h-20 md:h-24 gap-4">
+        <div className="flex justify-between items-center h-16 md:h-20 gap-4">
 
           {/* Left Navigation - Desktop */}
           <div className="hidden lg:flex items-center space-x-5 flex-1 justify-end pr-4">
@@ -80,7 +80,7 @@ const Navbar = () => {
                 <img
                   src="https://res.cloudinary.com/dtdgufs9u/image/upload/v1772345832/ChatGPT_Image_Feb_13_2026_02_11_36_PM_jgcxnu.png"
                   alt="Dutch-Point Negombo Beach Resort"
-                  className="h-20 md:h-28 w-auto object-contain relative z-10 transition-transform duration-500 group-hover:scale-105"
+                  className="h-16 md:h-20 w-auto object-contain relative z-10 transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
             </Link>

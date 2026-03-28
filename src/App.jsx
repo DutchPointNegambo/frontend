@@ -21,11 +21,15 @@ function App() {
   const location = useLocation();
   const hideNavbarRoutes = ['/admin', '/addRoom'];
   const shouldShowNavbar = !hideNavbarRoutes.some(route => location.pathname.startsWith(route));
+  
+  // Don't add top padding on the home page so the hero image goes under the transparent navbar
+  const isHomePage = location.pathname === '/';
+  const mainPadding = shouldShowNavbar && !isHomePage ? 'pt-20 md:pt-24' : '';
 
   return (
     <>
       {shouldShowNavbar && <Navbar />}
-      <main className={shouldShowNavbar ? 'pt-24 md:pt-28' : ''}>
+      <main className={mainPadding}>
       <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/signin" element={<SignIn />} />
