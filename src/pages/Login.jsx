@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Reveal from "../components/Reveal"
-import { loginUser } from '../utils/api'
+import { googleSignIn, loginUser } from '../utils/api'
 import { useAuth } from '../context/AuthContext'
+import { auth, googleProvider, signInWithPopup } from '../firebase'
+import { GoogleAuthProvider } from 'firebase/auth'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -41,6 +43,44 @@ const Login = () => {
       }
     } catch (err) {
       setError(err.message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    setIsSubmitting(true)
+    setError('')
+
+    try {
+      const result = await signInWithPopup(auth, googleProvider)
+      const user = result.user
+      const credential = GoogleAuthProvider.credentialFromResult(result)
+      const googleIdToken = credential?.idToken
+
+      if (!googleIdToken) {
+        throw new Error('Google sign-in did not return a valid token')
+      }
+
+      const data = await googleSignIn({
+        idToken: googleIdToken,
+        googleId: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+      })
+
+      login(data)
+
+      if (data.role === 'admin') {
+        navigate('/admin')
+      } else if (data.role === 'staff') {
+        navigate('/admin/staff')
+      } else {
+        navigate('/')
+      }
+    } catch (err) {
+      setError(err.message || 'Google sign-in failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -174,6 +214,8 @@ const Login = () => {
 
             <button
               type="button"
+              onClick={handleGoogleSignIn}
+              disabled={isSubmitting}
               className="w-full flex items-center justify-center gap-3 px-6 py-2.5 border border-navy-100 rounded-xl text-sm font-bold text-navy-700 hover:bg-navy-50 transition-all group"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">

@@ -42,6 +42,15 @@ export async function loginUser(payload) {
     return handleResponse(res);
 }
 
+export async function googleSignIn(payload) {
+    const res = await fetch(`${API_URL}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
 export async function getUserProfile() {
     const res = await fetch(`${API_URL}/auth/profile`, {
         headers: authHeaders()

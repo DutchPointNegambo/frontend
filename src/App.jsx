@@ -25,6 +25,7 @@ function App() {
   return (
     <>
       {shouldShowNavbar && <Navbar />}
+      <main className={shouldShowNavbar ? 'pt-24 md:pt-28' : ''}>
       <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/signin" element={<SignIn />} />
@@ -38,8 +39,7 @@ function App() {
       <Route path="/about-us" element={<AboutUs />} />
       <Route path="/contact-us" element={<ContactUs />} />
       <Route path="/addRoom" element={<AddRoomForm />} />
-    </Routes>
-    </>
+    </Routes>      </main>    </>
   )
 }
 
