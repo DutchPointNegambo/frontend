@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Reveal from "../components/Reveal"
 import { loginUser } from '../utils/api'
+import { useAuth } from '../context/AuthContext'
 
 const Login = () => {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -27,7 +29,7 @@ const Login = () => {
       const data = await loginUser(formData)
 
       // Success
-      localStorage.setItem('userInfo', JSON.stringify(data))
+      login(data)
       alert('Logged in successfully!')
       
       if (data.role === 'admin') {

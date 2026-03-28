@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Reveal from "../components/Reveal"
 import { registerUser } from '../utils/api'
+import { useAuth } from '../context/AuthContext'
 
 const SignIn = () => {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -43,9 +45,9 @@ const SignIn = () => {
       })
 
       // Success
-      localStorage.setItem('userInfo', JSON.stringify(data))
+      login(data)
       alert('Account created successfully!')
-      navigate('/login')
+      navigate('/')
     } catch (err) {
       setError(err.message)
     } finally {

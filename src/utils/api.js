@@ -3,7 +3,13 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 // ── Helpers ───────────────────────────────────────────────────
 
 const authHeaders = () => {
-    const token = localStorage.getItem('token');
+    const userInfo = localStorage.getItem('userInfo');
+    let token = null;
+    if (userInfo) {
+        try {
+            token = JSON.parse(userInfo).token;
+        } catch (e) {}
+    }
     return {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -31,6 +37,22 @@ export async function loginUser(payload) {
     const res = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function getUserProfile() {
+    const res = await fetch(`${API_URL}/auth/profile`, {
+        headers: authHeaders()
+    });
+    return handleResponse(res);
+}
+
+export async function updateUserProfile(payload) {
+    const res = await fetch(`${API_URL}/auth/profile`, {
+        method: 'PUT',
+        headers: authHeaders(),
         body: JSON.stringify(payload),
     });
     return handleResponse(res);

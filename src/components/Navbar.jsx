@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext.jsx'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const location = useLocation()
+  const { user, logout } = useAuth()
 
   const leftNavItems = [
     { name: 'Home', path: '/' },
-    { name: 'Rooms', path: '#' },
+    { name: 'Rooms', path: '/deluxeRooms' },
     { name: 'Offers', path: '#' },
     { name: 'Gallery', path: '#' },
-    { name: 'Events', path: '/events' },
+    { name: 'Events', path: '/event' },
   ]
 
   const rightNavItems = [
@@ -110,24 +111,49 @@ const Navbar = () => {
 
             {/* Auth Buttons */}
             <div className="flex items-center space-x-3 ml-2">
-              <Link
-                to="/signin"
-                className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 border-2 whitespace-nowrap ${shouldShowSolidNavbar
-                  ? 'border-navy-950 text-navy-950 hover:bg-navy-950 hover:text-white'
-                  : 'border-white/30 text-white hover:bg-white/10 hover:border-white'
-                  }`}
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/login"
-                className={`px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap ${shouldShowSolidNavbar
-                  ? 'bg-navy-950 text-white hover:bg-navy-900 shadow-navy-900/20'
-                  : 'bg-white text-navy-950 hover:bg-teal-50 shadow-white/10'
-                  }`}
-              >
-                Log In
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    to="/profile"
+                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 border-2 whitespace-nowrap ${shouldShowSolidNavbar
+                      ? 'border-navy-950 text-navy-950 hover:bg-navy-950 hover:text-white'
+                      : 'border-white/30 text-white hover:bg-white/10 hover:border-white'
+                      }`}
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={logout}
+                    className={`px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap ${shouldShowSolidNavbar
+                      ? 'bg-red-600 text-white hover:bg-red-700 shadow-red-900/20'
+                      : 'bg-red-500 text-white hover:bg-red-600 shadow-white/10'
+                      }`}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/signin"
+                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 border-2 whitespace-nowrap ${shouldShowSolidNavbar
+                      ? 'border-navy-950 text-navy-950 hover:bg-navy-950 hover:text-white'
+                      : 'border-white/30 text-white hover:bg-white/10 hover:border-white'
+                      }`}
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/login"
+                    className={`px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap ${shouldShowSolidNavbar
+                      ? 'bg-navy-950 text-white hover:bg-navy-900 shadow-navy-900/20'
+                      : 'bg-white text-navy-950 hover:bg-teal-50 shadow-white/10'
+                      }`}
+                  >
+                    Log In
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -200,20 +226,43 @@ const Navbar = () => {
           </div>
 
           <div className="p-6 border-t border-navy-50 space-y-3">
-            <Link
-              to="/signin"
-              className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center border-2 border-navy-950 text-navy-950 hover:bg-navy-50 transition-all duration-300"
-              onClick={() => setIsOpen(false)}
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/login"
-              className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center bg-navy-950 text-white shadow-lg shadow-navy-900/20 transition-all duration-300"
-              onClick={() => setIsOpen(false)}
-            >
-              Log In
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  to="/profile"
+                  className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center border-2 border-navy-950 text-navy-950 hover:bg-navy-50 transition-all duration-300"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Profile
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    setIsOpen(false);
+                  }}
+                  className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center bg-red-600 text-white shadow-lg shadow-red-900/20 transition-all duration-300"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/signin"
+                  className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center border-2 border-navy-950 text-navy-950 hover:bg-navy-50 transition-all duration-300"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/login"
+                  className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center bg-navy-950 text-white shadow-lg shadow-navy-900/20 transition-all duration-300"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Log In
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
