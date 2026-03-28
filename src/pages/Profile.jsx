@@ -28,7 +28,7 @@ const Profile = () => {
       return
     }
     
-    // Fetch latest profile
+ 
     const fetchProfile = async () => {
       try {
         const data = await getUserProfile()
@@ -71,7 +71,7 @@ const Profile = () => {
         password: formData.password || undefined
       })
       
-      // Update global context & localStorage
+  
       login(data)
       setSuccessMsg('Profile updated successfully!')
       setFormData((prev) => ({ ...prev, password: '', confirmPassword: '' }))
@@ -88,7 +88,7 @@ const Profile = () => {
     <>
 
       <div className="min-h-screen pt-24 pb-12 flex items-center justify-center bg-sand-50 px-6 relative overflow-hidden">
-        {/* Background Decorative Elements */}
+      
         <div className="absolute top-20 right-0 w-64 h-64 bg-navy-100/30 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-100/30 rounded-full -ml-32 -mb-32 blur-3xl pointer-events-none" />
 

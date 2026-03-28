@@ -5,19 +5,19 @@ const useIdleTimeout = (timeoutMinutes = 15) => {
   const { logout, user } = useAuth();
 
   useEffect(() => {
-    if (!user) return; // Do not run activity tracking if not logged in
+    if (!user) return; 
 
     let timeoutId;
     
     const resetTimer = () => {
       clearTimeout(timeoutId);
-      // set timer to trigger logout after timeoutMinutes
+
       timeoutId = setTimeout(() => {
         logout();
       }, timeoutMinutes * 60 * 1000);
     };
 
-    // run once on mount
+
     resetTimer();
 
     const events = [
