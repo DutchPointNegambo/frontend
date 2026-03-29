@@ -20,12 +20,33 @@ const ContactUs = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
-    setTimeout(() => {
+    
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_URL}/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong');
+      }
+
       setIsSubmitting(false)
       setIsSubmitted(true)
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
+      
       setTimeout(() => setIsSubmitted(false), 4000)
-    }, 1500)
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setIsSubmitting(false);
+      alert('Failed to send message: ' + error.message);
+    }
   }
 
   return (
