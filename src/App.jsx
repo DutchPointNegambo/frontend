@@ -2,6 +2,7 @@ import Home from './pages/Home'
 import EventManagement from './pages/eventManagement'
 import { Routes, Route } from 'react-router-dom'
 import SignIn from './pages/SignIn'  
+import Login from './pages/Login'
 import DayOutingRooms from './pages/DayOutingRooms'
 import DeluxeRooms from './pages/deluxeRooms' 
 import SemiLuxuryRooms from './pages/semiLuxuryRooms'
@@ -14,6 +15,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/signin" element={<SignIn />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/event" element={<EventManagement />} />
       <Route path="/DayOutingRooms" element={<DayOutingRooms />} />
       <Route path="/deluxeRooms" element={<DeluxeRooms />} />
@@ -26,4 +28,4 @@ function App() {
   )
 }
 
-export default App;
+export default App;
