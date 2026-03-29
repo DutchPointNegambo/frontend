@@ -5,22 +5,24 @@ import { fetchRoomsByCategory, checkRoomAvailability } from '../utils/api'
 const today = new Date().toISOString().split('T')[0]
 
 const FALLBACK_IMAGES = [
-    'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
+    'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813043/r5-11_etdeox.jpg',
+    'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813043/r5-8_uandub.jpg',
+    'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813042/r5-2_q7mrsg.jpg',
+    'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813042/r5-7_lfd50v.jpg',
+    'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813043/r5-10_oyajfg.jpg',
+    'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813041/r5-9_j8gwks.jpg',
 ]
 
 const getGalleryImages = (room) => {
     const base = room.images?.length ? room.images : []
     const combined = room.image ? [room.image, ...base] : base
     const unique = [...new Set(combined)]
-    while (unique.length < 4) {
+    while (unique.length < 6) {
         const fb = FALLBACK_IMAGES[unique.length % FALLBACK_IMAGES.length]
         if (!unique.includes(fb)) unique.push(fb)
         else unique.push(FALLBACK_IMAGES[(unique.length + 1) % FALLBACK_IMAGES.length])
     }
-    return unique.slice(0, 4)
+    return unique.slice(0, 6)
 }
 
 const HeroParticles = ({ color = 'rgba(245, 158, 11, 0.3)' }) => (
@@ -72,7 +74,7 @@ const LuxuryRooms = () => {
         return () => window.removeEventListener('keydown', handler)
     }, [lightboxIndex, lightboxPrev, lightboxNext])
 
-  
+
     const normalizeRoom = (room) => ({
         ...room,
         tagline: room.tagline || room.description || '',
@@ -455,7 +457,7 @@ const LuxuryRooms = () => {
                                                 <p className="text-amber-500 text-xs mt-1">Redirecting…</p>
                                             </div>
                                         ) : (
-                                        <button onClick={handleConfirmBooking}
+                                            <button onClick={handleConfirmBooking}
                                                 disabled={!checkIn || (selectedPackage !== 'day-use' && (!checkOut || calcNights() <= 0)) || availability === false || availability === 'checking'}
                                                 className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow">
                                                 {!checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
