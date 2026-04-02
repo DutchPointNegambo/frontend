@@ -3,22 +3,30 @@ import { useNavigate } from 'react-router-dom'
 import { fetchRoomsByCategory, checkRoomAvailability } from '../utils/api'
 
 const today = new Date().toISOString().split('T')[0]
+const checkInTime = "10:00 AM - 12:00 PM";
+const checkOutTime = "9:00 AM - 11:00 AM";
+const DaycheckInTime = "9:00 AM - 7:00 PM";
 
 const FALLBACK_IMAGES = [
-    'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
+
 ]
 
 const getGalleryImages = (room) => {
+    // 1. Use the gallery images array from DB if it exists and has content
     const base = room.images?.length ? room.images : []
-    const combined = room.image ? [room.image, ...base] : base
-    const unique = [...new Set(combined)]
-    while (unique.length < 4) {
-        const fb = FALLBACK_IMAGES[unique.length % FALLBACK_IMAGES.length]
-        if (!unique.includes(fb)) unique.push(fb)
-        else unique.push(FALLBACK_IMAGES[(unique.length + 1) % FALLBACK_IMAGES.length])
+
+    // 2. Include the primary image if it's not already in the gallery
+    const combined = room.image && !base.includes(room.image) ? [room.image, ...base] : base
+
+    // 3. Fall back to hardcoded images only if we have fewer than 4 unique photos
+    const unique = [...new Set(combined.filter(Boolean))]
+    let fallbackIdx = 0
+    while (unique.length < 4 && fallbackIdx < FALLBACK_IMAGES.length) {
+        const fb = FALLBACK_IMAGES[fallbackIdx]
+        if (!unique.includes(fb)) {
+            unique.push(fb)
+        }
+        fallbackIdx++
     }
     return unique.slice(0, 4)
 }
@@ -172,7 +180,7 @@ const DeluxeRooms = () => {
                     className="absolute inset-0 bg-cover bg-center animate-hero-zoom"
                     style={{
                         backgroundImage:
-                            "url('https://images.unsplash.com/photo-1618773928121-c32242e63f39?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')",
+                            "url('https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813035/r3-4_ayc1bx.jpg')",
                     }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 via-navy-800/50 to-navy-900/20" />
@@ -200,7 +208,7 @@ const DeluxeRooms = () => {
                         </span>
                     </h1>
                     <p className="text-white/70 mt-3 text-lg max-w-xl animate-fade-in-up animation-delay-400 leading-relaxed">
-                        Enjoy premium comfort with exclusive amenities at Serenity Bay.
+                        Enjoy premium comfort with exclusive amenities at Dutch Point Resort.
                     </p>
 
                     {/* Stats bar */}
@@ -216,8 +224,8 @@ const DeluxeRooms = () => {
                         </div>
                         <div className="w-px bg-white/20" />
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-white">Ocean</div>
-                            <div className="text-white/50 text-xs uppercase tracking-wider">View Rooms</div>
+                            <div className="text-2xl font-bold text-white">Direct Beach</div>
+                            <div className="text-white/50 text-xs uppercase tracking-wider">Access</div>
                         </div>
                     </div>
                 </div>
@@ -234,21 +242,19 @@ const DeluxeRooms = () => {
                             <div className="inline-flex rounded-2xl bg-navy-50/80 p-1 border border-navy-100/50">
                                 <button
                                     onClick={() => setSelectedPackage('full-board')}
-                                    className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-                                        selectedPackage === 'full-board'
-                                            ? 'bg-blue-500 text-white shadow-lg shadow-blue-200/50'
-                                            : 'text-navy-600 hover:text-navy-900 hover:bg-white/60'
-                                    }`}
+                                    className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${selectedPackage === 'full-board'
+                                        ? 'bg-blue-500 text-white shadow-lg shadow-blue-200/50'
+                                        : 'text-navy-600 hover:text-navy-900 hover:bg-white/60'
+                                        }`}
                                 >
                                     🍽️ Full Board
                                 </button>
                                 <button
                                     onClick={() => setSelectedPackage('day-use')}
-                                    className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-                                        selectedPackage === 'day-use'
-                                            ? 'bg-blue-500 text-white shadow-lg shadow-blue-200/50'
-                                            : 'text-navy-600 hover:text-navy-900 hover:bg-white/60'
-                                    }`}
+                                    className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${selectedPackage === 'day-use'
+                                        ? 'bg-blue-500 text-white shadow-lg shadow-blue-200/50'
+                                        : 'text-navy-600 hover:text-navy-900 hover:bg-white/60'
+                                        }`}
                                 >
                                     ☀️ Day Use
                                 </button>
@@ -378,7 +384,7 @@ const DeluxeRooms = () => {
 
                                 <div className="flex flex-col sm:flex-row">
                                     <div className="sm:w-48 md:w-56 h-48 sm:h-auto relative overflow-hidden flex-shrink-0">
-                                        <img src={room.image} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                        <img src={room.images[0]} alt={room.names} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                         <div className={`absolute top-3 left-3 ${room.badgeColor} text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg`}>
                                             {room.badge}
@@ -396,7 +402,7 @@ const DeluxeRooms = () => {
                                             </div>
                                             <div className="flex gap-4 text-sm text-navy-500">
                                                 <span className="flex items-center gap-1">👤 {room.capacity}</span>
-                                                <span className="flex items-center gap-1">📐 {room.size}</span>
+                                                {/* <span className="flex items-center gap-1">📐 {room.size}</span> */}
                                             </div>
                                         </div>
 
@@ -470,12 +476,12 @@ const DeluxeRooms = () => {
                                             <div className="grid grid-cols-2 gap-2 animate-fade-in">
                                                 <div className={`rounded-xl px-3 py-2 border ${selectedPackage === 'day-use' ? 'col-span-2 bg-blue-50 border-blue-100' : 'bg-blue-50 border-blue-100'}`}>
                                                     <span className="text-xs text-blue-600 font-bold block">{selectedPackage === 'day-use' ? 'Visit Date' : 'Check-In'}</span>
-                                                    <span className="text-navy-800 font-semibold text-sm">{new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                    <span className="text-navy-800 font-semibold text-sm">{new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {selectedPackage === 'day-use' ? DaycheckInTime : checkInTime}</span>
                                                 </div>
                                                 {selectedPackage !== 'day-use' && (
                                                     <div className="bg-blue-50 rounded-xl px-3 py-2 border border-blue-100">
                                                         <span className="text-xs text-blue-600 font-bold block">Check-Out</span>
-                                                        <span className="text-navy-800 font-semibold text-sm">{new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                        <span className="text-navy-800 font-semibold text-sm">{new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {checkOutTime}</span>
                                                     </div>
                                                 )}
                                                 <div className="col-span-2 bg-gradient-to-r from-navy-50 to-blue-50/50 rounded-xl px-3 py-2 flex justify-between">
@@ -539,7 +545,7 @@ const DeluxeRooms = () => {
                                                 <p className="text-teal-500 text-xs mt-1">Redirecting to booking page…</p>
                                             </div>
                                         ) : (
-                                        <button
+                                            <button
                                                 onClick={handleConfirmBooking}
                                                 disabled={!checkIn || (selectedPackage !== 'day-use' && (!checkOut || calcNights() <= 0)) || availability === false || availability === 'checking'}
                                                 className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow"
@@ -548,7 +554,7 @@ const DeluxeRooms = () => {
                                             </button>
                                         )}
 
-                                        <p className="text-center text-navy-400 text-xs">Free cancellation up to 48 hours before check-in.</p>
+                                        <p className="text-center text-navy-400 text-xs">Check dates & times before booking</p>
                                     </div>
                                 </div>
                             ) : (

@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchRoomsByCategory, checkRoomAvailability } from '../utils/api'
+import { fetchRoomsByCategory, checkRoomAvailability, fetchPackagesByType } from '../utils/api'
 
 const today = new Date().toISOString().split('T')[0]
+
+const DaycheckInTime = "9:00 AM - 7:00 PM";
 
 const FALLBACK_IMAGES = [
     'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80',
@@ -12,13 +14,21 @@ const FALLBACK_IMAGES = [
 ]
 
 const getGalleryImages = (room) => {
+    // 1. Use the gallery images array from DB if it exists and has content
     const base = room.images?.length ? room.images : []
-    const combined = room.image ? [room.image, ...base] : base
-    const unique = [...new Set(combined)]
-    while (unique.length < 4) {
-        const fb = FALLBACK_IMAGES[unique.length % FALLBACK_IMAGES.length]
-        if (!unique.includes(fb)) unique.push(fb)
-        else unique.push(FALLBACK_IMAGES[(unique.length + 1) % FALLBACK_IMAGES.length])
+
+    // 2. Include the primary image if it's not already in the gallery
+    const combined = room.image && !base.includes(room.image) ? [room.image, ...base] : base
+
+    // 3. Fall back to hardcoded images only if we have fewer than 4 unique photos
+    const unique = [...new Set(combined.filter(Boolean))]
+    let fallbackIdx = 0
+    while (unique.length < 4 && fallbackIdx < FALLBACK_IMAGES.length) {
+        const fb = FALLBACK_IMAGES[fallbackIdx]
+        if (!unique.includes(fb)) {
+            unique.push(fb)
+        }
+        fallbackIdx++
     }
     return unique.slice(0, 4)
 }
@@ -52,9 +62,12 @@ const DayOutingRooms = () => {
     const [view, setView] = useState('categories') // 'categories', 'rooms', 'info'
     const [selectedCategory, setSelectedCategory] = useState(null)
     const [outingDate, setOutingDate] = useState('')
-    const [availability, setAvailability] = useState(null) 
+    const [availability, setAvailability] = useState(null)
     const [bookingSuccess, setBookingSuccess] = useState(false)
     const [lightboxIndex, setLightboxIndex] = useState(null)
+    const [packages, setPackages] = useState([])
+    const [packagesLoading, setPackagesLoading] = useState(false)
+    const [packagesError, setPackagesError] = useState(null)
     const navigate = useNavigate()
 
     const openLightbox = (idx) => setLightboxIndex(idx)
@@ -73,47 +86,23 @@ const DayOutingRooms = () => {
         return () => window.removeEventListener('keydown', handler)
     }, [lightboxIndex, lightboxPrev, lightboxNext])
 
-    const familyPackages = [
-        {
-            id: 'fam-1',
-            name: 'Serenity Family Day',
-            price: 'LKR 15,000',
-            basis: 'per family (4 pax)',
-            description: 'A perfect blend of relaxation and fun for the whole family.',
-            includes: ['Welcome Drinks', 'Buffet Lunch', 'Large Pool Access', 'Kids Play Area Access', 'Evening Tea'],
-            image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=800&q=80'
-        },
-        {
-            id: 'fam-2',
-            name: 'Grand Family Reunion',
-            price: 'LKR 25,000',
-            basis: 'per family (6-8 pax)',
-            description: 'Exclusive luxury for larger families with dedicated facilities.',
-            includes: ['Private Gazebo', 'Premium Buffet', 'Private Changing Room', 'Indoor Games Access', 'Evening Snacks'],
-            image: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=800&q=80'
+    useEffect(() => {
+        if (view === 'info' && selectedCategory) {
+            console.log('Fetching packages for category:', selectedCategory);
+            setPackagesLoading(true)
+            setPackagesError(null)
+            fetchPackagesByType(selectedCategory)
+                .then(data => {
+                    console.log('Fetched packages data:', data);
+                    setPackages(data);
+                })
+                .catch(err => {
+                    console.error('Fetch packages error:', err);
+                    setPackagesError('Unable to load packages. Please try again.');
+                })
+                .finally(() => setPackagesLoading(false))
         }
-    ]
-
-    const teamPackages = [
-        {
-            id: 'team-1',
-            name: 'Corporate Bonding Pro',
-            price: 'LKR 4,500',
-            basis: 'per person (min 20 pax)',
-            description: 'Boost team morale with energizing activities and premium dining.',
-            includes: ['Conference Hall (4hrs)', 'Gourmet Lunch', 'Team Games Instructor', 'Pool Access', 'Tea & Bites'],
-            image: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=800&q=80'
-        },
-        {
-            id: 'team-2',
-            name: 'Executive Leadership Retreat',
-            price: 'LKR 7,500',
-            basis: 'per person (min 10 pax)',
-            description: 'High-end retreat designed for corporate leadership teams.',
-            includes: ['Private Meeting Area', 'Fine Dining Lunch', 'Spa Session (30min)', 'Beach Access', 'Wine & Cheese Evening'],
-            image: 'https://images.unsplash.com/photo-1542744094-24638eff58bb?auto=format&fit=crop&w=800&q=80'
-        }
-    ]
+    }, [view, selectedCategory])
 
     const normalizeRoom = (room) => ({
         ...room,
@@ -168,7 +157,7 @@ const DayOutingRooms = () => {
             const result = await checkRoomAvailability(
                 selectedRoom._id,
                 outingDate,
-                outingDate  
+                outingDate
             )
             setAvailability(result.available)
         } catch {
@@ -182,8 +171,10 @@ const DayOutingRooms = () => {
         setTimeout(() => navigate('/booking'), 1800)
     }
 
-    const formatPrice = (price) =>
-        `LKR ${price.toLocaleString()}`
+    const formatPrice = (price) => {
+        if (price === undefined || price === null) return 'N/A';
+        return `LKR ${price.toLocaleString()}`;
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-navy-50 via-white to-navy-50/30">
@@ -237,11 +228,11 @@ const DayOutingRooms = () => {
                     <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight animate-fade-in-up animation-delay-200">
                         Day Outing{' '}
                         <span className="bg-gradient-to-r from-teal-300 via-cyan-300 to-amber-300 bg-clip-text text-transparent italic animate-gradient-text">
-                            Rooms
+                            Rooms & Packeges
                         </span>
                     </h1>
                     <p className="text-white/70 mt-3 text-lg max-w-xl animate-fade-in-up animation-delay-400 leading-relaxed">
-                        Choose your perfect room and enjoy a full-day luxury escape at Serenity Bay.
+                        Choose your perfect room and enjoy a full-day luxury escape at Dutch Point Resort.
                     </p>
 
                     <div className="flex gap-8 mt-6 animate-fade-in-up animation-delay-600">
@@ -263,7 +254,7 @@ const DayOutingRooms = () => {
                 </div>
             </section>
 
-            
+
             {/* Date Picker Bar - Only shows when in rooms view */}
             {view === 'rooms' && (
                 <section className="bg-white border-b border-navy-100 shadow-sm hidden md:block">
@@ -281,16 +272,16 @@ const DayOutingRooms = () => {
                         <h2 className="text-3xl font-bold text-navy-900 mb-4">Choose Your Experience</h2>
                         <p className="text-navy-500 max-w-2xl mx-auto italic">Whether it's a romantic escape, a family reunion, or a corporate bonding session, we have the perfect package tailored for you.</p>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Couple Category */}
-                        <div 
+                        <div
                             onClick={() => handleSelectCategory('couple')}
                             className="card-shine group relative bg-white rounded-[2.5rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:-translate-y-3 border border-blue-50 animate-card-reveal"
                             style={{ animationDelay: '0ms' }}
                         >
                             <div className="h-64 relative overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1539635395538-417004471762?auto=format&fit=crop&w=800&q=80" alt="Couple outing" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                <img src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775106320/couple_beach_bb7m0m.jpg" alt="Couple outing" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-navy-900/70 via-navy-900/20 to-transparent" />
                                 <div className="absolute bottom-6 left-6">
                                     <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-2 inline-block animate-badge-pulse">Day Use Rooms</span>
@@ -306,7 +297,7 @@ const DayOutingRooms = () => {
                         </div>
 
                         {/* Family Category */}
-                        <div 
+                        <div
                             onClick={() => handleSelectCategory('family')}
                             className="card-shine group relative bg-white rounded-[2.5rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:-translate-y-3 border border-teal-50 animate-card-reveal"
                             style={{ animationDelay: '150ms' }}
@@ -328,7 +319,7 @@ const DayOutingRooms = () => {
                         </div>
 
                         {/* Team Category */}
-                        <div 
+                        <div
                             onClick={() => handleSelectCategory('team')}
                             className="card-shine group relative bg-white rounded-[2.5rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:-translate-y-3 border border-amber-50 animate-card-reveal"
                             style={{ animationDelay: '300ms' }}
@@ -369,7 +360,7 @@ const DayOutingRooms = () => {
                                             type="date"
                                             value={outingDate}
                                             min={today}
-                                            onChange={(e) => {setOutingDate(e.target.value); setAvailability(null)}}
+                                            onChange={(e) => { setOutingDate(e.target.value); setAvailability(null) }}
                                             className="border border-navy-200/60 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400 bg-white text-sm transition-all"
                                         />
                                     </div>
@@ -405,7 +396,7 @@ const DayOutingRooms = () => {
                                         </span>
                                     )}
                                 </div>
-                                
+
                                 {loading && (
                                     <div className="space-y-4">
                                         {[1, 2, 3].map(i => (
@@ -424,7 +415,7 @@ const DayOutingRooms = () => {
                                     >
                                         <div className="flex flex-col sm:flex-row">
                                             <div className="sm:w-48 md:w-56 h-48 sm:h-auto relative overflow-hidden flex-shrink-0">
-                                                <img src={room.image} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                                <img src={room.images[0]} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                                 <div className={`absolute top-3 left-3 ${room.badgeColor} text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg`}>{room.badge}</div>
                                             </div>
@@ -434,7 +425,7 @@ const DayOutingRooms = () => {
                                                     <p className="text-navy-500 text-sm mb-3 line-clamp-2">{room.tagline}</p>
                                                     <div className="flex gap-4 text-sm text-navy-500">
                                                         <span className="flex items-center gap-1">👤 {room.capacity}</span>
-                                                        <span className="flex items-center gap-1">📐 {room.size}</span>
+                                                        {/* <span className="flex items-center gap-1">📐 {room.size}</span> */}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center justify-between mt-4">
@@ -494,13 +485,13 @@ const DayOutingRooms = () => {
                                                         <span className="text-xl">📅</span>
                                                         <div>
                                                             <span className="text-xs text-teal-600 font-bold block">Outing Date</span>
-                                                            <span className="text-navy-800 font-semibold text-sm">{new Date(outingDate).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                                                            <span className="text-navy-800 font-semibold text-sm">{new Date(outingDate).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} | {DaycheckInTime}</span>
                                                         </div>
                                                     </div>
                                                 )}
                                                 {availability === true && <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-green-700 font-bold text-sm animate-scale-in">✅ Available for selected date!</div>}
                                                 {availability === false && <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-700 font-bold text-sm animate-scale-in">❌ Not available. Try another date.</div>}
-                                                
+
                                                 <div className="ornament-divider !my-3"><span>Details</span></div>
 
                                                 <div>
@@ -563,7 +554,7 @@ const DayOutingRooms = () => {
                     <button onClick={handleBack} className="flex items-center text-navy-500 hover:text-navy-900 font-bold text-sm transition-colors mb-8 group">
                         <span className="mr-2 transition-transform group-hover:-translate-x-1">←</span> Back to Package Categories
                     </button>
-                    
+
                     <div className="ornament-divider mb-8">
                         <span>{selectedCategory === 'family' ? '✦ Family Fun ✦' : '✦ Team Excellence ✦'}</span>
                     </div>
@@ -581,36 +572,105 @@ const DayOutingRooms = () => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {(selectedCategory === 'family' ? familyPackages : teamPackages).map((pkg, idx) => (
-                            <div key={pkg.id} className="card-shine bg-white rounded-[2.5rem] overflow-hidden shadow-xl border border-navy-50 flex flex-col animate-card-reveal" style={{ animationDelay: `${idx * 150}ms` }}>
-                                <div className="h-64 relative overflow-hidden group">
-                                    <img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        {packagesLoading ? (
+                            [1, 2].map(i => (
+                                <div key={i} className="bg-white rounded-[2.5rem] overflow-hidden shadow-xl border border-navy-50 h-96 animate-pulse" />
+                            ))
+                        ) : packagesError ? (
+                            <div className="col-span-full text-center py-12">
+                                <p className="text-red-500 font-bold">{packagesError}</p>
+                            </div>
+                        ) : packages.length === 0 ? (
+                            <div className="col-span-full text-center py-12 bg-white rounded-[2.5rem] shadow-sm border border-dashed border-navy-200">
+                                <p className="text-navy-400">No packages available for this category yet.</p>
+                            </div>
+                        ) : packages.map((pkg, idx) => (
+                            <div key={pkg._id} className="card-shine bg-white rounded-[2.5rem] overflow-hidden shadow-xl border border-navy-50 flex flex-col animate-card-reveal" style={{ animationDelay: `${idx * 150}ms` }}>
+                                <div className="h-72 relative overflow-hidden group">
+                                    <img src={pkg.images && pkg.images.length > 0 ? pkg.images[0] : FALLBACK_IMAGES[0]} alt={pkg.title || 'Package'} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-navy-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                    <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg">
-                                        <span className="text-navy-900 font-extrabold text-lg">{pkg.price}</span>
-                                        <span className="text-navy-400 text-[10px] block uppercase font-bold tracking-tighter">{pkg.basis}</span>
+                                    <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg text-center min-w-[120px]">
+                                        <span className="text-navy-900 font-extrabold text-xl block leading-none">{formatPrice(pkg.pricePerPerson)}</span>
+                                        <span className="text-navy-400 text-[10px] uppercase font-bold tracking-tighter">Per Person</span>
+                                    </div>
+                                    <div className="absolute bottom-6 left-6 flex flex-wrap gap-2 text-white">
+                                        {pkg.time && (
+                                            <span className="bg-navy-900/80 backdrop-blur-md text-[10px] font-bold px-3 py-1 rounded-full border border-white/20">
+                                                🕒 {pkg.time.start || 'TBD'} - {pkg.time.end || 'TBD'}
+                                            </span>
+                                        )}
+                                        {pkg.groupSize && (
+                                            <span className="bg-teal-500/80 backdrop-blur-md text-[10px] font-bold px-3 py-1 rounded-full border border-white/20">
+                                                👥 Min {pkg.groupSize.min || 'N/A'} Persons
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="p-8 flex-1 flex flex-col">
-                                    <h3 className="text-2xl font-bold text-navy-900 mb-2 italic">{pkg.name}</h3>
-                                    <p className="text-navy-500 text-sm mb-6">{pkg.description}</p>
-                                    
-                                    <h4 className="text-xs font-bold text-navy-800 uppercase tracking-widest mb-4">Package Highlights</h4>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-                                        {pkg.includes.map((item, i) => (
-                                            <div key={item} className="flex items-center gap-2 text-sm text-navy-600 animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
-                                                <span className={`${selectedCategory === 'family' ? 'text-teal-500' : 'text-amber-500'}`}>✓</span>
+                                    <div className="mb-4">
+                                        <h3 className="text-3xl font-bold text-navy-900 mb-2 italic tracking-tight">{pkg.title || 'Untitled Package'}</h3>
+                                        {pkg.description && <p className="text-navy-500 text-sm leading-relaxed line-clamp-2">{pkg.description}</p>}
+                                    </div>
+
+                                    {/* Meal Info */}
+                                    <div className="bg-navy-50/50 rounded-2xl p-4 mb-6 border border-navy-100/50">
+                                        <h4 className="text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-3">🍽️ Dining Experience</h4>
+                                        <div className="space-y-2">
+                                            {pkg.meals?.welcomeDrink && (
+                                                <div className="flex items-center gap-2 text-xs text-navy-700 font-semibold">
+                                                    <span className="text-teal-500">🍹</span> Welcome Drink Included
+                                                </div>
+                                            )}
+                                            {pkg.meals?.lunch && (
+                                                <div className="text-xs text-navy-600">
+                                                    <span className="font-bold text-navy-800">Lunch:</span> {pkg.meals.lunch.type === 'buffet' ? 'International Buffet' : 'Curated Set Menu'}
+                                                    {pkg.meals.lunch.items && pkg.meals.lunch.items.length > 0 && (
+                                                        <span className="text-navy-400 block mt-0.5 ml-5">{pkg.meals.lunch.items.join(', ')}</span>
+                                                    )}
+                                                </div>
+                                            )}
+                                            {pkg.meals?.eveningTea?.enabled && (
+                                                <div className="text-xs text-navy-600">
+                                                    <span className="font-bold text-navy-800">Evening Tea:</span> {pkg.meals.eveningTea.items?.join(', ')}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <h4 className="text-xs font-bold text-navy-800 uppercase tracking-widest mb-4">Package Facilities</h4>
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-8">
+                                        {pkg.facilities && pkg.facilities.map((item, i) => (
+                                            <div key={i} className="flex items-center gap-2 text-[13px] text-navy-600 animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
+                                                <span className={`${selectedCategory === 'family' ? 'text-teal-500' : 'text-amber-500'} font-bold`}>•</span>
+                                                {item}
+                                            </div>
+                                        ))}
+                                        {pkg.locationFeatures && pkg.locationFeatures.map((item, i) => (
+                                            <div key={`loc-${i}`} className="flex items-center gap-2 text-[13px] text-navy-600 animate-fade-in">
+                                                <span className="text-navy-300">✦</span>
                                                 {item}
                                             </div>
                                         ))}
                                     </div>
-                                    
-                                    <div className="mt-auto pt-6 border-t border-navy-50 flex items-center justify-between">
+
+                                    {pkg.specialOffers && pkg.specialOffers.length > 0 && (
+                                        <div className="mb-6 p-4 bg-amber-50 rounded-2xl border border-amber-100">
+                                            <h4 className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-2">✨ Exclusive Offers</h4>
+                                            {pkg.specialOffers.map((offer, i) => (
+                                                <div key={i} className="mb-1 last:mb-0">
+                                                    <div className="text-xs font-bold text-amber-900">{offer.title}</div>
+                                                    <div className="text-[10px] text-amber-700">{offer.description}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <div className="mt-auto pt-6 border-t border-navy-50 flex items-center justify-between gap-4">
                                         <button className={`flex-1 py-4 ${selectedCategory === 'family' ? 'bg-teal-500 hover:bg-teal-600' : 'bg-amber-500 hover:bg-amber-600'} text-white rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 animate-cta-glow`}>
                                             Enquire Now
                                         </button>
-                                        <button className="ml-4 w-14 h-14 border-2 border-navy-100 flex items-center justify-center rounded-2xl hover:bg-navy-50 transition-colors">
-                                            <span className="text-xl">📞</span>
+                                        <button className="w-14 h-14 border-2 border-navy-100 flex items-center justify-center rounded-2xl hover:bg-navy-50 transition-colors flex-shrink-0 group">
+                                            <span className="text-xl transition-transform group-hover:scale-125">📞</span>
                                         </button>
                                     </div>
                                 </div>

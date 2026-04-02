@@ -5,15 +5,22 @@ import { useAuth } from '../context/AuthContext.jsx'
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isRoomsDropdownOpen, setIsRoomsDropdownOpen] = useState(false)
   const location = useLocation()
   const { user, logout } = useAuth()
 
   const leftNavItems = [
     { name: 'Home', path: '/' },
-    { name: 'Rooms', path: '/deluxeRooms' },
     { name: 'Offers', path: '#' },
-    { name: 'Gallery', path: '#' },
+    { name: 'Gallery', path: '/gallery' },
     { name: 'Events', path: '/event' },
+  ]
+
+  const roomCategories = [
+    { name: 'Deluxe Rooms', path: '/deluxeRooms' },
+    { name: 'Semi-Luxury Rooms', path: '/semiLuxuryRooms' },
+    { name: 'Luxury Rooms', path: '/luxuryRooms' },
+    { name: 'Day Outing', path: '/DayOutingRooms' },
   ]
 
   const rightNavItems = [
@@ -69,7 +76,65 @@ const Navbar = () => {
                 />
               </Link>
             ))}
+
+            {/* Rooms Dropdown - Desktop */}
+            <div
+              className="relative group pt-1"
+              onMouseEnter={() => setIsRoomsDropdownOpen(true)}
+              onMouseLeave={() => setIsRoomsDropdownOpen(false)}
+            >
+              <button
+                className={`flex items-center space-x-1 px-2 py-1 text-xs font-bold uppercase tracking-widest transition-all duration-300 ${shouldShowSolidNavbar
+                  ? roomCategories.some(cat => isActive(cat.path))
+                    ? 'text-navy-950'
+                    : 'text-navy-700 hover:text-navy-950'
+                  : roomCategories.some(cat => isActive(cat.path))
+                    ? 'text-white'
+                    : 'text-white/80 hover:text-white'
+                  }`}
+              >
+                <span>Rooms</span>
+                <svg
+                  className={`w-3 h-3 transition-transform duration-300 ${isRoomsDropdownOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Dropdown Menu - Bridge to prevent hover loss */}
+              <div
+                className={`absolute left-0 top-full pt-2 w-56 transition-all duration-300 transform origin-top-left ${isRoomsDropdownOpen
+                  ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto'
+                  : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+                  }`}
+              >
+                <div className={`rounded-xl overflow-hidden shadow-2xl ${shouldShowSolidNavbar ? 'bg-white' : 'bg-navy-950/90 backdrop-blur-md border border-white/10'
+                  }`}>
+                  <div className="py-2">
+                  {roomCategories.map((category) => (
+                    <Link
+                      key={category.name}
+                      to={category.path}
+                      className={`block px-5 py-3 text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${shouldShowSolidNavbar
+                        ? isActive(category.path)
+                          ? 'bg-teal-50 text-teal-600'
+                          : 'text-navy-700 hover:bg-navy-50 hover:text-navy-950'
+                        : isActive(category.path)
+                          ? 'bg-teal-400/20 text-teal-400'
+                          : 'text-white/80 hover:bg-white/10 hover:text-white'
+                        }`}
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
 
           {/* Logo - Center */}
           <div className="flex-shrink-0 flex justify-center w-32 md:w-44 overflow-visible">
@@ -210,7 +275,66 @@ const Navbar = () => {
           </div>
 
           <div className="flex-1 overflow-y-auto py-8 px-6 space-y-2">
-            {[...leftNavItems, ...rightNavItems].map((item) => (
+            {leftNavItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`block px-4 py-4 text-sm font-bold uppercase tracking-widest rounded-xl transition-all duration-300 ${isActive(item.path)
+                  ? 'bg-navy-50 text-navy-950'
+                  : 'text-navy-600 hover:bg-navy-50 hover:text-navy-950'
+                  }`}
+                onClick={() => setIsOpen(false)}
+              >
+                {item.name}
+              </Link>
+            ))}
+
+            {/* Mobile Rooms Section */}
+            <div className="space-y-1">
+              <button
+                onClick={() => setIsRoomsDropdownOpen(!isRoomsDropdownOpen)}
+                className={`w-full flex justify-between items-center px-4 py-4 text-sm font-bold uppercase tracking-widest rounded-xl transition-all duration-300 ${roomCategories.some(cat => isActive(cat.path))
+                  ? 'bg-navy-50 text-navy-950'
+                  : 'text-navy-600 hover:bg-navy-50 hover:text-navy-950'
+                  }`}
+              >
+                <span>Rooms</span>
+                <svg
+                  className={`w-4 h-4 transition-transform duration-300 ${isRoomsDropdownOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${isRoomsDropdownOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+              >
+                <div className="pl-4 space-y-1 mt-1 pb-2">
+                  {roomCategories.map((category) => (
+                    <Link
+                      key={category.name}
+                      to={category.path}
+                      className={`block px-4 py-3 text-xs font-bold uppercase tracking-widest rounded-lg transition-all duration-300 ${isActive(category.path)
+                        ? 'bg-teal-50 text-teal-600'
+                        : 'text-navy-500 hover:bg-navy-50 hover:text-navy-950'
+                        }`}
+                      onClick={() => {
+                        setIsOpen(false)
+                        setIsRoomsDropdownOpen(false)
+                      }}
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {rightNavItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
