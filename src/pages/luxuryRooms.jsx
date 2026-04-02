@@ -4,6 +4,10 @@ import { fetchRoomsByCategory, checkRoomAvailability } from '../utils/api'
 
 const today = new Date().toISOString().split('T')[0]
 
+const checkInTime = "10:00 AM - 12:00 PM";
+const checkOutTime = "9:00 AM - 11:00 AM";
+const DaycheckInTime = "9:00 AM - 7:00 PM";
+
 const FALLBACK_IMAGES = [
     'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813043/r5-11_etdeox.jpg',
     'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813043/r5-8_uandub.jpg',
@@ -14,13 +18,21 @@ const FALLBACK_IMAGES = [
 ]
 
 const getGalleryImages = (room) => {
+    // 1. Use the gallery images array from DB if it exists and has content
     const base = room.images?.length ? room.images : []
-    const combined = room.image ? [room.image, ...base] : base
-    const unique = [...new Set(combined)]
-    while (unique.length < 6) {
-        const fb = FALLBACK_IMAGES[unique.length % FALLBACK_IMAGES.length]
-        if (!unique.includes(fb)) unique.push(fb)
-        else unique.push(FALLBACK_IMAGES[(unique.length + 1) % FALLBACK_IMAGES.length])
+
+    // 2. Include the primary image if it's not already in the gallery
+    const combined = room.image && !base.includes(room.image) ? [room.image, ...base] : base
+
+    // 3. Fall back to hardcoded images only if we have fewer than 4 unique photos
+    const unique = [...new Set(combined.filter(Boolean))]
+    let fallbackIdx = 0
+    while (unique.length < 6 && fallbackIdx < FALLBACK_IMAGES.length) {
+        const fb = FALLBACK_IMAGES[fallbackIdx]
+        if (!unique.includes(fb)) {
+            unique.push(fb)
+        }
+        fallbackIdx++
     }
     return unique.slice(0, 6)
 }
@@ -169,7 +181,7 @@ const LuxuryRooms = () => {
             {/* ===== HERO BANNER ===== */}
             <section className="relative h-80 md:h-[28rem] flex items-end overflow-hidden hero-sweep">
                 <div className="absolute inset-0 bg-cover bg-center animate-hero-zoom"
-                    style={{ backgroundImage: "url('https://images.unsplash.com/photo-1576610616656-d3aa5d1f4534?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')" }} />
+                    style={{ backgroundImage: "url('https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813043/r5-11_etdeox.jpg')" }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 via-navy-800/50 to-navy-900/20" />
                 <HeroParticles color="rgba(245, 158, 11, 0.35)" />
 
@@ -182,7 +194,7 @@ const LuxuryRooms = () => {
                     <nav className="breadcrumb-trail mb-4 animate-fade-in">
                         <a href="/" className="text-white/60 hover:text-white transition-colors">Home</a>
                         <span className="text-white/30">›</span>
-                        <span className="text-amber-300/80">Luxury Suites</span>
+                        <span className="text-amber-300/80">Luxury Rooms</span>
                     </nav>
 
                     <span className="inline-block px-4 py-1.5 bg-gradient-to-r from-amber-500/90 to-yellow-500/90 text-white text-xs font-bold uppercase tracking-widest rounded-full mb-4 backdrop-blur-sm animate-badge-pulse animate-fade-in-up shadow-lg shadow-amber-500/25">
@@ -191,11 +203,11 @@ const LuxuryRooms = () => {
                     <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight animate-fade-in-up animation-delay-200">
                         Luxury{' '}
                         <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent italic animate-gradient-text">
-                            Suites
+                            Rooms
                         </span>
                     </h1>
                     <p className="text-white/70 mt-3 text-lg max-w-xl animate-fade-in-up animation-delay-400 leading-relaxed">
-                        Immerse yourself in the pinnacle of luxury at Serenity Bay.
+                        Immerse yourself in the pinnacle of luxury at Dutch Point Resort.
                     </p>
 
                     <div className="flex gap-8 mt-6 animate-fade-in-up animation-delay-600">
@@ -211,7 +223,7 @@ const LuxuryRooms = () => {
                         <div className="w-px bg-white/20" />
                         <div className="text-center">
                             <div className="text-2xl font-bold text-amber-300">Private</div>
-                            <div className="text-white/50 text-xs uppercase tracking-wider">Terrace</div>
+                            <div className="text-white/50 text-xs uppercase tracking-wider">Pool</div>
                         </div>
                     </div>
                 </div>
@@ -285,8 +297,8 @@ const LuxuryRooms = () => {
                     <div className="lg:w-3/5 space-y-6">
                         <div className="flex items-end justify-between mb-2">
                             <div>
-                                <h2 className="text-2xl font-bold text-navy-900 mb-1">Select Your Suite</h2>
-                                <p className="text-navy-500 text-sm">Click a suite to preview exclusive amenities and pricing.</p>
+                                <h2 className="text-2xl font-bold text-navy-900 mb-1">Select Your Suit</h2>
+                                <p className="text-navy-500 text-sm">Click a Suit to preview exclusive amenities and pricing.</p>
                             </div>
                             {!loading && !error && (
                                 <span className="text-navy-400 text-xs font-semibold bg-amber-50 px-3 py-1 rounded-full border border-amber-100 animate-count">
@@ -319,7 +331,7 @@ const LuxuryRooms = () => {
                                 )}
                                 <div className="flex flex-col sm:flex-row">
                                     <div className="sm:w-48 md:w-56 h-48 sm:h-auto relative overflow-hidden flex-shrink-0">
-                                        <img src={room.image} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                        <img src={room.images[0]} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                         <div className={`absolute top-3 left-3 ${room.badgeColor} text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg`}>{room.badge}</div>
                                     </div>
@@ -334,7 +346,7 @@ const LuxuryRooms = () => {
                                             </div>
                                             <div className="flex gap-4 text-sm text-navy-500">
                                                 <span className="flex items-center gap-1">👤 {room.capacity}</span>
-                                                <span className="flex items-center gap-1">📐 {room.size}</span>
+                                                {/* <span className="flex items-center gap-1">📐 {room.size}</span> */}
                                             </div>
                                         </div>
                                         <div className="flex items-center justify-between mt-4 pt-4 border-t border-navy-50">
@@ -396,12 +408,12 @@ const LuxuryRooms = () => {
                                             <div className="grid grid-cols-2 gap-2 animate-fade-in">
                                                 <div className={`rounded-xl px-3 py-2 border ${selectedPackage === 'day-use' ? 'col-span-2 bg-amber-50 border-amber-100' : 'bg-amber-50 border-amber-100'}`}>
                                                     <span className="text-xs text-amber-600 font-bold block">{selectedPackage === 'day-use' ? 'Visit Date' : 'Check-In'}</span>
-                                                    <span className="text-navy-800 font-semibold text-sm">{new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                    <span className="text-navy-800 font-semibold text-sm">{new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {selectedPackage === 'day-use' ? DaycheckInTime : checkInTime}</span>
                                                 </div>
                                                 {selectedPackage !== 'day-use' && (
                                                     <div className="bg-amber-50 rounded-xl px-3 py-2 border border-amber-100">
                                                         <span className="text-xs text-amber-600 font-bold block">Check-Out</span>
-                                                        <span className="text-navy-800 font-semibold text-sm">{new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                        <span className="text-navy-800 font-semibold text-sm">{new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {checkOutTime}</span>
                                                     </div>
                                                 )}
                                                 <div className="col-span-2 bg-gradient-to-r from-navy-50 to-amber-50/50 rounded-xl px-3 py-2 flex justify-between">
@@ -463,7 +475,7 @@ const LuxuryRooms = () => {
                                                 {!checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
                                             </button>
                                         )}
-                                        <p className="text-center text-navy-400 text-xs">Free cancellation up to 72 hours before check-in.</p>
+                                        <p className="text-center text-navy-400 text-xs">Check dates & times before booking</p>
                                     </div>
                                 </div>
                             ) : (

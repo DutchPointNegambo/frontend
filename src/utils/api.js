@@ -155,3 +155,47 @@ export async function checkRoomAvailability(roomId, checkIn, checkOut) {
   if (!response.ok) throw new Error(data.message || 'Failed to check availability');
   return data;
 }
+
+export async function fetchGalleryRooms() {
+  const res = await fetch(`${API_URL}/rooms`);
+  return handleResponse(res);
+}
+
+// ── Packages ──────────────────────────────────────────────────
+
+export async function fetchPackagesByType(type) {
+    const res = await fetch(`${API_URL}/packages?type=${type}`);
+    return handleResponse(res);
+}
+
+export async function fetchAdminPackages(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/admin/packages?${qs}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function createPackage(payload) {
+    const res = await fetch(`${API_URL}/admin/packages`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function updatePackage(id, payload) {
+    const res = await fetch(`${API_URL}/admin/packages/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function deletePackage(id) {
+    const res = await fetch(`${API_URL}/admin/packages/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+    });
+    return handleResponse(res);
+}

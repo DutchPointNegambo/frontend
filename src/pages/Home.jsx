@@ -117,21 +117,21 @@ const Home = () => {
   return (
     <div className="w-full">
 
-      
+
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pb-20">
-       
+
         <div className="absolute inset-0">
           <div
             className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center"
           ></div>
-        
+
           <div className="absolute inset-0 animate-shimmer opacity-20"></div>
-          
+
           <div className="absolute inset-0 bg-gradient-to-b from-navy-950/80 via-navy-900/40 to-navy-950/80"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 via-transparent to-gold-500/10"></div>
         </div>
 
-        
+
         <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto pt-32 md:pt-40">
           <span className="inline-block text-teal-400 text-sm font-bold tracking-[0.3em] uppercase mb-6 animate-fade-in">
             Luxury Beach Resort
@@ -167,7 +167,7 @@ const Home = () => {
 
         </div>
 
-       
+
         <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-10">
           <Reveal delay={1.2}>
             <div className="flex flex-col items-center gap-3">
@@ -245,7 +245,7 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             <Reveal delay={0.1}>
               <div className="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer" onClick={openSemiLuxuryRooms}>
-                <img src={room4} alt="Semi-Luxury Room" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
+                <img src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813040/r4-6_qujirj.jpg" alt="Semi-Luxury Room" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6">
                   <h3 className="text-2xl font-bold text-white mb-2 font-serif">Semi-Luxury Rooms</h3>
@@ -257,7 +257,7 @@ const Home = () => {
 
             <Reveal delay={0.2}>
               <div className="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer" onClick={openLuxuryRooms}>
-                <img src={room5} alt="Luxury Room" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
+                <img src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813043/r5-11_etdeox.jpg" alt="Luxury Room" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6">
                   <h3 className="text-2xl font-bold text-white mb-2 font-serif">Luxury Rooms</h3>
@@ -269,7 +269,7 @@ const Home = () => {
 
             <Reveal delay={0.3}>
               <div className="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer" onClick={openDeluxeRooms}>
-                <img src={beach} alt="Deluxe Room" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
+                <img src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813034/r1or2-1_nv4ynw.jpg" alt="Deluxe Room" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6">
                   <h3 className="text-2xl font-bold text-white mb-2 font-serif">Deluxe Rooms</h3>
@@ -281,7 +281,7 @@ const Home = () => {
 
             <Reveal delay={0.4} >
               <div className="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer md:col-span-2 lg:col-span-3" onClick={openDayOutingRooms}>
-                <img src={beach2} alt="Day Outing" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
+                <img src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775151227/dayout_tqowqj.jpg" alt="Day Outing" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6">
                   <h3 className="text-2xl font-bold text-white mb-2 font-serif">Day Outing Packages</h3>
@@ -297,7 +297,7 @@ const Home = () => {
       <section className="py-24 bg-sand-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-16">
-            
+
             <div className="lg:w-1/3 text-left">
               <Reveal>
                 <span className="text-sand-500 font-bold text-xs tracking-[0.3em] uppercase block mb-4">
@@ -318,11 +318,11 @@ const Home = () => {
               </Reveal>
             </div>
 
-            
+
             <div className="lg:w-2/3 relative">
               <Reveal delay={0.2} width="100%">
                 <div className="flex items-center gap-8 relative overflow-visible">
-                  
+
                   <button className="hidden sm:flex absolute -left-12 top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center text-navy-400 hover:text-sand-500 transition-colors">
                     <ChevronLeft size={32} />
                   </button>
@@ -330,9 +330,9 @@ const Home = () => {
                     <ChevronRight size={32} />
                   </button>
 
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
-                    
+
                     <div className="group cursor-pointer">
                       <div className="relative aspect-[4/5] overflow-hidden rounded-sm mb-6 shadow-xl">
                         <img
@@ -341,7 +341,7 @@ const Home = () => {
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                         />
                         <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
-                        
+
                         <div className="absolute inset-0 flex items-center justify-center">
                           <span className="text-sand-100 text-4xl font-serif italic drop-shadow-lg opacity-80 group-hover:opacity-100 transition-opacity">Bunny Approved</span>
                         </div>
@@ -352,7 +352,7 @@ const Home = () => {
                       </div>
                     </div>
 
-                   
+
                     <div className="group cursor-pointer">
                       <div className="relative aspect-[4/5] overflow-hidden rounded-sm mb-6 shadow-xl">
                         <img
@@ -376,7 +376,7 @@ const Home = () => {
       </section>
 
       <section className="relative py-32 overflow-hidden">
-        
+
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1540518614846-7eded433c457?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
@@ -407,7 +407,7 @@ const Home = () => {
       <section className="py-24 bg-navy-50/50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            
+
             <div className="text-left">
               <Reveal>
                 <span className="text-teal-600 font-bold text-sm tracking-[0.3em] uppercase block mb-4">
@@ -432,10 +432,10 @@ const Home = () => {
               </Reveal>
             </div>
 
-            
+
             <div className="relative">
               <div className="grid grid-cols-2 gap-4 h-[500px]">
-                
+
                 <div className="row-span-2">
                   <Reveal delay={0.2} width="100%" className="h-full">
                     <div className="relative h-full rounded-2xl overflow-hidden shadow-2xl group">
@@ -445,7 +445,7 @@ const Home = () => {
                   </Reveal>
                 </div>
 
-              
+
                 <div className="flex flex-col gap-4 h-full">
                   <Reveal delay={0.4} width="100%" className="h-1/2">
                     <div className="relative h-full rounded-2xl overflow-hidden shadow-xl group">
@@ -462,7 +462,7 @@ const Home = () => {
                 </div>
               </div>
 
-              
+
               <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-teal-500/10 rounded-full -z-10 blur-2xl"></div>
             </div>
           </div>
@@ -487,7 +487,7 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
             {loadingReviews ? (
-             
+
               [1, 2, 3].map((i) => (
                 <div key={i} className="bg-navy-50/50 border border-navy-100 p-10 rounded-3xl animate-pulse h-64">
                   <div className="w-24 h-4 bg-navy-200 rounded mb-6"></div>
@@ -560,7 +560,7 @@ const Home = () => {
       </section>
 
       <section className="relative py-16 overflow-hidden bg-navy-950">
-        
+
         <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-sand-500/10 rounded-full -ml-32 -mb-32 blur-3xl"></div>
 
