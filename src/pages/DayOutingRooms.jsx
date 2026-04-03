@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchRoomsByCategory, checkRoomAvailability, fetchPackagesByType } from '../utils/api'
 
 const today = new Date().toISOString().split('T')[0]
@@ -14,13 +14,13 @@ const FALLBACK_IMAGES = [
 ]
 
 const getGalleryImages = (room) => {
-    // 1. Use the gallery images array from DB if it exists and has content
+
     const base = room.images?.length ? room.images : []
 
-    // 2. Include the primary image if it's not already in the gallery
+
     const combined = room.image && !base.includes(room.image) ? [room.image, ...base] : base
 
-    // 3. Fall back to hardcoded images only if we have fewer than 4 unique photos
+
     const unique = [...new Set(combined.filter(Boolean))]
     let fallbackIdx = 0
     while (unique.length < 4 && fallbackIdx < FALLBACK_IMAGES.length) {
@@ -55,13 +55,17 @@ const HeroParticles = ({ color = 'rgba(20, 184, 166, 0.3)' }) => (
 
 
 const DayOutingRooms = () => {
+    const location = useLocation()
+    const { state } = location
+
     const [rooms, setRooms] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [selectedRoom, setSelectedRoom] = useState(null)
-    const [view, setView] = useState('categories') // 'categories', 'rooms', 'info'
-    const [selectedCategory, setSelectedCategory] = useState(null)
-    const [outingDate, setOutingDate] = useState('')
+    const [view, setView] = useState(state?.checkIn ? 'rooms' : 'categories')
+    const [selectedCategory, setSelectedCategory] = useState(state?.checkIn ? 'couple' : null)
+    const [outingDate, setOutingDate] = useState(state?.checkIn || '')
+    const [guests, setGuests] = useState(state?.guests || '1')
     const [availability, setAvailability] = useState(null)
     const [bookingSuccess, setBookingSuccess] = useState(false)
     const [lightboxIndex, setLightboxIndex] = useState(null)
@@ -123,11 +127,18 @@ const DayOutingRooms = () => {
     useEffect(() => {
         setLoading(true)
         setError(null)
+        setSelectedRoom(null)
+        setAvailability(null)
+        setBookingSuccess(false)
         fetchRoomsByCategory('couple')
-            .then(data => setRooms(data.map(normalizeRoom)))
+            .then(data => {
+                const normalized = data.map(normalizeRoom);
+                const filtered = normalized.filter(room => room.guests >= parseInt(guests));
+                setRooms(filtered);
+            })
             .catch(() => setError('Unable to load rooms. Please try again.'))
             .finally(() => setLoading(false))
-    }, [])
+    }, [guests])
 
     const handleSelectCategory = (cat) => {
         setSelectedCategory(cat)
@@ -178,7 +189,7 @@ const DayOutingRooms = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-navy-50 via-white to-navy-50/30">
-            {/* Lightbox Overlay */}
+            {/*photo shower*/}
             {lightboxIndex !== null && selectedRoom && (() => {
                 const imgs = getGalleryImages(selectedRoom)
                 return (
@@ -199,7 +210,7 @@ const DayOutingRooms = () => {
                 )
             })()}
 
-            {/* ===== HERO BANNER ===== */}
+            {/*BANNer*/}
             <section className="relative h-80 md:h-[28rem] flex items-end overflow-hidden hero-sweep">
                 <div
                     className="absolute inset-0 bg-cover bg-center animate-hero-zoom"
@@ -211,7 +222,7 @@ const DayOutingRooms = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 via-navy-800/50 to-navy-900/20" />
                 <HeroParticles color="rgba(20, 184, 166, 0.35)" />
 
-                {/* Corner accents */}
+
                 <div className="absolute top-6 left-6 w-16 h-16 border-t-2 border-l-2 border-white/20 rounded-tl-2xl z-10 animate-fade-in" />
                 <div className="absolute top-6 right-6 w-16 h-16 border-t-2 border-r-2 border-white/20 rounded-tr-2xl z-10 animate-fade-in" />
 
@@ -262,7 +273,7 @@ const DayOutingRooms = () => {
                 </section>
             )}
 
-            {/* ===== CATEGORY SELECTION VIEW ===== */}
+            {/*category select*/}
             {view === 'categories' && (
                 <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                     <div className="ornament-divider mb-8">
@@ -343,7 +354,7 @@ const DayOutingRooms = () => {
                 </section>
             )}
 
-            {/* ===== ROOMS VIEW (Couple) ===== */}
+            {/*couple room view*/}
             {view === 'rooms' && (
                 <>
                     <section className="bg-white/80 backdrop-blur-md border-b border-navy-100/50 shadow-sm py-4">
@@ -363,6 +374,23 @@ const DayOutingRooms = () => {
                                             onChange={(e) => { setOutingDate(e.target.value); setAvailability(null) }}
                                             className="border border-navy-200/60 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400 bg-white text-sm transition-all"
                                         />
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Guests</label>
+                                        <select
+                                            value={guests}
+                                            onChange={(e) => setGuests(e.target.value)}
+                                            className="border border-navy-200/60 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400 bg-white text-sm transition-all cursor-pointer"
+                                        >
+                                            <option value="1">1 Guest</option>
+                                            <option value="2">2 Guests</option>
+                                            <option value="3">3 Guests</option>
+                                            <option value="4">4 Guests</option>
+                                            <option value="5">5+ Guests</option>
+                                        </select>
                                     </div>
                                 </div>
                                 {outingDate && selectedRoom && (
@@ -406,6 +434,15 @@ const DayOutingRooms = () => {
                                         ))}
                                     </div>
                                 )}
+                                {!loading && !error && rooms.length === 0 && (
+                                    <div className="bg-white rounded-3xl shadow-lg border border-dashed border-navy-200 p-12 text-center animate-fade-in col-span-full">
+                                        <div className="w-20 h-20 bg-gradient-to-br from-teal-50 to-navy-50 rounded-2xl flex items-center justify-center mx-auto mb-5 animate-float">
+                                            <span className="text-4xl">🔎</span>
+                                        </div>
+                                        <h4 className="text-lg font-bold text-navy-800 mb-2">No Rooms Found</h4>
+                                        <p className="text-navy-400 text-sm leading-relaxed">No rooms in this category can accommodate {guests} guests. Please try another category or reduce guest count.</p>
+                                    </div>
+                                )}
                                 {!loading && !error && rooms.map((room, idx) => (
                                     <div
                                         key={room._id}
@@ -424,14 +461,14 @@ const DayOutingRooms = () => {
                                                     <h3 className="text-xl font-bold text-navy-900 mb-1 italic group-hover:text-teal-700 transition-colors duration-300">{room.name}</h3>
                                                     <p className="text-navy-500 text-sm mb-3 line-clamp-2">{room.tagline}</p>
                                                     <div className="flex gap-4 text-sm text-navy-500">
-                                                        <span className="flex items-center gap-1">👤 {room.capacity}</span>
-                                                        {/* <span className="flex items-center gap-1">📐 {room.size}</span> */}
+                                                        <span className="flex items-center gap-1">{room.capacity}</span>
+
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center justify-between mt-4">
                                                     <div><span className="text-xs text-navy-400 block">Package Price</span><span className="text-2xl font-extrabold text-navy-900 italic">{formatPrice(room.price)}/-</span></div>
                                                     <button className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 ${selectedRoom?._id === room._id ? 'bg-teal-500 text-white shadow-lg animate-badge-pulse' : 'bg-navy-900 text-white hover:bg-navy-700'}`}>
-                                                        {selectedRoom?._id === room._id ? '✓ Selected' : 'Select Room'}
+                                                        {selectedRoom?._id === room._id ? 'Selected' : 'Select Room'}
                                                     </button>
                                                 </div>
                                             </div>
@@ -548,7 +585,7 @@ const DayOutingRooms = () => {
                 </>
             )}
 
-            {/* ===== INFO VIEW (Family/Team) ===== */}
+            {/*Family/Team*/}
             {view === 'info' && (
                 <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
                     <button onClick={handleBack} className="flex items-center text-navy-500 hover:text-navy-900 font-bold text-sm transition-colors mb-8 group">

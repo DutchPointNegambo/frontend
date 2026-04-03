@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchRoomsByCategory, checkRoomAvailability } from '../utils/api'
 
 const today = new Date().toISOString().split('T')[0]
@@ -8,17 +8,15 @@ const checkOutTime = "9:00 AM - 11:00 AM";
 const DaycheckInTime = "9:00 AM - 7:00 PM";
 
 const FALLBACK_IMAGES = [
-
+    'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
 ]
 
 const getGalleryImages = (room) => {
-    // 1. Use the gallery images array from DB if it exists and has content
     const base = room.images?.length ? room.images : []
-
-    // 2. Include the primary image if it's not already in the gallery
     const combined = room.image && !base.includes(room.image) ? [room.image, ...base] : base
-
-    // 3. Fall back to hardcoded images only if we have fewer than 4 unique photos
     const unique = [...new Set(combined.filter(Boolean))]
     let fallbackIdx = 0
     while (unique.length < 4 && fallbackIdx < FALLBACK_IMAGES.length) {
@@ -31,7 +29,6 @@ const getGalleryImages = (room) => {
     return unique.slice(0, 4)
 }
 
-/* Decorative floating particles for hero */
 const HeroParticles = ({ color = 'rgba(96, 165, 250, 0.3)' }) => (
     <>
         {[...Array(6)].map((_, i) => (
@@ -53,13 +50,17 @@ const HeroParticles = ({ color = 'rgba(96, 165, 250, 0.3)' }) => (
 )
 
 const DeluxeRooms = () => {
+    const location = useLocation()
+    const { state } = location
+
     const [rooms, setRooms] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [selectedRoom, setSelectedRoom] = useState(null)
-    const [selectedPackage, setSelectedPackage] = useState('full-board')
-    const [checkIn, setCheckIn] = useState('')
-    const [checkOut, setCheckOut] = useState('')
+    const [selectedPackage, setSelectedPackage] = useState(state?.isDayUse ? 'day-use' : 'full-board')
+    const [checkIn, setCheckIn] = useState(state?.checkIn || '')
+    const [checkOut, setCheckOut] = useState(state?.checkOut || '')
+    const [guests, setGuests] = useState(state?.guests || '1')
     const [availability, setAvailability] = useState(null)
     const [bookingSuccess, setBookingSuccess] = useState(false)
     const [lightboxIndex, setLightboxIndex] = useState(null)
@@ -105,10 +106,14 @@ const DeluxeRooms = () => {
         setAvailability(null)
         setBookingSuccess(false)
         fetchRoomsByCategory('deluxe', selectedPackage)
-            .then(data => setRooms(data.map(normalizeRoom)))
+            .then(data => {
+                const normalized = data.map(normalizeRoom);
+                const filtered = normalized.filter(room => room.guests >= parseInt(guests));
+                setRooms(filtered);
+            })
             .catch(() => setError('Unable to load rooms. Please try again.'))
             .finally(() => setLoading(false))
-    }, [selectedPackage])
+    }, [selectedPackage, guests])
 
     const handleSelectRoom = (room) => {
         setSelectedRoom(room)
@@ -153,7 +158,7 @@ const DeluxeRooms = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-navy-50 via-white to-navy-50/30">
-            {/* Lightbox Overlay */}
+            {/*photo shower*/}
             {lightboxIndex !== null && selectedRoom && (() => {
                 const imgs = getGalleryImages(selectedRoom)
                 return (
@@ -174,7 +179,7 @@ const DeluxeRooms = () => {
                 )
             })()}
 
-            {/* ===== HERO BANNER ===== */}
+            {/*banner*/}
             <section className="relative h-80 md:h-[28rem] flex items-end overflow-hidden hero-sweep">
                 <div
                     className="absolute inset-0 bg-cover bg-center animate-hero-zoom"
@@ -186,12 +191,12 @@ const DeluxeRooms = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 via-navy-800/50 to-navy-900/20" />
                 <HeroParticles color="rgba(96, 165, 250, 0.35)" />
 
-                {/* Decorative corner accents */}
+
                 <div className="absolute top-6 left-6 w-16 h-16 border-t-2 border-l-2 border-white/20 rounded-tl-2xl z-10 animate-fade-in" />
                 <div className="absolute top-6 right-6 w-16 h-16 border-t-2 border-r-2 border-white/20 rounded-tr-2xl z-10 animate-fade-in" />
 
                 <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 w-full">
-                    {/* Breadcrumb */}
+
                     <nav className="breadcrumb-trail mb-4 animate-fade-in">
                         <a href="/" className="text-white/60 hover:text-white transition-colors">Home</a>
                         <span className="text-white/30">›</span>
@@ -231,7 +236,7 @@ const DeluxeRooms = () => {
                 </div>
             </section>
 
-            {/* Package Selector — refined */}
+            {/* Package Selector*/}
             <section className="bg-white/80 backdrop-blur-md border-b border-navy-100/50 shadow-sm sticky top-0 z-30">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -247,7 +252,7 @@ const DeluxeRooms = () => {
                                         : 'text-navy-600 hover:text-navy-900 hover:bg-white/60'
                                         }`}
                                 >
-                                    🍽️ Full Board
+                                    Full Board
                                 </button>
                                 <button
                                     onClick={() => setSelectedPackage('day-use')}
@@ -256,7 +261,7 @@ const DeluxeRooms = () => {
                                         : 'text-navy-600 hover:text-navy-900 hover:bg-white/60'
                                         }`}
                                 >
-                                    ☀️ Day Use
+                                    Day Use
                                 </button>
                             </div>
                         </div>
@@ -289,6 +294,22 @@ const DeluxeRooms = () => {
                                     />
                                 </div>
                             )}
+                            <div>
+                                <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">
+                                    Guests
+                                </label>
+                                <select
+                                    value={guests}
+                                    onChange={(e) => setGuests(e.target.value)}
+                                    className="border border-navy-200/60 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 bg-white text-sm w-full sm:w-auto transition-all cursor-pointer"
+                                >
+                                    <option value="1">1 Guest</option>
+                                    <option value="2">2 Guests</option>
+                                    <option value="3">3 Guests</option>
+                                    <option value="4">4 Guests</option>
+                                    <option value="5">5+ Guests</option>
+                                </select>
+                            </div>
                             {checkIn && checkOut && selectedPackage !== 'day-use' && calcNights() > 0 && (
                                 <div className="px-4 py-2 bg-blue-50 rounded-xl border border-blue-100">
                                     <span className="text-blue-700 font-bold text-sm">{calcNights()} Night{calcNights() > 1 ? 's' : ''}</span>
@@ -319,16 +340,16 @@ const DeluxeRooms = () => {
                 </div>
             </section>
 
-            {/* ===== MAIN CONTENT ===== */}
+            {/*main contendt*/}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-                {/* Ornamental divider */}
+                {/*horizontal line*/}
                 <div className="ornament-divider mb-10">
                     <span>✦ Our Deluxe Collection ✦</span>
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-10">
 
-                    {/* ---- Room List ---- */}
+                    {/* Room List */}
                     <div className="lg:w-3/5 space-y-6">
                         <div className="flex items-end justify-between mb-2">
                             <div>
@@ -366,6 +387,16 @@ const DeluxeRooms = () => {
                             </div>
                         )}
 
+                        {!loading && !error && rooms.length === 0 && (
+                            <div className="bg-white rounded-3xl shadow-lg border border-dashed border-navy-200 p-12 text-center animate-fade-in col-span-full">
+                                <div className="w-20 h-20 bg-gradient-to-br from-blue-50 to-navy-50 rounded-2xl flex items-center justify-center mx-auto mb-5 animate-float">
+                                    <span className="text-4xl">🔎</span>
+                                </div>
+                                <h4 className="text-lg font-bold text-navy-800 mb-2">No Rooms Found</h4>
+                                <p className="text-navy-400 text-sm leading-relaxed">No rooms in this category can accommodate {guests} guests. Please try another category or reduce guest count.</p>
+                            </div>
+                        )}
+
                         {!loading && !error && rooms.map((room, idx) => (
                             <div
                                 key={room._id}
@@ -378,7 +409,7 @@ const DeluxeRooms = () => {
                             >
                                 {selectedRoom?._id === room._id && (
                                     <div className="absolute top-4 right-4 z-20 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow animate-badge-pulse">
-                                        ✓ Selected
+                                        Selected
                                     </div>
                                 )}
 
@@ -401,8 +432,8 @@ const DeluxeRooms = () => {
                                                 ))}
                                             </div>
                                             <div className="flex gap-4 text-sm text-navy-500">
-                                                <span className="flex items-center gap-1">👤 {room.capacity}</span>
-                                                {/* <span className="flex items-center gap-1">📐 {room.size}</span> */}
+                                                <span className="flex items-center gap-1">{room.capacity}</span>
+
                                             </div>
                                         </div>
 
@@ -418,7 +449,7 @@ const DeluxeRooms = () => {
                                                     : 'bg-navy-900 text-white hover:bg-navy-700 shadow-md hover:shadow-lg'
                                                     }`}
                                             >
-                                                {selectedRoom?._id === room._id ? '✓ Selected' : 'Select Room'}
+                                                {selectedRoom?._id === room._id ? 'Selected' : 'Select Room'}
                                             </button>
                                         </div>
                                     </div>
@@ -427,12 +458,12 @@ const DeluxeRooms = () => {
                         ))}
                     </div>
 
-                    {/* ---- Sidebar Summary ---- */}
+                    {/* summery */}
                     <div className="lg:w-2/5">
                         <div className="sticky top-28">
                             {selectedRoom ? (
                                 <div className="glass-summary rounded-3xl shadow-2xl overflow-hidden border border-blue-100/50 animate-panel-slide">
-                                    {/* Photo Gallery */}
+                                    {/* gallery*/}
                                     {(() => {
                                         const imgs = getGalleryImages(selectedRoom)
                                         return (
@@ -559,9 +590,7 @@ const DeluxeRooms = () => {
                                 </div>
                             ) : (
                                 <div className="bg-white rounded-3xl shadow-lg border border-dashed border-navy-200 p-12 text-center animate-fade-in">
-                                    <div className="w-20 h-20 bg-gradient-to-br from-blue-50 to-navy-50 rounded-2xl flex items-center justify-center mx-auto mb-5 animate-float">
-                                        <span className="text-4xl">🛏️</span>
-                                    </div>
+
                                     <h4 className="text-lg font-bold text-navy-800 mb-2">No Room Selected</h4>
                                     <p className="text-navy-400 text-sm leading-relaxed">Select check-in/out dates, then pick a room to see full details & pricing.</p>
                                 </div>

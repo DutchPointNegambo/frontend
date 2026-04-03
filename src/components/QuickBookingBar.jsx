@@ -6,18 +6,28 @@ const QuickBookingBar = () => {
     const [checkIn, setCheckIn] = useState('')
     const [checkOut, setCheckOut] = useState('')
     const [guests, setGuests] = useState('1')
-    const [roomType, setRoomType] = useState('')
+    const [roomType, setRoomType] = useState('deluxeRooms')
 
     const today = new Date().toISOString().split('T')[0]
     const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]
 
     const handleCheckAvailability = () => {
-        if (!checkIn || !checkOut) {
-            alert('Please select check-in and check-out dates')
+        if (!checkIn) {
+            alert('Please select check-in date')
             return
         }
-        // Navigate to booking page with search params
-        navigate(`/booking?checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&roomType=${roomType}`)
+
+        const isDayUse = !checkOut;
+        const targetPath = `/${roomType}`;
+
+        navigate(targetPath, {
+            state: {
+                checkIn,
+                checkOut: isDayUse ? checkIn : checkOut,
+                guests,
+                isDayUse
+            }
+        })
     }
 
     return (
@@ -80,10 +90,10 @@ const QuickBookingBar = () => {
                             onChange={(e) => setRoomType(e.target.value)}
                             className="w-full px-4 py-3 border border-navy-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 text-navy-900 font-medium appearance-none bg-white cursor-pointer"
                         >
-                            <option value="">All Rooms</option>
-                            <option value="deluxe">Deluxe Suite</option>
-                            <option value="presidential">Presidential Suite</option>
-                            <option value="ocean">Ocean View Suite</option>
+                            <option value="deluxeRooms">Deluxe Rooms</option>
+                            <option value="semiLuxuryRooms">Semi-Luxury Rooms</option>
+                            <option value="luxuryRooms">Luxury Rooms</option>
+                            <option value="DayOutingRooms">Day Outing Packages</option>
                         </select>
                     </div>
 
