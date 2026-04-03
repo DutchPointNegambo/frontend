@@ -1,31 +1,41 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchRoomsByCategory, checkRoomAvailability } from '../utils/api'
 
 const today = new Date().toISOString().split('T')[0]
 
+const checkInTime = "10:00 AM - 12:00 PM";
+const checkOutTime = "9:00 AM - 11:00 AM";
+const DaycheckInTime = "9:00 AM - 7:00 PM";
+
 const FALLBACK_IMAGES = [
-    'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813043/r5-11_etdeox.jpg',
-    'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813043/r5-8_uandub.jpg',
-    'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813042/r5-2_q7mrsg.jpg',
-    'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813042/r5-7_lfd50v.jpg',
-    'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813043/r5-10_oyajfg.jpg',
-    'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813041/r5-9_j8gwks.jpg',
+    'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
 ]
 
 const getGalleryImages = (room) => {
+
     const base = room.images?.length ? room.images : []
-    const combined = room.image ? [room.image, ...base] : base
-    const unique = [...new Set(combined)]
-    while (unique.length < 6) {
-        const fb = FALLBACK_IMAGES[unique.length % FALLBACK_IMAGES.length]
-        if (!unique.includes(fb)) unique.push(fb)
-        else unique.push(FALLBACK_IMAGES[(unique.length + 1) % FALLBACK_IMAGES.length])
+
+
+    const combined = room.image && !base.includes(room.image) ? [room.image, ...base] : base
+
+
+    const unique = [...new Set(combined.filter(Boolean))]
+    let fallbackIdx = 0
+    while (unique.length < 6 && fallbackIdx < FALLBACK_IMAGES.length) {
+        const fb = FALLBACK_IMAGES[fallbackIdx]
+        if (!unique.includes(fb)) {
+            unique.push(fb)
+        }
+        fallbackIdx++
     }
     return unique.slice(0, 6)
 }
 
-const HeroParticles = ({ color = 'rgba(245, 158, 11, 0.3)' }) => (
+const HeroParticles = ({ color = 'rgba(234, 179, 8, 0.3)' }) => (
     <>
         {[...Array(6)].map((_, i) => (
             <div
@@ -46,13 +56,17 @@ const HeroParticles = ({ color = 'rgba(245, 158, 11, 0.3)' }) => (
 )
 
 const LuxuryRooms = () => {
+    const location = useLocation()
+    const { state } = location
+
     const [rooms, setRooms] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [selectedRoom, setSelectedRoom] = useState(null)
-    const [selectedPackage, setSelectedPackage] = useState('full-board')
-    const [checkIn, setCheckIn] = useState('')
-    const [checkOut, setCheckOut] = useState('')
+    const [selectedPackage, setSelectedPackage] = useState(state?.isDayUse ? 'day-use' : 'full-board')
+    const [checkIn, setCheckIn] = useState(state?.checkIn || '')
+    const [checkOut, setCheckOut] = useState(state?.checkOut || '')
+    const [guests, setGuests] = useState(state?.guests || '1')
     const [availability, setAvailability] = useState(null)
     const [bookingSuccess, setBookingSuccess] = useState(false)
     const [lightboxIndex, setLightboxIndex] = useState(null)
@@ -88,7 +102,7 @@ const LuxuryRooms = () => {
             : (room.features || []).map(f => ({ icon: '✦', label: f })),
         includes: room.includes?.length
             ? room.includes
-            : ['Complimentary breakfast', 'Free Wi-Fi', 'Daily housekeeping'],
+            : ['Ocean views', 'Private balcony', 'Premium mini-bar'],
     })
 
     useEffect(() => {
@@ -98,10 +112,14 @@ const LuxuryRooms = () => {
         setAvailability(null)
         setBookingSuccess(false)
         fetchRoomsByCategory('luxury', selectedPackage)
-            .then(data => setRooms(data.map(normalizeRoom)))
+            .then(data => {
+                const normalized = data.map(normalizeRoom);
+                const filtered = normalized.filter(room => room.guests >= parseInt(guests));
+                setRooms(filtered);
+            })
             .catch(() => setError('Unable to load rooms. Please try again.'))
             .finally(() => setLoading(false))
-    }, [selectedPackage])
+    }, [selectedPackage, guests])
 
     const handleSelectRoom = (room) => {
         setSelectedRoom(room)
@@ -117,6 +135,11 @@ const LuxuryRooms = () => {
         } else if (checkOut && checkOut <= val) {
             setCheckOut('')
         }
+    }
+
+    const handleGuestsChange = (val) => {
+        setGuests(val)
+        setAvailability(null)
     }
 
     const handleCheckAvailability = async () => {
@@ -145,7 +168,7 @@ const LuxuryRooms = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-navy-50 via-white to-navy-50/30">
-            {/* Lightbox Overlay */}
+            {/*photoshowe*/}
             {lightboxIndex !== null && selectedRoom && (() => {
                 const imgs = getGalleryImages(selectedRoom)
                 return (
@@ -166,14 +189,14 @@ const LuxuryRooms = () => {
                 )
             })()}
 
-            {/* ===== HERO BANNER ===== */}
+            {/*banner*/}
             <section className="relative h-80 md:h-[28rem] flex items-end overflow-hidden hero-sweep">
                 <div className="absolute inset-0 bg-cover bg-center animate-hero-zoom"
-                    style={{ backgroundImage: "url('https://images.unsplash.com/photo-1576610616656-d3aa5d1f4534?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')" }} />
+                    style={{ backgroundImage: "url('https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813043/r5-11_etdeox.jpg')" }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 via-navy-800/50 to-navy-900/20" />
                 <HeroParticles color="rgba(245, 158, 11, 0.35)" />
 
-                {/* Gold corner accents */}
+
                 <div className="absolute top-6 left-6 w-20 h-20 border-t-2 border-l-2 border-amber-400/30 rounded-tl-2xl z-10 animate-fade-in" />
                 <div className="absolute top-6 right-6 w-20 h-20 border-t-2 border-r-2 border-amber-400/30 rounded-tr-2xl z-10 animate-fade-in" />
                 <div className="absolute bottom-6 left-6 w-20 h-20 border-b-2 border-l-2 border-amber-400/30 rounded-bl-2xl z-10 animate-fade-in" />
@@ -182,7 +205,7 @@ const LuxuryRooms = () => {
                     <nav className="breadcrumb-trail mb-4 animate-fade-in">
                         <a href="/" className="text-white/60 hover:text-white transition-colors">Home</a>
                         <span className="text-white/30">›</span>
-                        <span className="text-amber-300/80">Luxury Suites</span>
+                        <span className="text-amber-300/80">Luxury Suits</span>
                     </nav>
 
                     <span className="inline-block px-4 py-1.5 bg-gradient-to-r from-amber-500/90 to-yellow-500/90 text-white text-xs font-bold uppercase tracking-widest rounded-full mb-4 backdrop-blur-sm animate-badge-pulse animate-fade-in-up shadow-lg shadow-amber-500/25">
@@ -191,11 +214,11 @@ const LuxuryRooms = () => {
                     <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight animate-fade-in-up animation-delay-200">
                         Luxury{' '}
                         <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent italic animate-gradient-text">
-                            Suites
+                            Suits
                         </span>
                     </h1>
                     <p className="text-white/70 mt-3 text-lg max-w-xl animate-fade-in-up animation-delay-400 leading-relaxed">
-                        Immerse yourself in the pinnacle of luxury at Serenity Bay.
+                        Immerse yourself in the pinnacle of luxury at Dutch Point Resort.
                     </p>
 
                     <div className="flex gap-8 mt-6 animate-fade-in-up animation-delay-600">
@@ -211,13 +234,13 @@ const LuxuryRooms = () => {
                         <div className="w-px bg-white/20" />
                         <div className="text-center">
                             <div className="text-2xl font-bold text-amber-300">Private</div>
-                            <div className="text-white/50 text-xs uppercase tracking-wider">Terrace</div>
+                            <div className="text-white/50 text-xs uppercase tracking-wider">Pool</div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Package Selector — sticky */}
+            {/*pkg select*/}
             <section className="bg-white/80 backdrop-blur-md border-b border-navy-100/50 shadow-sm sticky top-0 z-30">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -226,11 +249,11 @@ const LuxuryRooms = () => {
                             <div className="inline-flex rounded-2xl bg-navy-50/80 p-1 border border-navy-100/50">
                                 <button onClick={() => setSelectedPackage('full-board')}
                                     className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${selectedPackage === 'full-board' ? 'bg-amber-500 text-white shadow-lg shadow-amber-200/50' : 'text-navy-600 hover:text-navy-900 hover:bg-white/60'}`}>
-                                    🍽️ Full Board
+                                    Full Board
                                 </button>
                                 <button onClick={() => setSelectedPackage('day-use')}
                                     className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${selectedPackage === 'day-use' ? 'bg-amber-500 text-white shadow-lg shadow-amber-200/50' : 'text-navy-600 hover:text-navy-900 hover:bg-white/60'}`}>
-                                    ☀️ Day Use
+                                    Day Use
                                 </button>
                             </div>
                         </div>
@@ -252,6 +275,22 @@ const LuxuryRooms = () => {
                                         className="border border-navy-200/60 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400 bg-white text-sm w-full sm:w-auto transition-all" />
                                 </div>
                             )}
+                            <div>
+                                <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">
+                                    Guests
+                                </label>
+                                <select
+                                    value={guests}
+                                    onChange={(e) => setGuests(e.target.value)}
+                                    className="border border-navy-200/60 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400 bg-white text-sm w-full sm:w-auto transition-all cursor-pointer"
+                                >
+                                    <option value="1">1 Guest</option>
+                                    <option value="2">2 Guests</option>
+                                    <option value="3">3 Guests</option>
+                                    <option value="4">4 Guests</option>
+                                    <option value="5">5+ Guests</option>
+                                </select>
+                            </div>
                             {checkIn && checkOut && selectedPackage !== 'day-use' && calcNights() > 0 && (
                                 <div className="px-4 py-2 bg-amber-50 rounded-xl border border-amber-100">
                                     <span className="text-amber-700 font-bold text-sm">{calcNights()} Night{calcNights() > 1 ? 's' : ''}</span>
@@ -285,8 +324,8 @@ const LuxuryRooms = () => {
                     <div className="lg:w-3/5 space-y-6">
                         <div className="flex items-end justify-between mb-2">
                             <div>
-                                <h2 className="text-2xl font-bold text-navy-900 mb-1">Select Your Suite</h2>
-                                <p className="text-navy-500 text-sm">Click a suite to preview exclusive amenities and pricing.</p>
+                                <h2 className="text-2xl font-bold text-navy-900 mb-1">Select Your Suit</h2>
+                                <p className="text-navy-500 text-sm">Click a Suit to preview exclusive amenities and pricing.</p>
                             </div>
                             {!loading && !error && (
                                 <span className="text-navy-400 text-xs font-semibold bg-amber-50 px-3 py-1 rounded-full border border-amber-100 animate-count">
@@ -310,6 +349,16 @@ const LuxuryRooms = () => {
 
                         {error && <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center animate-fade-in"><p className="text-red-600 font-semibold">{error}</p></div>}
 
+                        {!loading && !error && rooms.length === 0 && (
+                            <div className="bg-white rounded-3xl shadow-lg border border-dashed border-navy-200 p-12 text-center animate-fade-in col-span-full">
+                                <div className="w-20 h-20 bg-gradient-to-br from-amber-50 to-navy-50 rounded-2xl flex items-center justify-center mx-auto mb-5 animate-float">
+                                    <span className="text-4xl">🔎</span>
+                                </div>
+                                <h4 className="text-lg font-bold text-navy-800 mb-2">No Rooms Found</h4>
+                                <p className="text-navy-400 text-sm leading-relaxed">No rooms in this category can accommodate {guests} guests. Please try another category or reduce guest count.</p>
+                            </div>
+                        )}
+
                         {!loading && !error && rooms.map((room, idx) => (
                             <div key={room._id} onClick={() => handleSelectRoom(room)}
                                 className={`card-shine group relative bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer border-2 transform hover:-translate-y-1 ${selectedRoom?._id === room._id ? 'border-amber-500 shadow-amber-100 shadow-2xl scale-[1.01] animate-selected-ring' : 'border-transparent hover:border-amber-200'}`}
@@ -319,7 +368,7 @@ const LuxuryRooms = () => {
                                 )}
                                 <div className="flex flex-col sm:flex-row">
                                     <div className="sm:w-48 md:w-56 h-48 sm:h-auto relative overflow-hidden flex-shrink-0">
-                                        <img src={room.image} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                        <img src={room.images[0]} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                         <div className={`absolute top-3 left-3 ${room.badgeColor} text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg`}>{room.badge}</div>
                                     </div>
@@ -333,8 +382,8 @@ const LuxuryRooms = () => {
                                                 ))}
                                             </div>
                                             <div className="flex gap-4 text-sm text-navy-500">
-                                                <span className="flex items-center gap-1">👤 {room.capacity}</span>
-                                                <span className="flex items-center gap-1">📐 {room.size}</span>
+                                                <span className="flex items-center gap-1">{room.capacity}</span>
+
                                             </div>
                                         </div>
                                         <div className="flex items-center justify-between mt-4 pt-4 border-t border-navy-50">
@@ -344,7 +393,7 @@ const LuxuryRooms = () => {
                                             </div>
                                             <button onClick={(e) => { e.stopPropagation(); handleSelectRoom(room) }}
                                                 className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 ${selectedRoom?._id === room._id ? 'bg-amber-500 text-white shadow-lg shadow-amber-200' : 'bg-navy-900 text-white hover:bg-navy-700 shadow-md hover:shadow-lg'}`}>
-                                                {selectedRoom?._id === room._id ? '✓ Selected' : 'Select Suite'}
+                                                {selectedRoom?._id === room._id ? 'Selected' : 'Select Suite'}
                                             </button>
                                         </div>
                                     </div>
@@ -396,12 +445,12 @@ const LuxuryRooms = () => {
                                             <div className="grid grid-cols-2 gap-2 animate-fade-in">
                                                 <div className={`rounded-xl px-3 py-2 border ${selectedPackage === 'day-use' ? 'col-span-2 bg-amber-50 border-amber-100' : 'bg-amber-50 border-amber-100'}`}>
                                                     <span className="text-xs text-amber-600 font-bold block">{selectedPackage === 'day-use' ? 'Visit Date' : 'Check-In'}</span>
-                                                    <span className="text-navy-800 font-semibold text-sm">{new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                    <span className="text-navy-800 font-semibold text-sm">{new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {selectedPackage === 'day-use' ? DaycheckInTime : checkInTime}</span>
                                                 </div>
                                                 {selectedPackage !== 'day-use' && (
                                                     <div className="bg-amber-50 rounded-xl px-3 py-2 border border-amber-100">
                                                         <span className="text-xs text-amber-600 font-bold block">Check-Out</span>
-                                                        <span className="text-navy-800 font-semibold text-sm">{new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                        <span className="text-navy-800 font-semibold text-sm">{new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {checkOutTime}</span>
                                                     </div>
                                                 )}
                                                 <div className="col-span-2 bg-gradient-to-r from-navy-50 to-amber-50/50 rounded-xl px-3 py-2 flex justify-between">
@@ -463,7 +512,7 @@ const LuxuryRooms = () => {
                                                 {!checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
                                             </button>
                                         )}
-                                        <p className="text-center text-navy-400 text-xs">Free cancellation up to 72 hours before check-in.</p>
+                                        <p className="text-center text-navy-400 text-xs">Check dates & times before booking</p>
                                     </div>
                                 </div>
                             ) : (

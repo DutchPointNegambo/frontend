@@ -8,8 +8,10 @@ const AddRoomForm = () => {
     price: '',
     guests: '',
     description: '',
+    tagline: '',
     features: '',
     image: '',
+    images: '',
     view: 'ocean'
   });
 
@@ -29,7 +31,8 @@ const AddRoomForm = () => {
         ...formData,
         price: Number(formData.price),
         guests: Number(formData.guests),
-        features: formData.features.split(',').map(f => f.trim()).filter(f => f !== '')
+        features: formData.features.split(',').map(f => f.trim()).filter(f => f !== ''),
+        images: formData.images.split(',').map(i => i.trim()).filter(i => i !== '')
       };
 
       const response = await fetch('http://localhost:5000/api/rooms', {
@@ -50,8 +53,10 @@ const AddRoomForm = () => {
           price: '',
           guests: '',
           description: '',
+          tagline: '',
           features: '',
           image: '',
+          images: '',
           view: 'ocean'
         });
       } else {
@@ -94,11 +99,10 @@ const AddRoomForm = () => {
                 className="w-full px-4 py-3 rounded-xl border border-navy-100 focus:border-teal-500 outline-none transition-all"
               >
                 <option value="deluxe">Deluxe</option>
-                <option value="semi-luxury">Semi-Luxury</option>
+                <option value="semiluxury">Semi-Luxury</option>
                 <option value="luxury">Luxury</option>
-                <option value="ocean">Ocean</option>
-                <option value="villa">Villa</option>
-                <option value="family">Family</option>
+                <option value="dayOuting">Day Outing</option>
+                <option value="couple">Couple</option>
               </select>
             </div>
 
@@ -154,17 +158,31 @@ const AddRoomForm = () => {
             ></textarea>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-navy-400 mb-2">Image URL</label>
-            <input
-              type="text"
-              name="image"
-              value={formData.image}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-navy-100 focus:border-teal-500 outline-none transition-all"
-              placeholder="https://images.unsplash.com/..."
-              required
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-navy-400 mb-2">Primary Image URL</label>
+              <input
+                type="text"
+                name="image"
+                value={formData.image}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-xl border border-navy-100 focus:border-teal-500 outline-none transition-all"
+                placeholder="https://images.unsplash.com/main..."
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-navy-400 mb-2">Gallery Images (Comma separated)</label>
+              <input
+                type="text"
+                name="images"
+                value={formData.images}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-xl border border-navy-100 focus:border-teal-500 outline-none transition-all"
+                placeholder="url1, url2, url3..."
+              />
+            </div>
           </div>
 
           {status.message && (

@@ -1,8 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchRoomsByCategory, checkRoomAvailability } from '../utils/api'
 
 const today = new Date().toISOString().split('T')[0]
+
+const checkInTime = "10:00 AM - 12:00 PM";
+const checkOutTime = "9:00 AM - 11:00 AM";
+const DaycheckInTime = "9:00 AM - 7:00 PM";
+
 
 const FALLBACK_IMAGES = [
     'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80',
@@ -12,13 +17,19 @@ const FALLBACK_IMAGES = [
 ]
 
 const getGalleryImages = (room) => {
+
     const base = room.images?.length ? room.images : []
-    const combined = room.image ? [room.image, ...base] : base
-    const unique = [...new Set(combined)]
-    while (unique.length < 4) {
-        const fb = FALLBACK_IMAGES[unique.length % FALLBACK_IMAGES.length]
-        if (!unique.includes(fb)) unique.push(fb)
-        else unique.push(FALLBACK_IMAGES[(unique.length + 1) % FALLBACK_IMAGES.length])
+
+    const combined = room.image && !base.includes(room.image) ? [room.image, ...base] : base
+
+    const unique = [...new Set(combined.filter(Boolean))]
+    let fallbackIdx = 0
+    while (unique.length < 4 && fallbackIdx < FALLBACK_IMAGES.length) {
+        const fb = FALLBACK_IMAGES[fallbackIdx]
+        if (!unique.includes(fb)) {
+            unique.push(fb)
+        }
+        fallbackIdx++
     }
     return unique.slice(0, 4)
 }
@@ -44,13 +55,17 @@ const HeroParticles = ({ color = 'rgba(20, 184, 166, 0.3)' }) => (
 )
 
 const SemiLuxuryRooms = () => {
+    const location = useLocation()
+    const { state } = location
+
     const [rooms, setRooms] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [selectedRoom, setSelectedRoom] = useState(null)
-    const [selectedPackage, setSelectedPackage] = useState('full-board')
-    const [checkIn, setCheckIn] = useState('')
-    const [checkOut, setCheckOut] = useState('')
+    const [selectedPackage, setSelectedPackage] = useState(state?.isDayUse ? 'day-use' : 'full-board')
+    const [checkIn, setCheckIn] = useState(state?.checkIn || '')
+    const [checkOut, setCheckOut] = useState(state?.checkOut || '')
+    const [guests, setGuests] = useState(state?.guests || '1')
     const [availability, setAvailability] = useState(null)
     const [bookingSuccess, setBookingSuccess] = useState(false)
     const [lightboxIndex, setLightboxIndex] = useState(null)
@@ -72,7 +87,7 @@ const SemiLuxuryRooms = () => {
         return () => window.removeEventListener('keydown', handler)
     }, [lightboxIndex, lightboxPrev, lightboxNext])
 
-    
+
     const normalizeRoom = (room) => ({
         ...room,
         tagline: room.tagline || room.description || '',
@@ -86,7 +101,7 @@ const SemiLuxuryRooms = () => {
             : (room.features || []).map(f => ({ icon: '✦', label: f })),
         includes: room.includes?.length
             ? room.includes
-            : ['Complimentary breakfast', 'Free Wi-Fi', 'Daily housekeeping'],
+            : ['Pool access', 'Free breakfast', 'Garden views'],
     })
 
     useEffect(() => {
@@ -96,10 +111,14 @@ const SemiLuxuryRooms = () => {
         setAvailability(null)
         setBookingSuccess(false)
         fetchRoomsByCategory('semiluxury', selectedPackage)
-            .then(data => setRooms(data.map(normalizeRoom)))
+            .then(data => {
+                const normalized = data.map(normalizeRoom);
+                const filtered = normalized.filter(room => room.guests >= parseInt(guests));
+                setRooms(filtered);
+            })
             .catch(() => setError('Unable to load rooms. Please try again.'))
             .finally(() => setLoading(false))
-    }, [selectedPackage])
+    }, [selectedPackage, guests])
 
     const handleSelectRoom = (room) => {
         setSelectedRoom(room)
@@ -115,6 +134,11 @@ const SemiLuxuryRooms = () => {
         } else if (checkOut && checkOut <= val) {
             setCheckOut('')
         }
+    }
+
+    const handleGuestsChange = (val) => {
+        setGuests(val)
+        setAvailability(null)
     }
 
     const handleCheckAvailability = async () => {
@@ -143,7 +167,7 @@ const SemiLuxuryRooms = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-navy-50 via-white to-navy-50/30">
-            {/* Lightbox Overlay */}
+            {/*photos*/}
             {lightboxIndex !== null && selectedRoom && (() => {
                 const imgs = getGalleryImages(selectedRoom)
                 return (
@@ -164,10 +188,10 @@ const SemiLuxuryRooms = () => {
                 )
             })()}
 
-            {/* ===== HERO BANNER ===== */}
+            {/*banner*/}
             <section className="relative h-80 md:h-[28rem] flex items-end overflow-hidden hero-sweep">
                 <div className="absolute inset-0 bg-cover bg-center animate-hero-zoom"
-                    style={{ backgroundImage: "url('https://images.unsplash.com/photo-1618773928121-c32242e63f39?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')" }} />
+                    style={{ backgroundImage: "url('https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813040/r4-6_qujirj.jpg')" }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 via-navy-800/50 to-navy-900/20" />
                 <HeroParticles color="rgba(20, 184, 166, 0.35)" />
 
@@ -197,7 +221,7 @@ const SemiLuxuryRooms = () => {
 
                     <div className="flex gap-8 mt-6 animate-fade-in-up animation-delay-600">
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-white">Pool</div>
+                            <div className="text-2xl font-bold text-white">Direct Beach</div>
                             <div className="text-white/50 text-xs uppercase tracking-wider">Access</div>
                         </div>
                         <div className="w-px bg-white/20" />
@@ -214,7 +238,7 @@ const SemiLuxuryRooms = () => {
                 </div>
             </section>
 
-            {/* Package Selector — sticky */}
+            {/* pkg selector*/}
             <section className="bg-white/80 backdrop-blur-md border-b border-navy-100/50 shadow-sm sticky top-0 z-30">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -223,11 +247,11 @@ const SemiLuxuryRooms = () => {
                             <div className="inline-flex rounded-2xl bg-navy-50/80 p-1 border border-navy-100/50">
                                 <button onClick={() => setSelectedPackage('full-board')}
                                     className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${selectedPackage === 'full-board' ? 'bg-teal-500 text-white shadow-lg shadow-teal-200/50' : 'text-navy-600 hover:text-navy-900 hover:bg-white/60'}`}>
-                                    🍽️ Full Board
+                                    Full Board
                                 </button>
                                 <button onClick={() => setSelectedPackage('day-use')}
                                     className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${selectedPackage === 'day-use' ? 'bg-teal-500 text-white shadow-lg shadow-teal-200/50' : 'text-navy-600 hover:text-navy-900 hover:bg-white/60'}`}>
-                                    ☀️ Day Use
+                                    Day Use
                                 </button>
                             </div>
                         </div>
@@ -249,6 +273,22 @@ const SemiLuxuryRooms = () => {
                                         className="border border-navy-200/60 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400 bg-white text-sm w-full sm:w-auto transition-all" />
                                 </div>
                             )}
+                            <div>
+                                <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">
+                                    Guests
+                                </label>
+                                <select
+                                    value={guests}
+                                    onChange={(e) => setGuests(e.target.value)}
+                                    className="border border-navy-200/60 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400 bg-white text-sm w-full sm:w-auto transition-all cursor-pointer"
+                                >
+                                    <option value="1">1 Guest</option>
+                                    <option value="2">2 Guests</option>
+                                    <option value="3">3 Guests</option>
+                                    <option value="4">4 Guests</option>
+                                    <option value="5">5+ Guests</option>
+                                </select>
+                            </div>
                             {checkIn && checkOut && selectedPackage !== 'day-use' && calcNights() > 0 && (
                                 <div className="px-4 py-2 bg-teal-50 rounded-xl border border-teal-100">
                                     <span className="text-teal-700 font-bold text-sm">{calcNights()} Night{calcNights() > 1 ? 's' : ''}</span>
@@ -272,7 +312,7 @@ const SemiLuxuryRooms = () => {
                 </div>
             </section>
 
-            {/* ===== MAIN CONTENT ===== */}
+            {/*main*/}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
                 <div className="ornament-divider mb-10">
                     <span>✦ Semi-Luxury Collection ✦</span>
@@ -307,6 +347,16 @@ const SemiLuxuryRooms = () => {
 
                         {error && <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center animate-fade-in"><p className="text-red-600 font-semibold">{error}</p></div>}
 
+                        {!loading && !error && rooms.length === 0 && (
+                            <div className="bg-white rounded-3xl shadow-lg border border-dashed border-navy-200 p-12 text-center animate-fade-in col-span-full">
+                                <div className="w-20 h-20 bg-gradient-to-br from-teal-50 to-navy-50 rounded-2xl flex items-center justify-center mx-auto mb-5 animate-float">
+                                    <span className="text-4xl">🔎</span>
+                                </div>
+                                <h4 className="text-lg font-bold text-navy-800 mb-2">No Rooms Found</h4>
+                                <p className="text-navy-400 text-sm leading-relaxed">No rooms in this category can accommodate {guests} guests. Please try another category or reduce guest count.</p>
+                            </div>
+                        )}
+
                         {!loading && !error && rooms.map((room, idx) => (
                             <div key={room._id} onClick={() => handleSelectRoom(room)}
                                 className={`card-shine group relative bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer border-2 transform hover:-translate-y-1 ${selectedRoom?._id === room._id ? 'border-teal-500 shadow-teal-100 shadow-2xl scale-[1.01] animate-selected-ring' : 'border-transparent hover:border-teal-200'}`}
@@ -316,7 +366,7 @@ const SemiLuxuryRooms = () => {
                                 )}
                                 <div className="flex flex-col sm:flex-row">
                                     <div className="sm:w-48 md:w-56 h-48 sm:h-auto relative overflow-hidden flex-shrink-0">
-                                        <img src={room.image} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                        <img src={room.images[0]} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                         <div className={`absolute top-3 left-3 ${room.badgeColor} text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg`}>{room.badge}</div>
                                     </div>
@@ -330,8 +380,8 @@ const SemiLuxuryRooms = () => {
                                                 ))}
                                             </div>
                                             <div className="flex gap-4 text-sm text-navy-500">
-                                                <span className="flex items-center gap-1">👤 {room.capacity}</span>
-                                                <span className="flex items-center gap-1">📐 {room.size}</span>
+                                                <span className="flex items-center gap-1">{room.capacity}</span>
+
                                             </div>
                                         </div>
                                         <div className="flex items-center justify-between mt-4 pt-4 border-t border-navy-50">
@@ -341,7 +391,7 @@ const SemiLuxuryRooms = () => {
                                             </div>
                                             <button onClick={(e) => { e.stopPropagation(); handleSelectRoom(room) }}
                                                 className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 ${selectedRoom?._id === room._id ? 'bg-teal-500 text-white shadow-lg shadow-teal-200' : 'bg-navy-900 text-white hover:bg-navy-700 shadow-md hover:shadow-lg'}`}>
-                                                {selectedRoom?._id === room._id ? '✓ Selected' : 'Select Room'}
+                                                {selectedRoom?._id === room._id ? 'Selected' : 'Select Room'}
                                             </button>
                                         </div>
                                     </div>
@@ -393,12 +443,12 @@ const SemiLuxuryRooms = () => {
                                             <div className="grid grid-cols-2 gap-2 animate-fade-in">
                                                 <div className={`rounded-xl px-3 py-2 border ${selectedPackage === 'day-use' ? 'col-span-2 bg-teal-50 border-teal-100' : 'bg-teal-50 border-teal-100'}`}>
                                                     <span className="text-xs text-teal-600 font-bold block">{selectedPackage === 'day-use' ? 'Visit Date' : 'Check-In'}</span>
-                                                    <span className="text-navy-800 font-semibold text-sm">{new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                    <span className="text-navy-800 font-semibold text-sm">{new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {selectedPackage === 'day-use' ? DaycheckInTime : checkInTime}</span>
                                                 </div>
                                                 {selectedPackage !== 'day-use' && (
                                                     <div className="bg-teal-50 rounded-xl px-3 py-2 border border-teal-100">
                                                         <span className="text-xs text-teal-600 font-bold block">Check-Out</span>
-                                                        <span className="text-navy-800 font-semibold text-sm">{new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                        <span className="text-navy-800 font-semibold text-sm">{new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {checkOutTime}</span>
                                                     </div>
                                                 )}
                                                 <div className="col-span-2 bg-gradient-to-r from-navy-50 to-teal-50/50 rounded-xl px-3 py-2 flex justify-between">
@@ -454,20 +504,18 @@ const SemiLuxuryRooms = () => {
                                                 <p className="text-teal-500 text-xs mt-1">Redirecting…</p>
                                             </div>
                                         ) : (
-                                        <button onClick={handleConfirmBooking}
+                                            <button onClick={handleConfirmBooking}
                                                 disabled={!checkIn || (selectedPackage !== 'day-use' && (!checkOut || calcNights() <= 0)) || availability === false || availability === 'checking'}
                                                 className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-teal-600 hover:to-teal-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow">
                                                 {!checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
                                             </button>
                                         )}
-                                        <p className="text-center text-navy-400 text-xs">Free cancellation up to 48 hours before check-in.</p>
+                                        <p className="text-center text-navy-400 text-xs">Check dates & times before booking</p>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="bg-white rounded-3xl shadow-lg border border-dashed border-navy-200 p-12 text-center animate-fade-in">
-                                    <div className="w-20 h-20 bg-gradient-to-br from-teal-50 to-navy-50 rounded-2xl flex items-center justify-center mx-auto mb-5 animate-float">
-                                        <span className="text-4xl">🌟</span>
-                                    </div>
+
                                     <h4 className="text-lg font-bold text-navy-800 mb-2">No Room Selected</h4>
                                     <p className="text-navy-400 text-sm leading-relaxed">Select dates then choose a room to see full details.</p>
                                 </div>
