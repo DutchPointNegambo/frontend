@@ -178,6 +178,20 @@ const Navbar = () => {
             <div className="flex items-center space-x-3 ml-2">
               {user ? (
                 <>
+                  {(user.role === 'admin' || user.role === 'staff') && (
+                    <Link
+                      to="/admin"
+                      title="Admin Dashboard"
+                      className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 border-2 ${shouldShowSolidNavbar
+                        ? 'border-teal-600 bg-teal-600 text-white hover:bg-teal-700 shadow-lg shadow-teal-500/20'
+                        : 'border-teal-400 bg-teal-400/20 text-teal-400 hover:bg-teal-400 hover:text-navy-950'
+                        }`}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                      </svg>
+                    </Link>
+                  )}
                   <Link
                     to="/profile"
                     className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 border-2 whitespace-nowrap ${shouldShowSolidNavbar
@@ -352,6 +366,18 @@ const Navbar = () => {
           <div className="p-6 border-t border-navy-50 space-y-3">
             {user ? (
               <>
+                {(user.role === 'admin' || user.role === 'staff') && (
+                  <Link
+                    to="/admin"
+                    className="flex items-center justify-between w-full px-5 py-4 rounded-2xl text-sm font-bold uppercase tracking-widest bg-teal-600 text-white shadow-xl shadow-teal-900/20 transition-all duration-300"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <span>Admin Panel</span>
+                    <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                  </Link>
+                )}
                 <Link
                   to="/profile"
                   className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center border-2 border-navy-950 text-navy-950 hover:bg-navy-50 transition-all duration-300"

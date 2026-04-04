@@ -43,7 +43,7 @@ const Dashboard = () => {
 
     const adminName = (() => {
         try {
-            const u = JSON.parse(localStorage.getItem('user') || '{}');
+            const u = JSON.parse(localStorage.getItem('userInfo') || '{}');
             return u.firstName || 'Admin';
         } catch { return 'Admin'; }
     })();
@@ -117,7 +117,7 @@ const Dashboard = () => {
 
     return (
         <div className="space-y-6">
-            {/* Page Header */}
+            
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-navy-900">
@@ -147,7 +147,7 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Error Banner */}
+           
             {error && (
                 <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm">
                     <span className="font-medium">Could not load live stats.</span>
@@ -156,16 +156,16 @@ const Dashboard = () => {
                 </div>
             )}
 
-            {/* Stat Cards */}
+            
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {statCards.map((s, i) => (
                     <StatCard key={i} {...s} loading={loading} />
                 ))}
             </div>
 
-            {/* Chart + Quick Actions */}
+           
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Revenue Chart */}
+                
                 <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-navy-100 p-6">
                     <div className="flex items-center justify-between mb-6">
                         <div>
@@ -209,7 +209,7 @@ const Dashboard = () => {
                     )}
                 </div>
 
-                {/* Quick Actions */}
+                
                 <div className="bg-white rounded-2xl shadow-sm border border-navy-100 p-5">
                     <h3 className="text-base font-bold text-navy-900 mb-4">Quick Actions</h3>
                     <div className="space-y-2">
