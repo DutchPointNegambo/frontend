@@ -11,7 +11,7 @@ const Navbar = () => {
 
   const leftNavItems = [
     { name: 'Home', path: '/' },
-    { name: 'Offers', path: '#' },
+    // { name: 'Offers', path: '#' },
     { name: 'Gallery', path: '/gallery' },
     { name: 'Events', path: '/event' },
   ]
@@ -65,8 +65,8 @@ const Navbar = () => {
                     ? 'text-navy-950'
                     : 'text-navy-700 hover:text-navy-950'
                   : isActive(item.path)
-                    ? 'text-white'
-                    : 'text-white/80 hover:text-white'
+                    ? (isHomePage ? 'text-navy-950' : 'text-white')
+                    : (isHomePage ? 'text-navy-700 hover:text-navy-950' : 'text-white/80 hover:text-white')
                   }`}
               >
                 {item.name}
@@ -89,8 +89,8 @@ const Navbar = () => {
                     ? 'text-navy-950'
                     : 'text-navy-700 hover:text-navy-950'
                   : roomCategories.some(cat => isActive(cat.path))
-                    ? 'text-white'
-                    : 'text-white/80 hover:text-white'
+                    ? (isHomePage ? 'text-navy-950' : 'text-white')
+                    : (isHomePage ? 'text-navy-700 hover:text-navy-950' : 'text-white/80 hover:text-white')
                   }`}
               >
                 <span>Rooms</span>
@@ -162,8 +162,8 @@ const Navbar = () => {
                     ? 'text-navy-950'
                     : 'text-navy-700 hover:text-navy-950'
                   : isActive(item.path)
-                    ? 'text-white'
-                    : 'text-white/80 hover:text-white'
+                    ? (isHomePage ? 'text-navy-950' : 'text-white')
+                    : (isHomePage ? 'text-navy-700 hover:text-navy-950' : 'text-white/80 hover:text-white')
                   }`}
               >
                 {item.name}
@@ -196,7 +196,9 @@ const Navbar = () => {
                     to="/profile"
                     className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 border-2 whitespace-nowrap ${shouldShowSolidNavbar
                       ? 'border-navy-950 text-navy-950 hover:bg-navy-950 hover:text-white'
-                      : 'border-white/30 text-white hover:bg-white/10 hover:border-white'
+                      : isHomePage 
+                        ? 'border-navy-950/30 text-navy-950 hover:bg-navy-950 hover:text-white hover:border-navy-950'
+                        : 'border-white/30 text-white hover:bg-white/10 hover:border-white'
                       }`}
                   >
                     Profile
@@ -217,7 +219,9 @@ const Navbar = () => {
                     to="/signin"
                     className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 border-2 whitespace-nowrap ${shouldShowSolidNavbar
                       ? 'border-navy-950 text-navy-950 hover:bg-navy-950 hover:text-white'
-                      : 'border-white/30 text-white hover:bg-white/10 hover:border-white'
+                      : isHomePage
+                        ? 'border-navy-950/30 text-navy-950 hover:bg-navy-950 hover:text-white hover:border-navy-950'
+                        : 'border-white/30 text-white hover:bg-white/10 hover:border-white'
                       }`}
                   >
                     Sign In
@@ -226,7 +230,9 @@ const Navbar = () => {
                     to="/login"
                     className={`px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap ${shouldShowSolidNavbar
                       ? 'bg-navy-950 text-white hover:bg-navy-900 shadow-navy-900/20'
-                      : 'bg-white text-navy-950 hover:bg-teal-50 shadow-white/10'
+                      : isHomePage
+                        ? 'bg-navy-950 text-white hover:bg-navy-900 shadow-navy-900/20'
+                        : 'bg-white text-navy-950 hover:bg-teal-50 shadow-white/10'
                       }`}
                   >
                     Log In
@@ -242,13 +248,13 @@ const Navbar = () => {
               onClick={() => setIsOpen(!isOpen)}
               className={`p-2 rounded-xl transition-all duration-300 ${shouldShowSolidNavbar
                 ? 'text-navy-950 hover:bg-navy-50'
-                : 'text-white hover:bg-white/10'
+                : (isHomePage ? 'text-navy-950 hover:bg-navy-50' : 'text-white hover:bg-white/10')
                 }`}
             >
               <div className="w-6 h-5 relative flex flex-col justify-between">
-                <span className={`w-full h-0.5 rounded-full transition-all duration-300 ${shouldShowSolidNavbar ? 'bg-navy-950' : 'bg-white'} ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
-                <span className={`w-full h-0.5 rounded-full transition-all duration-300 ${shouldShowSolidNavbar ? 'bg-navy-950' : 'bg-white'} ${isOpen ? 'opacity-0' : ''}`} />
-                <span className={`w-full h-0.5 rounded-full transition-all duration-300 ${shouldShowSolidNavbar ? 'bg-navy-950' : 'bg-white'} ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+                <span className={`w-full h-0.5 rounded-full transition-all duration-300 ${shouldShowSolidNavbar || isHomePage ? 'bg-navy-950' : 'bg-white'} ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
+                <span className={`w-full h-0.5 rounded-full transition-all duration-300 ${shouldShowSolidNavbar || isHomePage ? 'bg-navy-950' : 'bg-white'} ${isOpen ? 'opacity-0' : ''}`} />
+                <span className={`w-full h-0.5 rounded-full transition-all duration-300 ${shouldShowSolidNavbar || isHomePage ? 'bg-navy-950' : 'bg-white'} ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
               </div>
             </button>
           </div>

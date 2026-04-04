@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import Reveal from "../components/Reveal"
 import { registerUser } from '../utils/api'
 import { useAuth } from '../context/AuthContext'
@@ -16,6 +17,8 @@ const SignIn = () => {
     confirmPassword: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const [error, setError] = useState('')
 
@@ -193,29 +196,47 @@ const SignIn = () => {
                   <label htmlFor="signup-password" className="block text-xs font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">
                     Password
                   </label>
-                  <input
-                    type="password"
-                    id="signup-password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 bg-sand-50/50 border border-navy-100 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-navy-900 text-sm placeholder:text-navy-300"
-                    placeholder="••••••••"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      id="signup-password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 bg-sand-50/50 border border-navy-100 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-navy-900 text-sm placeholder:text-navy-300 pr-10"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-navy-400 hover:text-teal-600 transition-colors p-1"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label htmlFor="signup-confirmPassword" className="block text-xs font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">
                     Confirm Key
                   </label>
-                  <input
-                    type="password"
-                    id="signup-confirmPassword"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 bg-sand-50/50 border border-navy-100 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-navy-900 text-sm placeholder:text-navy-300"
-                    placeholder="••••••••"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      id="signup-confirmPassword"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 bg-sand-50/50 border border-navy-100 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-navy-900 text-sm placeholder:text-navy-300 pr-10"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-navy-400 hover:text-teal-600 transition-colors p-1"
+                    >
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
               </div>
 
