@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Minus, Tag, Sprout, Sparkles, Waves } from 'lucide-react'
 import Reveal from '../components/Reveal';
 import Footer from '../components/Footer';
 import QuickBookingBar from "../components/QuickBookingBar";
@@ -12,9 +12,10 @@ import room5 from "../assets/images/room5.jpeg";
 const Home = () => {
   const navigate = useNavigate()
   const [openFaq, setOpenFaq] = useState(null);
+  const [roomIndex, setRoomIndex] = useState(0);
 
   const handleBookNow = () => {
-    navigate('/contact-us')
+    navigate('/deluxeRooms')
   }
 
   const openDayOutingRooms = (e) => {
@@ -118,109 +119,170 @@ const Home = () => {
     <div className="w-full">
 
 
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pb-20">
+      {/* ===== HERO SECTION: VISION 1 - EDITORIAL BOUTIQUE ===== */}
+      <section className="relative min-h-[90vh] lg:min-h-screen flex items-center bg-white overflow-hidden pt-36 md:pt-48 lg:pt-20 pb-20 lg:pb-0">
+        
+        {/* Background Accent Gradients */}
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-sand-50/50 -z-0 hidden lg:block"></div>
+        <div className="absolute top-0 left-0 w-64 h-64 bg-teal-500/5 rounded-full -ml-32 -mt-32 blur-3xl"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            
+            {/* Left Column: Typography & Story */}
+            <div className="text-left order-2 lg:order-1">
+              <Reveal>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-[1px] bg-sand-500"></div>
+                  <span className="text-sand-600 text-xs font-bold tracking-[0.4em] uppercase">
+                    Boutique Luxury
+                  </span>
+                </div>
 
-        <div className="absolute inset-0">
-          <div
-            className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center"
-          ></div>
+                <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold text-navy-950 mb-8 leading-[1.1] font-serif" style={{ fontFamily: 'var(--font-serif)' }}>
+                  Dutch Point <br />
+                  <span className="text-sand-500 italic block mt-2">Negombo</span>
+                </h1>
 
-          <div className="absolute inset-0 animate-shimmer opacity-20"></div>
+                <p className="text-lg md:text-xl text-navy-600 mb-10 font-light leading-relaxed max-w-lg">
+                  Where the golden shores of Sri Lanka meet the pinnacle of coastal elegance. Experience a sanctuary designed for the discerning traveler.
+                </p>
 
-          <div className="absolute inset-0 bg-gradient-to-b from-navy-950/80 via-navy-900/40 to-navy-950/80"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 via-transparent to-gold-500/10"></div>
-        </div>
+                <div className="flex flex-wrap items-center gap-6 mb-12">
+                  <button 
+                    onClick={handleBookNow}
+                    className="px-10 py-5 bg-navy-950 text-white font-bold rounded-full hover:bg-navy-900 transition-all duration-300 uppercase tracking-widest text-xs shadow-xl shadow-navy-950/20 transform hover:-translate-y-1"
+                  >
+                    Experience Luxury
+                  </button>
+                  <div className="flex items-center gap-2 px-6 py-2 border border-navy-100 rounded-full text-navy-400">
+                    <span className="text-teal-500">🏖️</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Beachfront Paradise</span>
+                  </div>
+                </div>
 
-
-        <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto pt-32 md:pt-40">
-          <span className="inline-block text-teal-400 text-sm font-bold tracking-[0.3em] uppercase mb-6 animate-fade-in">
-            Luxury Beach Resort
-          </span>
-
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-tight animate-slide-up">
-            Dutch Point Negombo
-            <br />
-            <span className="bg-gradient-to-r from-teal-300 via-gold-300 to-teal-300 bg-[length:200%_auto] animate-gradient-flow bg-clip-text text-transparent italic" style={{ fontFamily: 'var(--font-serif)' }}>
-              Beach Resort
-            </span>
-          </h1>
-
-          <p className="text-xl md:text-2xl text-white/80 mb-12 font-light max-w-3xl mx-auto animate-fade-in delay-300">
-            Where Tropical Paradise Meets Unmatched Luxury on the Golden Shores of Sri Lanka
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-6 mb-16 animate-fade-in delay-500">
-            <div className="bg-white/10 backdrop-blur-md px-5 py-2 rounded-full border border-white/20 flex items-center gap-2">
-              <span className="text-teal-400">🏖️</span>
-              <span className="text-white text-xs font-bold uppercase tracking-wider">Beachfront</span>
+                {/* Micro Highlights */}
+                <div className="grid grid-cols-2 gap-8 border-t border-navy-50 pt-8">
+                  <div>
+                    <p className="text-2xl font-bold text-navy-950 mb-1">{placeData.rating} <span className="text-teal-500 text-sm">★</span></p>
+                    <p className="text-[10px] text-navy-400 font-bold uppercase tracking-[0.2em]">Guest Rating</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-navy-950 mb-1">Direct</p>
+                    <p className="text-[10px] text-navy-400 font-bold uppercase tracking-[0.2em]">Beach Access</p>
+                  </div>
+                </div>
+              </Reveal>
             </div>
-            <div className="bg-white/10 backdrop-blur-md px-5 py-2 rounded-full border border-white/20 flex items-center gap-2">
-              <span className="text-gold-400">⭐</span>
-              <span className="text-white text-xs font-bold uppercase tracking-wider">{placeData.rating} Guest Rating</span>
+
+            {/* Right Column: Visual Composition */}
+            <div className="relative order-1 lg:order-2 mb-12 lg:mb-0">
+              <Reveal delay={0.3} width="100%">
+                <div className="relative">
+                  
+                  {/* Backdrop Decorative Card */}
+                  <div className="absolute -inset-4 lg:-inset-8 border-2 border-sand-100 rounded-[3rem] lg:rounded-[5rem] -z-10 transform rotate-3"></div>
+                  
+                  {/* Main Image Masked */}
+                  <div className="relative h-[450px] md:h-[600px] w-full rounded-[2.5rem] lg:rounded-[4.5rem] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)]">
+                    <img 
+                      src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325414/615939793_122116670343131125_2666782521558393514_n_pjxfqw.jpg" 
+                      alt="Dutch Point Resort" 
+                      className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-[2000ms]"
+                    />
+                    <div className="absolute inset-0 bg-navy-950/10 mix-blend-overlay"></div>
+                  </div>
+
+                  {/* Floating Detail Image */}
+                  <div className="absolute -bottom-10 lg:-bottom-16 -left-10 lg:-left-20 w-40 h-56 lg:w-56 lg:h-72 rounded-3xl lg:rounded-[2.5rem] overflow-hidden shadow-2xl border-4 lg:border-8 border-white hidden sm:block transform -rotate-6 hover:rotate-0 transition-transform duration-700">
+                    <img 
+                      src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325413/unnamed_6_lun1kc.webp" 
+                      alt="Detail" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  {/* Floating Circular Badge */}
+                  <div className="absolute -top-6 -right-6 lg:-top-10 lg:-right-10 w-24 h-24 lg:w-32 lg:h-32 bg-white rounded-full flex items-center justify-center p-2 shadow-2xl border border-navy-50 animate-float">
+                    <div className="w-full h-full rounded-full border-2 border-dashed border-sand-200 flex items-center justify-center text-center p-2">
+                       <span className="text-[8px] lg:text-[10px] font-bold text-navy-900 uppercase tracking-widest">Negombo's Finest</span>
+                    </div>
+                  </div>
+
+                  {/* Secondary Context Image Tip */}
+                  <div className="absolute bottom-10 -right-12 w-32 h-32 lg:w-44 lg:h-44 rounded-full overflow-hidden shadow-2xl border-4 border-white hidden xl:block">
+                     <img 
+                      src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325414/unnamed_avhkpc.webp" 
+                      alt="Lobby Experience" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </Reveal>
             </div>
-            <div className="bg-white/10 backdrop-blur-md px-5 py-2 rounded-full border border-white/20 flex items-center gap-2">
-              <span className="text-teal-400">🇱🇰</span>
-              <span className="text-white text-xs font-bold uppercase tracking-wider">Negombo, Sri Lanka</span>
-            </div>
+
           </div>
-
-
         </div>
 
-
-        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-10">
-          <Reveal delay={1.2}>
-            <div className="flex flex-col items-center gap-3">
-              <span className="text-white/40 text-[10px] font-bold uppercase tracking-[0.4em]">Explore</span>
-              <div className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center p-1.5">
-                <div className="w-1.5 h-1.5 bg-teal-400 rounded-full animate-float"></div>
-              </div>
-            </div>
-          </Reveal>
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-10 left-8 hidden lg:block">
+             <div className="flex flex-col items-center gap-12 w-6">
+                <span className="text-navy-300 text-[10px] font-bold uppercase tracking-[0.4em] rotate-90 whitespace-nowrap mb-8">Scroll Perspective</span>
+                <div className="w-[1px] h-24 bg-gradient-to-b from-navy-100 to-transparent"></div>
+             </div>
         </div>
       </section>
 
-
-      <section className="py-24 bg-navy-50/30 relative">
+      <section className="py-24 bg-white relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <Reveal width="100%">
               <h2 className="text-4xl md:text-5xl font-bold text-navy-950 mb-6 font-serif" style={{ fontFamily: 'var(--font-serif)' }}>
-                Why Choose Us
+                Enjoy Exclusive Benefits
               </h2>
-              <div className="w-24 h-1 bg-teal-500 mx-auto mb-6"></div>
+              <div className="w-24 h-1 bg-sand-500 mx-auto mb-6"></div>
               <p className="text-lg text-navy-600 max-w-2xl mx-auto">
                 Experience the perfect harmony of nature and luxury at Dutch Point Negombo Beach Resort.
               </p>
             </Reveal>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-0 lg:divide-x lg:divide-navy-100">
             {[
               {
-                icon: '🏆',
-                title: 'Luxury Accommodation',
-                desc: 'Elegantly designed rooms with premium amenities and stunning ocean views.'
+                icon: <Tag size={40} strokeWidth={1.2} />,
+                title: 'Best Rates Guaranteed',
+                desc: 'Book directly for the most competitive pricing.'
               },
               {
-                icon: '🍽️',
-                title: 'Fine Dining',
-                desc: 'Exquisite cuisine prepared by master chefs using the freshest local ingredients.'
+                icon: <Sprout size={40} strokeWidth={1.2} />,
+                title: 'Exclusive Eco-Friendly Experiences',
+                desc: 'Sustainable luxury that respects our coastline.'
               },
               {
-                icon: '💆',
-                title: 'Spa & Wellness',
-                desc: 'Rejuvenate your senses with our world-class spa facilities and coastal healing.'
+                icon: <Waves size={40} strokeWidth={1.2} />,
+                title: 'Direct Beachfront Access',
+                desc: 'Step onto the golden sands of Negombo.'
+              },
+              {
+                icon: <Sparkles size={40} strokeWidth={1.2} />,
+                title: 'Personalized Service And Offers',
+                desc: 'Tailored experiences just for you.'
               }
             ].map((feature, idx) => (
-              <Reveal key={idx} delay={idx * 0.2} width="100%">
-                <div className="group p-10 rounded-3xl border border-navy-50 hover:border-teal-100 bg-white hover:shadow-2xl hover:shadow-navy-900/5 transition-all duration-500 text-center relative overflow-hidden h-full">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700 opacity-50" />
-                  <div className="w-20 h-20 bg-navy-50 rounded-2xl flex items-center justify-center mx-auto mb-8 group-hover:bg-teal-500 group-hover:scale-110 transition-all duration-500">
-                    <span className="text-4xl group-hover:scale-110 transition-transform duration-500">{feature.icon}</span>
+              <Reveal key={idx} delay={idx * 0.15} width="100%">
+                <div className="flex items-center gap-5 px-6 group py-4">
+                  <div className="text-sand-600 flex-shrink-0 group-hover:scale-110 transition-transform duration-500">
+                    {feature.icon}
                   </div>
-                  <h3 className="text-2xl font-bold text-navy-950 mb-4">{feature.title}</h3>
-                  <p className="text-navy-600 leading-relaxed">{feature.desc}</p>
+                  <div className="text-left">
+                    <h3 className="text-sm font-bold text-navy-950 leading-tight mb-1 group-hover:text-sand-600 transition-colors">
+                      {feature.title}
+                    </h3>
+                    <p className="text-xs text-navy-500 leading-relaxed font-light">
+                      {feature.desc}
+                    </p>
+                  </div>
                 </div>
               </Reveal>
             ))}
@@ -228,73 +290,128 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-24 bg-sand-50">
+      <section className="py-24 bg-sand-50 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-16 px-2">
             <Reveal width="100%">
-              <h2 className="text-4xl md:text-5xl font-bold text-navy-950 mb-6 font-serif" style={{ fontFamily: 'var(--font-serif)' }}>
-                Our Suites & Rooms
-              </h2>
-              <div className="w-24 h-1 bg-teal-500 mx-auto mb-6"></div>
-              <p className="text-lg text-navy-600 max-w-2xl mx-auto">
-                Hand-crafted spaces designed for ultimate relaxation and seaside comfort.
-              </p>
+              <div className="text-left">
+                <span className="text-teal-600 font-bold text-xs tracking-[0.3em] uppercase block mb-4">Accommodation</span>
+                <h2 className="text-4xl md:text-5xl font-bold text-navy-950 mb-6 font-serif" style={{ fontFamily: 'var(--font-serif)' }}>
+                  Our Suites & Rooms
+                </h2>
+                <div className="w-24 h-1 bg-teal-500 mb-6"></div>
+                <p className="text-lg text-navy-600 max-w-2xl">
+                  Hand-crafted spaces designed for ultimate relaxation and seaside comfort.
+                </p>
+              </div>
             </Reveal>
+
+            {/* Slider Controls */}
+            <div className="flex items-center gap-4 mt-8 md:mt-0">
+              <button
+                onClick={() => setRoomIndex(prev => Math.max(0, prev - 1))}
+                disabled={roomIndex === 0}
+                className={`w-14 h-14 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${roomIndex === 0 ? 'border-navy-100 text-navy-200 cursor-not-allowed' : 'border-teal-500 text-teal-600 hover:bg-teal-500 hover:text-white shadow-lg shadow-teal-500/20 active:scale-95'}`}
+              >
+                <ChevronLeft size={28} />
+              </button>
+              <button
+                onClick={() => setRoomIndex(prev => Math.min(1, prev + 1))}
+                disabled={roomIndex === 1}
+                className={`w-14 h-14 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${roomIndex === 1 ? 'border-navy-100 text-navy-200 cursor-not-allowed' : 'border-teal-500 text-teal-600 hover:bg-teal-500 hover:text-white shadow-lg shadow-teal-500/20 active:scale-95'}`}
+              >
+                <ChevronRight size={28} />
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-            <Reveal delay={0.1}>
-              <div className="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer" onClick={openSemiLuxuryRooms}>
-                <img src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813040/r4-6_qujirj.jpg" alt="Semi-Luxury Room" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-6">
-                  <h3 className="text-2xl font-bold text-white mb-2 font-serif">Semi-Luxury Rooms</h3>
-                  <p className="text-white/80 mb-4">Comfortable and elegant rooms with essential amenities.</p>
-                  <span className="text-teal-400 font-semibold">View Details &rarr;</span>
-                </div>
-              </div>
-            </Reveal>
+          <div className="relative">
+            <div className="overflow-hidden py-10 px-2 lg:-mx-4">
+              <div
+                className="flex transition-transform duration-700 ease-[cubic-bezier(0.23, 1, 0.32, 1)] gap-6"
+                style={{ transform: `translateX(-${roomIndex * (100 / 3 + 1.2)}%)` }}
+              >
+                {[
+                  {
+                    id: 'deluxe',
+                    title: 'Deluxe Rooms',
+                    desc: 'The pinnacle of luxury with exclusive services and amenities.',
+                    img: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813034/r1or2-1_nv4ynw.jpg',
+                    tag: 'Featured',
+                    color: 'teal',
+                    onClick: openDeluxeRooms
+                  },
+                  {
+                    id: 'luxury',
+                    title: 'Luxury Rooms',
+                    desc: 'Spacious rooms with premium features and breathtaking views.',
+                    img: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813043/r5-11_etdeox.jpg',
+                    tag: 'Premium',
+                    color: 'amber',
+                    onClick: openLuxuryRooms
+                  },
+                  {
+                    id: 'semi-luxury',
+                    title: 'Semi-Luxury Rooms',
+                    desc: 'Comfortable and elegant rooms with essential amenities.',
+                    img: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813040/r4-6_qujirj.jpg',
+                    tag: 'Comfort',
+                    color: 'blue',
+                    onClick: openSemiLuxuryRooms
+                  },
+                  {
+                    id: 'day-outing',
+                    title: 'Day Outing Packages',
+                    desc: 'Enjoy a full day of activities, dining, and relaxation.',
+                    img: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1775151227/dayout_tqowqj.jpg',
+                    tag: 'Leisure',
+                    color: 'emerald',
+                    onClick: openDayOutingRooms
+                  }
+                ].map((room, idx) => (
+                  <div
+                    key={room.id}
+                    className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] flex-shrink-0 group"
+                  >
+                    <div
+                      className="relative overflow-hidden rounded-[2.5rem] shadow-xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] cursor-pointer h-[420px] transition-all duration-500 border border-navy-50"
+                      onClick={room.onClick}
+                    >
+                      <img
+                        src={room.img}
+                        alt={room.title}
+                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-[1200ms]"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
 
-            <Reveal delay={0.2}>
-              <div className="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer" onClick={openLuxuryRooms}>
-                <img src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813043/r5-11_etdeox.jpg" alt="Luxury Room" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-6">
-                  <h3 className="text-2xl font-bold text-white mb-2 font-serif">Luxury Rooms</h3>
-                  <p className="text-white/80 mb-4">Spacious rooms with premium features and breathtaking views.</p>
-                  <span className="text-teal-400 font-semibold">View Details &rarr;</span>
-                </div>
-              </div>
-            </Reveal>
+                      <div className="absolute top-6 left-6">
+                        <span className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-full border border-white/20">
+                          {room.tag}
+                        </span>
+                      </div>
 
-            <Reveal delay={0.3}>
-              <div className="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer" onClick={openDeluxeRooms}>
-                <img src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1774813034/r1or2-1_nv4ynw.jpg" alt="Deluxe Room" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-6">
-                  <h3 className="text-2xl font-bold text-white mb-2 font-serif">Deluxe Rooms</h3>
-                  <p className="text-white/80 mb-4">The pinnacle of luxury with exclusive services and amenities.</p>
-                  <span className="text-teal-400 font-semibold">View Details &rarr;</span>
-                </div>
+                      <div className="absolute bottom-0 left-0 right-0 p-8 pt-20">
+                        <h3 className="text-2xl font-bold text-white mb-3 font-serif" style={{ fontFamily: 'var(--font-serif)' }}>
+                          {room.title}
+                        </h3>
+                        <p className="text-white/70 mb-6 text-sm leading-relaxed line-clamp-2">
+                          {room.desc}
+                        </p>
+                        <div className="flex items-center gap-2 text-teal-400 font-semibold text-sm group-hover:gap-3 transition-all duration-300">
+                          <span>View Details</span>
+                          <span className="transform group-hover:translate-x-1 transition-transform duration-300">→</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </Reveal>
-
-            <Reveal delay={0.4} >
-              <div className="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer md:col-span-2 lg:col-span-3" onClick={openDayOutingRooms}>
-                <img src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775151227/dayout_tqowqj.jpg" alt="Day Outing" className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-6">
-                  <h3 className="text-2xl font-bold text-white mb-2 font-serif">Day Outing Packages</h3>
-                  <p className="text-white/80 mb-4">Enjoy a full day of activities, dining, and relaxation.</p>
-                  <span className="text-teal-400 font-semibold">View Details &rarr;</span>
-                </div>
-              </div>
-            </Reveal>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="py-24 bg-sand-50 overflow-hidden">
+      {/* <section className="py-24 bg-sand-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-16">
 
@@ -310,7 +427,7 @@ const Home = () => {
                   Indulge in serene spa treatments, exquisite dining and a host of unique value-additions amidst Negombo's breathtaking beauty and tranquil coastal environment.
                 </p>
                 <button
-                  onClick={() => navigate('/events')}
+                  onClick={() => navigate('/event')}
                   className="px-8 py-4 bg-sand-500 hover:bg-sand-600 text-white font-bold rounded-lg transition-all duration-300 uppercase tracking-widest text-xs"
                 >
                   Explore All
@@ -373,7 +490,7 @@ const Home = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <section className="relative py-32 overflow-hidden">
 
@@ -439,7 +556,7 @@ const Home = () => {
                 <div className="row-span-2">
                   <Reveal delay={0.2} width="100%" className="h-full">
                     <div className="relative h-full rounded-2xl overflow-hidden shadow-2xl group">
-                      <img src={beach} alt="Beachfront View" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                      <img src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325412/2026-02-01_hmkevm.webp" alt="Beachfront View" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                       <div className="absolute inset-0 bg-navy-950/20 group-hover:bg-transparent transition-colors duration-500" />
                     </div>
                   </Reveal>
@@ -449,13 +566,13 @@ const Home = () => {
                 <div className="flex flex-col gap-4 h-full">
                   <Reveal delay={0.4} width="100%" className="h-1/2">
                     <div className="relative h-full rounded-2xl overflow-hidden shadow-xl group">
-                      <img src={room4} alt="Luxury Suite" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                      <img src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325414/2026-03-09_mhruyv.webp" alt="Luxury Suite" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                       <div className="absolute inset-0 bg-navy-950/10 group-hover:bg-transparent transition-colors duration-500" />
                     </div>
                   </Reveal>
                   <Reveal delay={0.6} width="100%" className="h-1/2">
                     <div className="relative h-full rounded-2xl overflow-hidden shadow-xl group">
-                      <img src={beach2} alt="Resort Activities" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                      <img src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325413/unnamed_6_lun1kc.webp" alt="Resort Activities" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                       <div className="absolute inset-0 bg-navy-950/10 group-hover:bg-transparent transition-colors duration-500" />
                     </div>
                   </Reveal>

@@ -49,15 +49,13 @@ const Sidebar = () => {
 
     const adminName = (() => {
         try {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const user = JSON.parse(localStorage.getItem('userInfo') || '{}');
             return user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Admin';
         } catch { return 'Admin'; }
     })();
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('adminAuth');
+        localStorage.removeItem('userInfo');
         navigate('/login');
     };
 

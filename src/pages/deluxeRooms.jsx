@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchRoomsByCategory, checkRoomAvailability } from '../utils/api'
+import Footer from '../components/Footer'
 
 const today = new Date().toISOString().split('T')[0]
 const checkInTime = "10:00 AM - 12:00 PM";
@@ -599,6 +600,7 @@ const DeluxeRooms = () => {
                     </div>
                 </div>
             </section>
+            <Footer />
         </div>
     )
 }

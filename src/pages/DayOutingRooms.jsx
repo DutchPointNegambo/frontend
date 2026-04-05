@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchRoomsByCategory, checkRoomAvailability, fetchPackagesByType } from '../utils/api'
+import Footer from '../components/Footer'
 
 const today = new Date().toISOString().split('T')[0]
 
@@ -715,7 +716,9 @@ const DayOutingRooms = () => {
                         ))}
                     </div>
                 </section>
-            )}</div>
+            )}
+            <Footer />
+        </div>
     )
 }
 
