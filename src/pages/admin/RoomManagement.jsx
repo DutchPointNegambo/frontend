@@ -7,7 +7,7 @@ import { fetchRooms, createRoom, updateRoom, deleteRoom } from '../../utils/api'
 import Toast from '../../components/admin_components/Toast';
 import { useToast } from '../../components/admin_components/useToast';
 
-const ROOM_TYPES = ['deluxe', 'presidential', 'ocean', 'villa', 'family', 'honeymoon'];
+const ROOM_TYPES = ['deluxe', 'luxury', 'semiluxury', 'dayOuting', 'couple'];
 const STATUS_OPTIONS = ['available', 'occupied', 'maintenance'];
 
 const EMPTY_FORM = {
@@ -36,8 +36,8 @@ export default function RoomManagement() {
     const load = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await fetchRooms();
-            setRooms(data);
+            const data = await fetchRooms({ limit: 100 });
+            setRooms(Array.isArray(data.rooms) ? data.rooms : (Array.isArray(data) ? data : []));
         } catch (e) {
             showToast(e.message, 'error');
         } finally {

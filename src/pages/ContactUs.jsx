@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Reveal from "../components/Reveal"
+import Footer from "../components/Footer"
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -20,12 +21,33 @@ const ContactUs = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
-    setTimeout(() => {
+    
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_URL}/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong');
+      }
+
       setIsSubmitting(false)
       setIsSubmitted(true)
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
+      
       setTimeout(() => setIsSubmitted(false), 4000)
-    }, 1500)
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setIsSubmitting(false);
+      alert('Failed to send message: ' + error.message);
+    }
   }
 
   return (
@@ -35,7 +57,7 @@ const ContactUs = () => {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
+            backgroundImage: `url('https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325412/2025-12-21_tilqwn.webp')`,
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-navy-950/70 via-navy-900/60 to-navy-950/80" />
@@ -72,7 +94,7 @@ const ContactUs = () => {
               {
                 icon: '✉️',
                 title: 'Email',
-                lines: ['temp@mail.com'],
+                lines: ['dutchpointresort@gmail.com'],
                 gradient: 'from-gold-500 to-gold-600',
               },
               {
@@ -263,6 +285,7 @@ const ContactUs = () => {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   )
 }

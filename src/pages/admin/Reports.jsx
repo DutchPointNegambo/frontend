@@ -20,6 +20,14 @@ const downloadCSV = (filename, rows) => {
 
 const Reports = () => {
     const [year, setYear] = useState(new Date().getFullYear());
+    // Default to last 30 days for summary
+    const [fromDate, setFromDate] = useState(() => {
+        const d = new Date();
+        d.setDate(d.getDate() - 30);
+        return d.toISOString().split('T')[0];
+    });
+    const [toDate, setToDate] = useState(() => new Date().toISOString().split('T')[0]);
+    
     const [summary, setSummary] = useState(null);
     const [monthly, setMonthly] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -27,7 +35,10 @@ const Reports = () => {
     const load = useCallback(async () => {
         setLoading(true);
         try {
-            const [s, m] = await Promise.all([fetchReportSummary(), fetchMonthlyReport(year)]);
+            const [s, m] = await Promise.all([
+                fetchReportSummary({ from: fromDate, to: toDate }),
+                fetchMonthlyReport(year)
+            ]);
             setSummary(s);
             setMonthly(Array.isArray(m) ? m : []);
         } catch (e) {
@@ -35,7 +46,7 @@ const Reports = () => {
         } finally {
             setLoading(false);
         }
-    }, [year]);
+    }, [year, fromDate, toDate]);
 
     useEffect(() => { load(); }, [load]);
 
@@ -55,21 +66,35 @@ const Reports = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pb-2 border-b border-navy-50">
                 <div>
                     <h1 className="text-2xl font-bold text-navy-900">Analytics & Reports</h1>
                     <p className="text-navy-400 mt-0.5 text-sm">Financial performance and operational insights</p>
                 </div>
+                
+                {/* Date range selection for summary stats */}
+                <div className="flex flex-wrap items-center gap-3 bg-white p-2 rounded-xl shadow-sm border border-navy-100">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-navy-400 uppercase tracking-wider ml-2">Analyze Range:</span>
+                        <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="border-none bg-navy-50 rounded-lg px-3 py-1.5 text-xs text-navy-700 focus:ring-0" />
+                        <span className="text-navy-300">to</span>
+                        <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="border-none bg-navy-50 rounded-lg px-3 py-1.5 text-xs text-navy-700 focus:ring-0" />
+                    </div>
+                </div>
+
                 <div className="flex gap-2">
-                    <select value={year} onChange={e => setYear(Number(e.target.value))} className="border border-navy-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-navy-700">
-                        {[2023, 2024, 2025].map(y => <option key={y}>{y}</option>)}
-                    </select>
-                    <button onClick={load} disabled={loading} className="flex items-center gap-1.5 px-3 py-2 bg-white border border-navy-200 text-navy-600 rounded-xl hover:bg-navy-50 transition-colors text-sm font-medium shadow-sm disabled:opacity-50">
+                    <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-navy-100 shadow-sm">
+                        <span className="text-xs font-bold text-navy-400">YEAR</span>
+                        <select value={year} onChange={e => setYear(Number(e.target.value))} className="border-none text-xs focus:ring-0 bg-transparent font-bold text-navy-700 p-0 pr-4 cursor-pointer">
+                            {[2023, 2024, 2025].map(y => <option key={y} value={y}>{y}</option>)}
+                        </select>
+                    </div>
+                    <button onClick={load} disabled={loading} className="p-2.5 bg-white border border-navy-200 text-navy-600 rounded-xl hover:bg-navy-50 transition-colors shadow-sm disabled:opacity-50">
                         <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
                     </button>
-                    <button onClick={handleDownloadFinancial} className="bg-navy-900 text-white px-4 py-2 rounded-xl flex items-center hover:bg-teal-700 transition shadow-sm text-sm font-medium">
+                    <button onClick={handleDownloadFinancial} className="bg-navy-900 text-white px-4 py-2.5 rounded-xl flex items-center hover:bg-teal-700 transition shadow-sm text-sm font-medium">
                         <Download size={15} className="mr-2" />
-                        Export CSV
+                        Export
                     </button>
                 </div>
             </div>

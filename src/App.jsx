@@ -1,6 +1,7 @@
 import Home from './pages/Home'
 import EventManagement from './pages/eventManagement'
 import { Routes, Route, useLocation } from 'react-router-dom'
+import React, { Suspense, lazy } from 'react'
 import SignIn from './pages/SignIn'
 import Login from './pages/Login'
 import Profile from './pages/Profile'
@@ -15,15 +16,24 @@ import AddRoomForm from './components/admin_components/AddRoomForm'
 import useIdleTimeout from './hooks/useIdleTimeout'
 import Navbar from './components/Navbar'
 
+
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'))
+const UserManagement = lazy(() => import('./pages/admin/UserManagement'))
+const RoomManagement = lazy(() => import('./pages/admin/RoomManagement'))
+const BookingManagement = lazy(() => import('./pages/admin/BookingManagement'))
+const FoodOrdering = lazy(() => import('./pages/admin/FoodOrdering'))
+const Reports = lazy(() => import('./pages/admin/Reports'))
+const Staff = lazy(() => import('./pages/admin/Staff'))
 function App() {
-  // Call it here with the desired timeout in minutes (e.g., 15 minutes)
+
   useIdleTimeout(15);
   
   const location = useLocation();
   const hideNavbarRoutes = ['/admin', '/addRoom'];
   const shouldShowNavbar = !hideNavbarRoutes.some(route => location.pathname.startsWith(route));
   
-  // Don't add top padding on the home page so the hero image goes under the transparent navbar
+
   const isHomePage = location.pathname === '/';
   const mainPadding = shouldShowNavbar && !isHomePage ? 'pt-20 md:pt-24' : '';
 
@@ -31,21 +41,35 @@ function App() {
     <>
       {shouldShowNavbar && <Navbar />}
       <main className={mainPadding}>
-      <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/signin" element={<SignIn />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/event" element={<EventManagement />} />
-      <Route path="/DayOutingRooms" element={<DayOutingRooms />} />
-      <Route path="/deluxeRooms" element={<DeluxeRooms />} />
-      <Route path="/semiLuxuryRooms" element={<SemiLuxuryRooms />} />
-      <Route path="/luxuryRooms" element={<LuxuryRooms />} />
-      <Route path="/about-us" element={<AboutUs />} />
-      <Route path="/contact-us" element={<ContactUs />} />
-      <Route path="/gallery" element={<Gallery />} />
-      <Route path="/addRoom" element={<AddRoomForm />} />
-    </Routes>      </main>    </>
+      <Suspense fallback={<div className="h-screen flex items-center justify-center text-navy-500 font-bold">Loading...</div>}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/event" element={<EventManagement />} />
+          <Route path="/DayOutingRooms" element={<DayOutingRooms />} />
+          <Route path="/deluxeRooms" element={<DeluxeRooms />} />
+          <Route path="/semiLuxuryRooms" element={<SemiLuxuryRooms />} />
+          <Route path="/luxuryRooms" element={<LuxuryRooms />} />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/contact-us" element={<ContactUs />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/addRoom" element={<AddRoomForm />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="rooms" element={<RoomManagement />} />
+            <Route path="bookings" element={<BookingManagement />} />
+            <Route path="food" element={<FoodOrdering />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="staff" element={<Staff />} />
+          </Route>
+        </Routes>
+      </Suspense>
+    </main>    </>
   )
 }
 
