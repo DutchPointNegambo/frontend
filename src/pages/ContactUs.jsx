@@ -30,7 +30,7 @@ const ContactUs = () => {
 
   return (
     <div className="w-full overflow-hidden">
-     
+
       <section className="relative h-[45vh] min-h-[360px] flex items-center justify-center">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -52,7 +52,7 @@ const ContactUs = () => {
         </div>
       </section>
 
-      
+
       <section className="relative -mt-12 z-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -99,7 +99,7 @@ const ContactUs = () => {
         </div>
       </section>
 
-      
+
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -220,7 +220,7 @@ const ContactUs = () => {
               </div>
             </Reveal>
 
-          
+
             <div>
               <span className="text-teal-600 font-semibold text-sm tracking-widest uppercase">Find Us</span>
               <h2 className="text-3xl font-bold text-navy-900 mt-3 mb-8" style={{ fontFamily: 'var(--font-serif)' }}>
@@ -243,14 +243,14 @@ const ContactUs = () => {
                 <h3 className="font-bold text-navy-900 mb-4">Follow Us</h3>
                 <div className="flex gap-3">
                   {[
-                    { name: 'Facebook', icon: 'f', color: 'hover:bg-blue-600' },
+                    { name: 'Facebook', icon: 'f', color: 'hover:bg-blue-600', link: 'https://www.facebook.com/share/1D7ZsRJQKY/' },
                     { name: 'Instagram', icon: '📷', color: 'hover:bg-pink-600' },
                     { name: 'Twitter', icon: '𝕏', color: 'hover:bg-gray-800' },
                     { name: 'TripAdvisor', icon: '🦉', color: 'hover:bg-green-600' },
                   ].map((social) => (
                     <a
                       key={social.name}
-                      href="#"
+                      href={social.link}
                       className={`w-11 h-11 bg-navy-100 rounded-xl flex items-center justify-center text-navy-600 ${social.color} hover:text-white transition-all duration-300 text-sm font-bold`}
                       title={social.name}
                     >
