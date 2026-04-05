@@ -44,8 +44,8 @@ const Footer = () => {
             <ul className="space-y-3">
               {[
                 { name: 'Home', path: '/' },
-                { name: 'Rooms & Suites', path: '/rooms' },
-                { name: 'Events', path: '/events' },
+                { name: 'Rooms & Suites', path: '/deluxeRooms' },
+                { name: 'Events', path: '/event' },
                 { name: 'Gallery', path: '/gallery' },
               ].map((link) => (
                 <li key={link.name}>
@@ -98,7 +98,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2">
                 <span>✉️</span>
-                <span>temp@mail.com</span>
+                <span>dutchpointresort@gmail.com</span>
               </li>
             </ul>
 

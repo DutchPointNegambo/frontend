@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { fetchGalleryRooms } from '../utils/api'
+import Footer from '../components/Footer'
 
 const CATEGORIES = ['All', 'Rooms', 'Events', 'Resort', 'Dining']
 
@@ -228,6 +229,7 @@ const Gallery = () => {
                     </a>
                 </div>
             </section>
+            <Footer />
         </div>
     )
 }

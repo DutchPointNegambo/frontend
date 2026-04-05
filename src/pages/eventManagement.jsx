@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import Footer from '../components/Footer'
 
 const API = 'http://localhost:5000/api'
 
@@ -244,60 +245,64 @@ const EventManagement = () => {
     // ── Success screen ─────────────────────────────────────────────────────────
     if (bookingSuccess) {
         return (
-            <div className="pt-24 pb-16 min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="max-w-lg w-full mx-4 bg-white rounded-3xl shadow-2xl overflow-hidden">
-                    <div className="p-8 text-center" style={{ background: 'linear-gradient(135deg,#0f2942,#1a4a72)' }}>
-                        <div className="text-6xl mb-4">🎉</div>
-                        <h2 className="text-3xl font-bold text-white mb-2">Booking Confirmed!</h2>
-                        <p className="text-white/70">Your event has been successfully reserved.</p>
-                    </div>
-                    <div className="p-8 space-y-4">
-                        <div className="bg-gray-50 rounded-2xl p-5 space-y-3 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Booking Ref</span>
-                                <span className="font-bold text-gray-800">{bookingSuccess.bookingRef}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Event</span>
-                                <span className="font-semibold text-gray-800 capitalize">{bookingSuccess.eventType}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Date</span>
-                                <span className="font-semibold text-gray-800">
-                                    {new Date(bookingSuccess.eventDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Slot</span>
-                                <span className="font-semibold text-gray-800 capitalize">
-                                    {bookingSuccess.timeSlot === 'day' ? '☀️ Day' : '🌙 Night'}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Guests</span>
-                                <span className="font-semibold text-gray-800">{bookingSuccess.guests}</span>
-                            </div>
-                            <div className="flex justify-between border-t border-gray-200 pt-3 mt-3">
-                                <span className="text-gray-700 font-bold">Total</span>
-                                <span className="font-bold text-teal-600 text-lg">${bookingSuccess.totalAmount?.toLocaleString()}</span>
-                            </div>
+            <div className="min-h-screen flex flex-col bg-gray-50">
+                <div className="flex-grow flex items-center justify-center pt-24 pb-16">
+                    <div className="max-w-lg w-full mx-4 bg-white rounded-3xl shadow-2xl overflow-hidden">
+                        <div className="p-8 text-center" style={{ background: 'linear-gradient(135deg,#0f2942,#1a4a72)' }}>
+                            <div className="text-6xl mb-4">🎉</div>
+                            <h2 className="text-3xl font-bold text-white mb-2">Booking Confirmed!</h2>
+                            <p className="text-white/70">Your event has been successfully reserved.</p>
                         </div>
-                        <p className="text-gray-400 text-xs text-center">A confirmation will be sent to {bookingSuccess.guestInfo?.email}</p>
-                        <button
-                            onClick={() => { setBookingSuccess(null); setStep(1); setSelectedEventType(null); setEventDate(''); setDateAvailability(null) }}
-                            className="w-full py-3 rounded-xl font-bold text-white transition-all hover:opacity-90"
-                            style={{ background: 'linear-gradient(135deg,#14b8a6,#0d9488)' }}
-                        >
-                            Book Another Event
-                        </button>
+                        <div className="p-8 space-y-4">
+                            <div className="bg-gray-50 rounded-2xl p-5 space-y-3 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Booking Ref</span>
+                                    <span className="font-bold text-gray-800">{bookingSuccess.bookingRef}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Event</span>
+                                    <span className="font-semibold text-gray-800 capitalize">{bookingSuccess.eventType}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Date</span>
+                                    <span className="font-semibold text-gray-800">
+                                        {new Date(bookingSuccess.eventDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Slot</span>
+                                    <span className="font-semibold text-gray-800 capitalize">
+                                        {bookingSuccess.timeSlot === 'day' ? '☀️ Day' : '🌙 Night'}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Guests</span>
+                                    <span className="font-semibold text-gray-800">{bookingSuccess.guests}</span>
+                                </div>
+                                <div className="flex justify-between border-t border-gray-200 pt-3 mt-3">
+                                    <span className="text-gray-700 font-bold">Total</span>
+                                    <span className="font-bold text-teal-600 text-lg">${bookingSuccess.totalAmount?.toLocaleString()}</span>
+                                </div>
+                            </div>
+                            <p className="text-gray-400 text-xs text-center">A confirmation will be sent to {bookingSuccess.guestInfo?.email}</p>
+                            <button
+                                onClick={() => { setBookingSuccess(null); setStep(1); setSelectedEventType(null); setEventDate(''); setDateAvailability(null) }}
+                                className="w-full py-3 rounded-xl font-bold text-white transition-all hover:opacity-90"
+                                style={{ background: 'linear-gradient(135deg,#14b8a6,#0d9488)' }}
+                            >
+                                Book Another Event
+                            </button>
+                        </div>
                     </div>
                 </div>
+                <Footer />
             </div>
         )
     }
 
     return (
-        <div className="pt-24 pb-16 min-h-screen bg-gray-50">
+        <div className="flex flex-col min-h-screen bg-gray-50">
+            <div className="flex-grow pt-24 pb-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 {/* Header */}
@@ -795,6 +800,8 @@ const EventManagement = () => {
                     </div>
                 </div>
             )}
+            </div>
+            <Footer />
         </div>
     )
 }
