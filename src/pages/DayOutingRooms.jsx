@@ -193,6 +193,8 @@ const DayOutingRooms = () => {
             })
     }
 
+
+
     const formatPrice = (price) => {
         if (price === undefined || price === null) return 'N/A';
         return `LKR ${price.toLocaleString()}`;
@@ -222,7 +224,7 @@ const DayOutingRooms = () => {
             })()}
 
             {/*BANNer*/}
-            <section className="relative h-80 md:h-[28rem] flex items-end overflow-hidden hero-sweep">
+            <section className="relative h-64 sm:h-80 md:h-[28rem] flex items-end overflow-hidden hero-sweep">
                 <div
                     className="absolute inset-0 bg-cover bg-center animate-hero-zoom"
                     style={{
@@ -234,10 +236,10 @@ const DayOutingRooms = () => {
                 <HeroParticles color="rgba(20, 184, 166, 0.35)" />
 
 
-                <div className="absolute top-6 left-6 w-16 h-16 border-t-2 border-l-2 border-white/20 rounded-tl-2xl z-10 animate-fade-in" />
-                <div className="absolute top-6 right-6 w-16 h-16 border-t-2 border-r-2 border-white/20 rounded-tr-2xl z-10 animate-fade-in" />
+                <div className="hidden sm:block absolute top-6 left-6 w-16 h-16 border-t-2 border-l-2 border-white/20 rounded-tl-2xl z-10 animate-fade-in" />
+                <div className="hidden sm:block absolute top-6 right-6 w-16 h-16 border-t-2 border-r-2 border-white/20 rounded-tr-2xl z-10 animate-fade-in" />
 
-                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 w-full">
+                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-12 w-full">
                     <nav className="breadcrumb-trail mb-4 animate-fade-in">
                         <a href="/" className="text-white/60 hover:text-white transition-colors">Home</a>
                         <span className="text-white/30">›</span>
@@ -247,17 +249,17 @@ const DayOutingRooms = () => {
                     <span className="inline-block px-4 py-1.5 bg-teal-500/90 text-white text-xs font-bold uppercase tracking-widest rounded-full mb-4 backdrop-blur-sm animate-badge-pulse animate-fade-in-up">
                         ☀ Day Outing Package
                     </span>
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight animate-fade-in-up animation-delay-200">
+                    <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight animate-fade-in-up animation-delay-200">
                         Day Outing{' '}
                         <span className="bg-gradient-to-r from-teal-300 via-cyan-300 to-amber-300 bg-clip-text text-transparent italic animate-gradient-text">
                             Rooms & Packages
                         </span>
                     </h1>
-                    <p className="text-white/70 mt-3 text-lg max-w-xl animate-fade-in-up animation-delay-400 leading-relaxed">
+                    <p className="text-white/70 mt-3 text-base sm:text-lg max-w-xl animate-fade-in-up animation-delay-400 leading-relaxed">
                         Choose your perfect room and enjoy a full-day luxury escape at Dutch Point Resort.
                     </p>
 
-                    <div className="flex gap-8 mt-6 animate-fade-in-up animation-delay-600">
+                    <div className="flex flex-wrap gap-4 sm:gap-8 mt-6 animate-fade-in-up animation-delay-600">
                         <div className="text-center">
                             <div className="text-2xl font-bold text-white">Full Day</div>
                             <div className="text-white/50 text-xs uppercase tracking-wider">Access</div>
@@ -295,7 +297,7 @@ const DayOutingRooms = () => {
                         <p className="text-navy-500 max-w-2xl mx-auto italic">Whether it's a romantic escape, a family reunion, or a corporate bonding session, we have the perfect package tailored for you.</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
                         {/* Couple Category */}
                         <div
                             onClick={() => handleSelectCategory('couple')}
@@ -368,12 +370,12 @@ const DayOutingRooms = () => {
             {/*couple room view*/}
             {view === 'rooms' && (
                 <>
-                    <section className="bg-white/80 backdrop-blur-md border-b border-navy-100/50 shadow-sm py-4">
+                    <section className="bg-white/80 backdrop-blur-md border-b border-navy-100/50 shadow-sm py-2.5 sm:py-4">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <button onClick={handleBack} className="flex items-center text-navy-500 hover:text-navy-900 font-bold text-sm transition-colors mb-4 group">
                                 <span className="mr-2 transition-transform group-hover:-translate-x-1">←</span> Back to Package Categories
                             </button>
-                            <div className="flex flex-col sm:flex-row items-center gap-4">
+                            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
                                 <div className="flex items-center gap-3 flex-1">
                                     <span className="text-2xl">📅</span>
                                     <div>
@@ -383,7 +385,7 @@ const DayOutingRooms = () => {
                                             value={outingDate}
                                             min={today}
                                             onChange={(e) => { setOutingDate(e.target.value); setAvailability(null) }}
-                                            className="border border-navy-200/60 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400 bg-white text-sm transition-all"
+                                            className="border border-navy-200/60 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400 bg-white text-sm transition-all"
                                         />
                                     </div>
                                 </div>
@@ -394,7 +396,7 @@ const DayOutingRooms = () => {
                                         <select
                                             value={guests}
                                             onChange={(e) => setGuests(e.target.value)}
-                                            className="border border-navy-200/60 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400 bg-white text-sm transition-all cursor-pointer"
+                                            className="border border-navy-200/60 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400 bg-white text-sm transition-all cursor-pointer"
                                         >
                                             <option value="1">1 Guest</option>
                                             <option value="2">2 Guests</option>
@@ -408,7 +410,7 @@ const DayOutingRooms = () => {
                                     <button
                                         onClick={handleCheckAvailability}
                                         disabled={availability === 'checking'}
-                                        className="px-6 py-2.5 bg-navy-900 text-white rounded-xl font-bold text-sm hover:bg-navy-700 transition-all duration-200 shadow-md disabled:opacity-60"
+                                        className="px-4 sm:px-6 py-2 sm:py-2.5 bg-navy-900 text-white rounded-xl font-bold text-xs sm:text-sm hover:bg-navy-700 transition-all duration-200 shadow-md disabled:opacity-60"
                                     >
                                         {availability === 'checking' ? 'Checking…' : 'Check Availability'}
                                     </button>
@@ -481,8 +483,8 @@ const DayOutingRooms = () => {
 
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center justify-between mt-4">
-                                                    <div><span className="text-xs text-navy-400 block">Package Price</span><span className="text-2xl font-extrabold text-navy-900 italic">{formatPrice(room.price)}/-</span></div>
+                                                <div className="flex flex-wrap items-center justify-between gap-2 mt-4">
+                                                    <div><span className="text-xs text-navy-400 block">Package Price</span><span className="text-xl sm:text-2xl font-extrabold text-navy-900 italic">{formatPrice(room.price)}/-</span></div>
                                                     <button
                                                         disabled={room.isAvailable === false || room.status === 'occupied'}
                                                         className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 ${(room.isAvailable === false || room.status === 'occupied')
@@ -533,7 +535,7 @@ const DayOutingRooms = () => {
                                                 <div className="flex items-center justify-between">
                                                     <div>
                                                         <span className="text-[10px] text-navy-400 block uppercase tracking-widest">Package Price</span>
-                                                        <span className="text-3xl font-extrabold text-navy-900 italic">{formatPrice(selectedRoom.price)}/-</span>
+                                                        <span className="text-2xl sm:text-3xl font-extrabold text-navy-900 italic">{formatPrice(selectedRoom.price)}/-</span>
                                                     </div>
                                                     <div className="text-right">
                                                         <span className="text-[10px] text-navy-400 block uppercase tracking-widest">Capacity</span>
@@ -586,8 +588,8 @@ const DayOutingRooms = () => {
                                                         <p className="text-teal-500 text-xs mt-1">Redirecting to booking page…</p>
                                                     </div>
                                                 ) : (
-                                                    <button onClick={handleConfirmBooking} disabled={!outingDate || availability === false || availability === 'checking'} className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-50 animate-cta-glow transition-all duration-300 hover:from-teal-600 hover:to-teal-700 transform hover:-translate-y-0.5 active:translate-y-0">
-                                                        {!outingDate ? 'Select Date First' : 'Confirm Booking'}
+                                                    <button onClick={handleConfirmBooking} disabled={!outingDate || availability === false || availability === 'checking' || selectedRoom?.isAvailable === false || selectedRoom?.status === 'occupied'} className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow transition-all duration-300 hover:from-teal-600 hover:to-teal-700 transform hover:-translate-y-0.5 active:translate-y-0">
+                                                        {(selectedRoom?.isAvailable === false || selectedRoom?.status === 'occupied') ? 'Room Occupied' : !outingDate ? 'Select Date First' : 'Confirm Booking'}
                                                     </button>
                                                 )}
                                             </div>

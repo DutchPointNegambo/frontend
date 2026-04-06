@@ -430,3 +430,21 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-navy-500);
 }
+
+/* ===== Mobile Responsive Adjustments ===== */
+@media (max-width: 640px) {
+  .ornament-divider {
+    gap: 0.5rem;
+    margin: 1.25rem 0;
+  }
+  .ornament-divider span {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+  }
+  .glass-summary {
+    border-radius: 1.25rem;
+  }
+  .breadcrumb-trail {
+    font-size: 0.65rem;
+  }
+}

@@ -5,7 +5,7 @@ import Footer from '../components/Footer'
 import BookingModal from '../components/BookingModal'
 
 const today = new Date().toISOString().split('T')[0]
-const checkInTime = "10:00 AM - 12:00 PM";
+const checkInTime = "12:00 AM - 2:00 PM";
 const checkOutTime = "9:00 AM - 11:00 AM";
 const DaycheckInTime = "9:00 AM - 7:00 PM";
 
@@ -165,6 +165,8 @@ const DeluxeRooms = () => {
         return Math.max(0, Math.round(diff / (1000 * 60 * 60 * 24)))
     }
 
+
+
     const formatPrice = (price) => `LKR ${price.toLocaleString()}`
 
     return (
@@ -191,7 +193,7 @@ const DeluxeRooms = () => {
             })()}
 
             {/*banner*/}
-            <section className="relative h-80 md:h-[28rem] flex items-end overflow-hidden hero-sweep">
+            <section className="relative h-64 sm:h-80 md:h-[28rem] flex items-end overflow-hidden hero-sweep">
                 <div
                     className="absolute inset-0 bg-cover bg-center animate-hero-zoom"
                     style={{
@@ -203,10 +205,10 @@ const DeluxeRooms = () => {
                 <HeroParticles color="rgba(96, 165, 250, 0.35)" />
 
 
-                <div className="absolute top-6 left-6 w-16 h-16 border-t-2 border-l-2 border-white/20 rounded-tl-2xl z-10 animate-fade-in" />
-                <div className="absolute top-6 right-6 w-16 h-16 border-t-2 border-r-2 border-white/20 rounded-tr-2xl z-10 animate-fade-in" />
+                <div className="hidden sm:block absolute top-6 left-6 w-16 h-16 border-t-2 border-l-2 border-white/20 rounded-tl-2xl z-10 animate-fade-in" />
+                <div className="hidden sm:block absolute top-6 right-6 w-16 h-16 border-t-2 border-r-2 border-white/20 rounded-tr-2xl z-10 animate-fade-in" />
 
-                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 w-full">
+                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-12 w-full">
 
                     <nav className="breadcrumb-trail mb-4 animate-fade-in">
                         <a href="/" className="text-white/60 hover:text-white transition-colors">Home</a>
@@ -217,18 +219,18 @@ const DeluxeRooms = () => {
                     <span className="inline-block px-4 py-1.5 bg-blue-500/90 text-white text-xs font-bold uppercase tracking-widest rounded-full mb-4 backdrop-blur-sm animate-badge-pulse animate-fade-in-up">
                         ★ Deluxe Collection
                     </span>
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight animate-fade-in-up animation-delay-200">
+                    <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight animate-fade-in-up animation-delay-200">
                         Deluxe{' '}
                         <span className="bg-gradient-to-r from-blue-300 via-cyan-300 to-teal-300 bg-clip-text text-transparent italic animate-gradient-text">
                             Rooms
                         </span>
                     </h1>
-                    <p className="text-white/70 mt-3 text-lg max-w-xl animate-fade-in-up animation-delay-400 leading-relaxed">
+                    <p className="text-white/70 mt-3 text-base sm:text-lg max-w-xl animate-fade-in-up animation-delay-400 leading-relaxed">
                         Enjoy premium comfort with exclusive amenities at Dutch Point Resort.
                     </p>
 
                     {/* Stats bar */}
-                    <div className="flex gap-8 mt-6 animate-fade-in-up animation-delay-600">
+                    <div className="flex flex-wrap gap-4 sm:gap-8 mt-6 animate-fade-in-up animation-delay-600">
                         <div className="text-center">
                             <div className="text-2xl font-bold text-white">24/7</div>
                             <div className="text-white/50 text-xs uppercase tracking-wider">Room Service</div>
@@ -248,17 +250,17 @@ const DeluxeRooms = () => {
             </section>
 
             {/* Package Selector*/}
-            <section className="bg-white/80 backdrop-blur-md border-b border-navy-100/50 shadow-sm sticky top-0 z-30">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <section className="bg-white/80 backdrop-blur-md border-b border-navy-100/50 shadow-sm sm:sticky sm:top-0 z-30">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
                         <div>
-                            <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-2">
+                            <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1 sm:mb-2">
                                 Package Type
                             </label>
                             <div className="inline-flex rounded-2xl bg-navy-50/80 p-1 border border-navy-100/50">
                                 <button
                                     onClick={() => setSelectedPackage('full-board')}
-                                    className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${selectedPackage === 'full-board'
+                                    className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 ${selectedPackage === 'full-board'
                                         ? 'bg-blue-500 text-white shadow-lg shadow-blue-200/50'
                                         : 'text-navy-600 hover:text-navy-900 hover:bg-white/60'
                                         }`}
@@ -267,7 +269,7 @@ const DeluxeRooms = () => {
                                 </button>
                                 <button
                                     onClick={() => setSelectedPackage('day-use')}
-                                    className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${selectedPackage === 'day-use'
+                                    className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 ${selectedPackage === 'day-use'
                                         ? 'bg-blue-500 text-white shadow-lg shadow-blue-200/50'
                                         : 'text-navy-600 hover:text-navy-900 hover:bg-white/60'
                                         }`}
@@ -278,7 +280,7 @@ const DeluxeRooms = () => {
                         </div>
 
                         {/* Inline date selectors */}
-                        <div className="flex flex-col sm:flex-row items-end gap-3 flex-wrap">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 flex-wrap">
                             <div>
                                 <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">
                                     {selectedPackage === 'day-use' ? 'Select Date' : 'Check-In'}
@@ -288,7 +290,7 @@ const DeluxeRooms = () => {
                                     value={checkIn}
                                     min={today}
                                     onChange={(e) => handleCheckInChange(e.target.value)}
-                                    className="border border-navy-200/60 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 bg-white text-sm w-full sm:w-auto transition-all"
+                                    className="border border-navy-200/60 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 bg-white text-sm w-full sm:w-auto transition-all"
                                 />
                             </div>
                             {selectedPackage !== 'day-use' && (
@@ -301,7 +303,7 @@ const DeluxeRooms = () => {
                                         value={checkOut}
                                         min={checkIn || today}
                                         onChange={(e) => { setCheckOut(e.target.value); setAvailability(null) }}
-                                        className="border border-navy-200/60 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 bg-white text-sm w-full sm:w-auto transition-all"
+                                        className="border border-navy-200/60 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 bg-white text-sm w-full sm:w-auto transition-all"
                                     />
                                 </div>
                             )}
@@ -312,7 +314,7 @@ const DeluxeRooms = () => {
                                 <select
                                     value={guests}
                                     onChange={(e) => setGuests(e.target.value)}
-                                    className="border border-navy-200/60 rounded-xl px-4 py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 bg-white text-sm w-full sm:w-auto transition-all cursor-pointer"
+                                    className="border border-navy-200/60 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-navy-800 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 bg-white text-sm w-full sm:w-auto transition-all cursor-pointer"
                                 >
                                     <option value="1">1 Guest</option>
                                     <option value="2">2 Guests</option>
@@ -330,7 +332,7 @@ const DeluxeRooms = () => {
                                 <button
                                     onClick={handleCheckAvailability}
                                     disabled={availability === 'checking'}
-                                    className="px-6 py-2.5 bg-navy-900 text-white rounded-xl font-bold text-sm hover:bg-navy-700 transition-all duration-200 shadow-md disabled:opacity-60"
+                                    className="px-4 sm:px-6 py-2 sm:py-2.5 bg-navy-900 text-white rounded-xl font-bold text-xs sm:text-sm hover:bg-navy-700 transition-all duration-200 shadow-md disabled:opacity-60"
                                 >
                                     {availability === 'checking' ? 'Checking…' : 'Check Availability'}
                                 </button>
@@ -454,10 +456,10 @@ const DeluxeRooms = () => {
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-navy-50">
+                                        <div className="flex flex-wrap items-center justify-between gap-2 mt-4 pt-4 border-t border-navy-50">
                                             <div>
                                                 <span className="text-xs text-navy-400 block">Per Night</span>
-                                                <span className="text-2xl font-extrabold text-navy-900 italic">{formatPrice(room.price)}/-</span>
+                                                <span className="text-xl sm:text-2xl font-extrabold text-navy-900 italic">{formatPrice(room.price)}/-</span>
                                             </div>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleSelectRoom(room) }}
@@ -513,7 +515,7 @@ const DeluxeRooms = () => {
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <span className="text-[10px] text-navy-400 block uppercase tracking-widest">Per Night</span>
-                                                <span className="text-3xl font-extrabold text-navy-900 italic">{formatPrice(selectedRoom.price)}/-</span>
+                                                <span className="text-2xl sm:text-3xl font-extrabold text-navy-900 italic">{formatPrice(selectedRoom.price)}/-</span>
                                             </div>
                                             <div className="text-right">
                                                 <span className="text-[10px] text-navy-400 block uppercase tracking-widest">Capacity</span>
@@ -598,10 +600,10 @@ const DeluxeRooms = () => {
                                         ) : (
                                             <button
                                                 onClick={handleConfirmBooking}
-                                                disabled={!checkIn || (selectedPackage !== 'day-use' && (!checkOut || calcNights() <= 0)) || availability === false || availability === 'checking'}
+                                                disabled={!checkIn || (selectedPackage !== 'day-use' && (!checkOut || calcNights() <= 0)) || availability === false || availability === 'checking' || selectedRoom?.isAvailable === false || selectedRoom?.status === 'occupied'}
                                                 className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow"
                                             >
-                                                {!checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
+                                                {(selectedRoom?.isAvailable === false || selectedRoom?.status === 'occupied') ? 'Room Occupied' : !checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
                                             </button>
                                         )}
 
