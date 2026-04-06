@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchRoomsByCategory, checkRoomAvailability } from '../utils/api'
 import Footer from '../components/Footer'
+import BookingModal from '../components/BookingModal'
 
 const today = new Date().toISOString().split('T')[0]
 
@@ -11,10 +12,7 @@ const DaycheckInTime = "9:00 AM - 7:00 PM";
 
 
 const FALLBACK_IMAGES = [
-    'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
+    'https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325411/unnamed_7_zt9tzo.webp'
 ]
 
 const getGalleryImages = (room) => {
@@ -70,6 +68,7 @@ const SemiLuxuryRooms = () => {
     const [availability, setAvailability] = useState(null)
     const [bookingSuccess, setBookingSuccess] = useState(false)
     const [lightboxIndex, setLightboxIndex] = useState(null)
+    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
     const navigate = useNavigate()
 
     const openLightbox = (idx) => setLightboxIndex(idx)
@@ -111,7 +110,7 @@ const SemiLuxuryRooms = () => {
         setSelectedRoom(null)
         setAvailability(null)
         setBookingSuccess(false)
-        fetchRoomsByCategory('semiluxury', selectedPackage)
+        fetchRoomsByCategory('semiluxury', selectedPackage, checkIn, checkOut)
             .then(data => {
                 const normalized = data.map(normalizeRoom);
                 const filtered = normalized.filter(room => room.guests >= parseInt(guests));
@@ -119,7 +118,7 @@ const SemiLuxuryRooms = () => {
             })
             .catch(() => setError('Unable to load rooms. Please try again.'))
             .finally(() => setLoading(false))
-    }, [selectedPackage, guests])
+    }, [selectedPackage, guests, checkIn, checkOut, bookingSuccess])
 
     const handleSelectRoom = (room) => {
         setSelectedRoom(room)
@@ -154,9 +153,20 @@ const SemiLuxuryRooms = () => {
     }
 
     const handleConfirmBooking = () => {
-        if (!selectedRoom || !checkIn || !checkOut) return
+        if (!selectedRoom || !checkIn || (selectedPackage !== 'day-use' && !checkOut)) return
+        setIsBookingModalOpen(true)
+    }
+
+    const handleBookingSuccess = () => {
         setBookingSuccess(true)
-        setTimeout(() => navigate('/booking'), 1800)
+        setAvailability(null)
+        // Refresh rooms to show updated status
+        fetchRoomsByCategory('semiluxury', selectedPackage, checkIn, checkOut)
+            .then(data => {
+                const normalized = data.map(normalizeRoom);
+                const filtered = normalized.filter(room => room.guests >= parseInt(guests));
+                setRooms(filtered);
+            })
     }
 
     const calcNights = () => {
@@ -303,7 +313,7 @@ const SemiLuxuryRooms = () => {
                             {checkIn && (selectedPackage === 'day-use' || (checkOut && calcNights() > 0)) && selectedRoom && (
                                 <button onClick={handleCheckAvailability} disabled={availability === 'checking'}
                                     className="px-6 py-2.5 bg-navy-900 text-white rounded-xl font-bold text-sm hover:bg-navy-700 transition-all duration-200 shadow-md disabled:opacity-60">
-                                    {availability === 'checking' ? '⏳ Checking…' : '🔍 Check Availability'}
+                                    {availability === 'checking' ? 'Checking…' : 'Check Availability'}
                                 </button>
                             )}
                             {!checkIn && <p className="text-sm text-navy-400 italic py-2">Select stay date</p>}
@@ -350,9 +360,7 @@ const SemiLuxuryRooms = () => {
 
                         {!loading && !error && rooms.length === 0 && (
                             <div className="bg-white rounded-3xl shadow-lg border border-dashed border-navy-200 p-12 text-center animate-fade-in col-span-full">
-                                <div className="w-20 h-20 bg-gradient-to-br from-teal-50 to-navy-50 rounded-2xl flex items-center justify-center mx-auto mb-5 animate-float">
-                                    <span className="text-4xl">🔎</span>
-                                </div>
+
                                 <h4 className="text-lg font-bold text-navy-800 mb-2">No Rooms Found</h4>
                                 <p className="text-navy-400 text-sm leading-relaxed">No rooms in this category can accommodate {guests} guests. Please try another category or reduce guest count.</p>
                             </div>
@@ -364,6 +372,14 @@ const SemiLuxuryRooms = () => {
                                 style={{ animationDelay: `${idx * 120}ms` }}>
                                 {selectedRoom?._id === room._id && (
                                     <div className="absolute top-4 right-4 z-20 bg-teal-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow animate-badge-pulse">✓ Selected</div>
+                                )}
+
+                                {(room.isAvailable === false || room.status === 'occupied') && (
+                                    <div className="absolute inset-0 z-10 bg-navy-900/40 backdrop-blur-[2px] flex items-center justify-center pointer-events-none">
+                                        <div className="bg-red-500 text-white px-6 py-2 rounded-full font-bold text-lg shadow-2xl rotate-[-10deg] animate-pulse">
+                                            Occupied
+                                        </div>
+                                    </div>
                                 )}
                                 <div className="flex flex-col sm:flex-row">
                                     <div className="sm:w-48 md:w-56 h-48 sm:h-auto relative overflow-hidden flex-shrink-0">
@@ -391,8 +407,13 @@ const SemiLuxuryRooms = () => {
                                                 <span className="text-2xl font-extrabold text-navy-900 italic">{formatPrice(room.price)}/-</span>
                                             </div>
                                             <button onClick={(e) => { e.stopPropagation(); handleSelectRoom(room) }}
-                                                className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 ${selectedRoom?._id === room._id ? 'bg-teal-500 text-white shadow-lg shadow-teal-200' : 'bg-navy-900 text-white hover:bg-navy-700 shadow-md hover:shadow-lg'}`}>
-                                                {selectedRoom?._id === room._id ? 'Selected' : 'Select Room'}
+                                                disabled={room.isAvailable === false || room.status === 'occupied'}
+                                                className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 ${(room.isAvailable === false || room.status === 'occupied')
+                                                    ? 'bg-navy-200 text-navy-400 cursor-not-allowed'
+                                                    : selectedRoom?._id === room._id
+                                                        ? 'bg-teal-500 text-white shadow-lg shadow-teal-200'
+                                                        : 'bg-navy-900 text-white hover:bg-navy-700 shadow-md hover:shadow-lg'}`}>
+                                                {(room.isAvailable === false || room.status === 'occupied') ? 'Not Available' : selectedRoom?._id === room._id ? 'Selected' : 'Select Room'}
                                             </button>
                                         </div>
                                     </div>
@@ -464,13 +485,13 @@ const SemiLuxuryRooms = () => {
                                         )}
                                         {availability === true && (
                                             <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 animate-scale-in">
-                                                <span className="text-green-500 text-xl">✅</span>
+
                                                 <span className="text-green-700 font-bold text-sm">Available for selected dates!</span>
                                             </div>
                                         )}
                                         {availability === false && (
                                             <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 animate-scale-in">
-                                                <span className="text-red-500 text-xl">❌</span>
+
                                                 <span className="text-red-700 font-bold text-sm">Not available. Please try other dates.</span>
                                             </div>
                                         )}
@@ -501,7 +522,7 @@ const SemiLuxuryRooms = () => {
                                         </div>
                                         {bookingSuccess ? (
                                             <div className="bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-2xl p-4 text-center animate-scale-in">
-                                                <p className="text-teal-700 font-bold">🎉 Booking Confirmed!</p>
+                                                <p className="text-teal-700 font-bold">Booking Confirmed!</p>
                                                 <p className="text-teal-500 text-xs mt-1">Redirecting…</p>
                                             </div>
                                         ) : (
@@ -526,6 +547,17 @@ const SemiLuxuryRooms = () => {
                 </div>
             </section>
             <Footer />
+
+            <BookingModal
+                isOpen={isBookingModalOpen}
+                onClose={() => setIsBookingModalOpen(false)}
+                room={selectedRoom}
+                checkIn={checkIn}
+                checkOut={checkOut}
+                guests={guests}
+                selectedPackage={selectedPackage}
+                onSuccess={handleBookingSuccess}
+            />
         </div>
     )
 }

@@ -152,9 +152,11 @@ export async function deleteRoom(id) {
     return handleResponse(res);
 }
 
-export async function fetchRoomsByCategory(category, packageType) {
-  let url = `${API_URL}/rooms/category/${category}`;
-  if (packageType) url += `?package=${packageType}`;
+export async function fetchRoomsByCategory(category, packageType, checkIn, checkOut) {
+  let url = `${API_URL}/rooms/category/${category}?`;
+  if (packageType) url += `package=${packageType}&`;
+  if (checkIn) url += `checkIn=${checkIn}&`;
+  if (checkOut) url += `checkOut=${checkOut}&`;
   const response = await fetch(url);
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || 'Failed to fetch rooms');
@@ -230,6 +232,17 @@ export async function updateBookingStatus(id, status) {
         method: 'PUT',
         headers: authHeaders(),
         body: JSON.stringify({ status }),
+    });
+    return handleResponse(res);
+}
+
+// ── Public: Bookings ──────────────────────────────────────────
+
+export async function createBooking(payload) {
+    const res = await fetch(`${API_URL}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
     });
     return handleResponse(res);
 }

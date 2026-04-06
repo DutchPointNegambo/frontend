@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { FaFacebookF, FaInstagram, FaXTwitter } from 'react-icons/fa6'
+import { SiTripadvisor } from 'react-icons/si'
 
 const Footer = () => {
   return (
@@ -21,14 +23,14 @@ const Footer = () => {
             {/* Social Icons */}
             <div className="flex gap-3">
               {[
-                { label: 'Facebook', icon: 'f' },
-                { label: 'Instagram', icon: '✦' },
-                { label: 'Twitter', icon: '𝕏' },
-                { label: 'TripAdvisor', icon: '★' },
+                { label: 'Facebook', icon: <FaFacebookF />, link: 'https://www.facebook.com/share/1D7ZsRJQKY/' },
+                { label: 'Instagram', icon: <FaInstagram />, link: 'https://www.instagram.com/dutch_point_beach_resort?igsh=MTdyc2Nuc3ZpcTNxdQ==' },
+                { label: 'Twitter', icon: <FaXTwitter />, link: '#' },
+                { label: 'TripAdvisor', icon: <SiTripadvisor />, link: '#' },
               ].map((s) => (
                 <a
                   key={s.label}
-                  href="#"
+                  href={s.link}
                   aria-label={s.label}
                   className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center text-white/70 hover:bg-teal-500 hover:text-white transition-all duration-300 text-xs font-bold"
                 >
