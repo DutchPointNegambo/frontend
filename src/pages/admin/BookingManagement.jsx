@@ -167,9 +167,13 @@ export default function BookingManagement() {
                                     const cfg = STATUS_FLOW[b.status] || STATUS_FLOW.pending;
                                     const isUpdating = updatingId === b._id;
                                     return (
-                                        <tr key={b._id} className="hover:bg-navy-50/40 transition-colors">
+                                        <tr 
+                                            key={b._id} 
+                                            onClick={() => setSelectedBooking(b)}
+                                            className="hover:bg-navy-50/60 transition-colors cursor-pointer group/row"
+                                        >
                                             <td className="px-5 py-4">
-                                                <span className="font-mono text-xs text-navy-600 bg-navy-50 px-2 py-1 rounded-lg">
+                                                <span className="font-mono text-xs text-navy-600 bg-navy-50 px-2 py-1 rounded-lg group-hover/row:bg-white transition-colors">
                                                     {b.bookingId || b._id.slice(-8).toUpperCase()}
                                                 </span>
                                             </td>
@@ -194,7 +198,7 @@ export default function BookingManagement() {
                                                     {b.status}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
                                                 <div className="flex items-center justify-end gap-1">
                                                     <button
                                                         onClick={() => setSelectedBooking(b)}
@@ -206,7 +210,7 @@ export default function BookingManagement() {
                                                     {cfg.next.map(ns => (
                                                         <button
                                                             key={ns}
-                                                            onClick={() => handleStatusChange(b._id, ns)}
+                                                            onClick={(e) => { e.stopPropagation(); handleStatusChange(b._id, ns); }}
                                                             disabled={isUpdating}
                                                             className={`px-2.5 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors disabled:opacity-50 ${
                                                                 ns === 'confirmed' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' :

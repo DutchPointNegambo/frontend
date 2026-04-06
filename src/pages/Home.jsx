@@ -13,6 +13,21 @@ const Home = () => {
   const navigate = useNavigate()
   const [openFaq, setOpenFaq] = useState(null);
   const [roomIndex, setRoomIndex] = useState(0);
+  const [itemsPerView, setItemsPerView] = useState(3);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) setItemsPerView(3);
+      else if (window.innerWidth >= 640) setItemsPerView(2);
+      else setItemsPerView(1);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const totalRooms = 4;
+  const maxRoomIndex = Math.max(0, totalRooms - itemsPerView);
 
   const handleBookNow = () => {
     navigate('/deluxeRooms')
@@ -316,9 +331,9 @@ const Home = () => {
                 <ChevronLeft size={28} />
               </button>
               <button
-                onClick={() => setRoomIndex(prev => Math.min(1, prev + 1))}
-                disabled={roomIndex === 1}
-                className={`w-14 h-14 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${roomIndex === 1 ? 'border-navy-100 text-navy-200 cursor-not-allowed' : 'border-teal-500 text-teal-600 hover:bg-teal-500 hover:text-white shadow-lg shadow-teal-500/20 active:scale-95'}`}
+                onClick={() => setRoomIndex(prev => Math.min(maxRoomIndex, prev + 1))}
+                disabled={roomIndex >= maxRoomIndex}
+                className={`w-14 h-14 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${roomIndex >= maxRoomIndex ? 'border-navy-100 text-navy-200 cursor-not-allowed' : 'border-teal-500 text-teal-600 hover:bg-teal-500 hover:text-white shadow-lg shadow-teal-500/20 active:scale-95'}`}
               >
                 <ChevronRight size={28} />
               </button>
@@ -329,7 +344,7 @@ const Home = () => {
             <div className="overflow-hidden py-10 px-2 lg:-mx-4">
               <div
                 className="flex transition-transform duration-700 ease-[cubic-bezier(0.23, 1, 0.32, 1)] gap-6"
-                style={{ transform: `translateX(-${roomIndex * (100 / 3 + 1.2)}%)` }}
+                style={{ transform: `translateX(-${roomIndex * (100 / itemsPerView + (itemsPerView === 3 ? 1.2 : itemsPerView === 2 ? 1.5 : 2))}%)` }}
               >
                 {[
                   {

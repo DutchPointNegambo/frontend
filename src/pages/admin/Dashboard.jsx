@@ -84,6 +84,7 @@ const Dashboard = () => {
             value: stats ? `$${Number(stats.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00',
             icon: DollarSign,
             color: 'from-amber-500 to-amber-600',
+            link: '/admin/reports',
         },
         {
             title: 'Total Customers',

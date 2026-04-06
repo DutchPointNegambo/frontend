@@ -3,7 +3,7 @@ import {
     Plus, Search, Edit2, Trash2, X, BedDouble,
     CheckCircle, WrenchIcon, XCircle, RefreshCw, Save,
 } from 'lucide-react';
-import { fetchRooms, createRoom, updateRoom, deleteRoom } from '../../utils/api';
+import { fetchRooms, createRoom, updateRoom, deleteRoom, updateRoomStatusByNumber } from '../../utils/api';
 import Toast from '../../components/admin_components/Toast';
 import { useToast } from '../../components/admin_components/useToast';
 
@@ -11,7 +11,7 @@ const ROOM_TYPES = ['deluxe', 'luxury', 'semiluxury', 'dayOuting', 'couple'];
 const STATUS_OPTIONS = ['available', 'occupied', 'maintenance'];
 
 const EMPTY_FORM = {
-    name: '', type: 'deluxe', price: '', guests: '', description: '',
+    name: '', roomNumber: '', type: 'deluxe', price: '', guests: '', description: '',
     features: '', image: '', status: 'available', view: 'ocean',
 };
 
@@ -51,7 +51,7 @@ export default function RoomManagement() {
     const openEdit = (room) => {
         setEditingRoom(room);
         setForm({
-            name: room.name, type: room.type, price: room.price,
+            name: room.name, roomNumber: room.roomNumber || '', type: room.type, price: room.price,
             guests: room.guests, description: room.description,
             features: (room.features || []).join(', '),
             image: room.image, status: room.status, view: room.view || 'ocean',
@@ -99,9 +99,15 @@ export default function RoomManagement() {
 
     const handleStatusToggle = async (room, newStatus) => {
         try {
-            const updated = await updateRoom(room._id, { status: newStatus });
-            setRooms(prev => prev.map(r => r._id === updated._id ? updated : r));
-            showToast(`Room marked as ${newStatus}`);
+            if (room.roomNumber) {
+                await updateRoomStatusByNumber(room.roomNumber, newStatus);
+                load();
+                showToast(`All rooms with number ${room.roomNumber} marked as ${newStatus}`);
+            } else {
+                const updated = await updateRoom(room._id, { status: newStatus });
+                setRooms(prev => prev.map(r => r._id === updated._id ? updated : r));
+                showToast(`Room marked as ${newStatus}`);
+            }
         } catch (e) {
             showToast(e.message, 'error');
         }
@@ -233,6 +239,7 @@ export default function RoomManagement() {
                                         <h3 className="font-bold text-navy-900 text-sm leading-tight">{room.name}</h3>
                                         <span className="text-lg font-bold text-teal-600 flex-shrink-0">${room.price}<span className="text-xs font-normal text-navy-400">/night</span></span>
                                     </div>
+                                    <p className="text-xs text-navy-600 font-bold mb-1">Room No: {room.roomNumber || 'N/A'}</p>
                                     <p className="text-xs text-navy-400 capitalize mb-3">{room.type} · {room.guests} guests · {room.view} view</p>
 
                                     
@@ -279,9 +286,13 @@ export default function RoomManagement() {
                         </div>
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="col-span-2">
+                                <div className="col-span-1">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Room Name *</label>
-                                    <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Ocean Suite 101" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                    <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Ocean Suite" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                </div>
+                                <div className="col-span-1">
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Room Number *</label>
+                                    <input required value={form.roomNumber} onChange={e => setForm({ ...form, roomNumber: e.target.value })} placeholder="e.g. 101" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Type *</label>
