@@ -39,7 +39,7 @@ const UserManagement = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [saving, setSaving] = useState(false);
     const [newUser, setNewUser] = useState({
-        name: '', email: '', phone: '', role: 'Guest', status: 'Active', location: '', password: '',
+        firstName: '', lastName: '', email: '', phone: '', role: 'Guest', status: 'Active', location: '', password: '',
     });
 
     const roles = ['Guest', 'Staff', 'Admin'];
@@ -61,15 +61,17 @@ const UserManagement = () => {
 
     const openAddModal = () => {
         setIsEditing(false);
-        setNewUser({ name: '', email: '', phone: '', role: 'Guest', status: 'Active', location: '', password: '' });
+        setNewUser({ firstName: '', lastName: '', email: '', phone: '', role: 'Guest', status: 'Active', location: '', password: '' });
         setIsModalOpen(true);
     };
 
     const openEditModal = (user) => {
         setIsEditing(true);
         setSelectedUser(user);
+        const [firstName, ...rest] = user.name.split(' ');
         setNewUser({
-            name: user.name,
+            firstName: firstName || '',
+            lastName: rest.join(' ') || '',
             email: user.email,
             phone: user.phone,
             role: user.role,
@@ -82,12 +84,24 @@ const UserManagement = () => {
 
     const handleSaveUser = async (e) => {
         e.preventDefault();
+        
+        if (newUser.password && newUser.password.length < 8) {
+            showToast('Password must be at least 8 characters', 'error');
+            return;
+        }
+
+        if (newUser.phone && newUser.phone.length !== 10) {
+            showToast('Phone number must be exactly 10 digits', 'error');
+            return;
+        }
+
         setSaving(true);
         try {
-            const [firstName, ...rest] = newUser.name.trim().split(' ');
-            const lastName = rest.join(' ') || '';
             const payload = {
-                firstName, lastName, email: newUser.email, phone: newUser.phone,
+                firstName: newUser.firstName, 
+                lastName: newUser.lastName, 
+                email: newUser.email, 
+                phone: newUser.phone,
                 role: ROLE_TO_API[newUser.role] || 'guest',
                 location: newUser.location,
                 status: newUser.status
@@ -100,7 +114,7 @@ const UserManagement = () => {
                 setUsers(prev => prev.map(u => (u.id === selectedUser.id ? normalise(updated) : u)));
                 showToast('User updated successfully');
             } else {
-                const created = await apiCreateUser({ ...payload, password: newUser.password });
+                const created = await apiCreateUser(payload);
                 setUsers(prev => [normalise(created), ...prev]);
                 showToast('User created successfully');
             }
@@ -273,9 +287,15 @@ const UserManagement = () => {
                             <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-navy-50 rounded-lg text-navy-400 hover:text-navy-600 transition-colors"><X size={20} /></button>
                         </div>
                         <form onSubmit={handleSaveUser} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-navy-700 mb-1">Full Name</label>
-                                <input required type="text" value={newUser.name} onChange={e => setNewUser({ ...newUser, name: e.target.value })} className="w-full px-4 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-navy-700 mb-1">First Name</label>
+                                    <input required type="text" value={newUser.firstName} onChange={e => setNewUser({ ...newUser, firstName: e.target.value })} className="w-full px-4 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-navy-700 mb-1">Last Name</label>
+                                    <input type="text" value={newUser.lastName} onChange={e => setNewUser({ ...newUser, lastName: e.target.value })} className="w-full px-4 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
@@ -284,13 +304,13 @@ const UserManagement = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-navy-700 mb-1">Phone</label>
-                                    <input required type="tel" value={newUser.phone} onChange={e => setNewUser({ ...newUser, phone: e.target.value })} className="w-full px-4 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                    <input required type="tel" pattern="[0-9]{10}" title="Ten digits only" value={newUser.phone} onChange={e => setNewUser({ ...newUser, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} className="w-full px-4 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-navy-700 mb-1">Password</label>
                                 <div className="relative">
-                                    <input required={!isEditing} type={showPassword ? 'text' : 'password'} value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} placeholder={isEditing ? 'Leave blank to keep current' : ''} className="w-full px-4 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                    <input required={!isEditing} type={showPassword ? 'text' : 'password'} minLength={8} value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} placeholder={isEditing ? 'Leave blank to keep current' : ''} className="w-full px-4 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-navy-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
                                 </div>
                             </div>
