@@ -311,3 +311,25 @@ export async function fetchBookingReport({ from, to }) {
     });
     return handleResponse(res);
 }
+
+// Admin: Notifications
+export async function fetchNotifications() {
+    const res = await fetch(`${API_URL}/admin/notifications`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function markNotificationRead(id) {
+    const res = await fetch(`${API_URL}/admin/notifications/${id}/read`, {
+        method: 'PUT',
+        headers: authHeaders()
+    });
+    return handleResponse(res);
+}
+
+export async function markAllNotificationsRead() {
+    const res = await fetch(`${API_URL}/admin/notifications/read-all`, {
+        method: 'PUT',
+        headers: authHeaders()
+    });
+    return handleResponse(res);
+}

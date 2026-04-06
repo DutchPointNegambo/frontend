@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import Sidebar from '../../components/admin_components/Sidebar';
+import NotificationCenter from '../../components/admin_components/NotificationCenter';
 import { useAuth } from '../../context/AuthContext';
 
 const AdminLayout = () => {
@@ -17,9 +18,19 @@ const AdminLayout = () => {
     return (
         <div className="flex bg-slate-50 min-h-screen">
             <Sidebar />
-            <div className="flex-1 ml-64 p-8 overflow-y-auto h-screen">
-                <main className="max-w-7xl mx-auto space-y-6">
-                    <Outlet />
+            <div className="flex-1 ml-64 flex flex-col h-screen">
+                {/* Top Header */}
+                <header className="h-16 bg-white border-b border-navy-100 flex items-center justify-between px-8 z-10 sticky top-0">
+                    <h2 className="text-lg font-bold text-navy-900 tracking-tight">Admin Dashboard</h2>
+                    <div className="flex items-center gap-4">
+                        <NotificationCenter />
+                    </div>
+                </header>
+
+                <main className="flex-1 p-8 overflow-y-auto w-full">
+                    <div className="max-w-7xl mx-auto space-y-6">
+                        <Outlet />
+                    </div>
                 </main>
             </div>
         </div>

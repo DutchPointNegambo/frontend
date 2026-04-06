@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     Plus, Search, Edit2, Trash2, X, BedDouble,
-    CheckCircle, WrenchIcon, XCircle, RefreshCw, Save,
+    CheckCircle, WrenchIcon, XCircle, RefreshCw, Save, LogOut
 } from 'lucide-react';
-import { fetchRooms, createRoom, updateRoom, deleteRoom, updateRoomStatusByNumber } from '../../utils/api';
+import { fetchRooms, createRoom, updateRoom, deleteRoom, updateRoomStatusByNumber, updateBookingStatus } from '../../utils/api';
 import Toast from '../../components/admin_components/Toast';
 import { useToast } from '../../components/admin_components/useToast';
 
@@ -12,7 +12,7 @@ const STATUS_OPTIONS = ['available', 'occupied', 'maintenance'];
 
 const EMPTY_FORM = {
     name: '', roomNumber: '', type: 'deluxe', price: '', guests: '', description: '',
-    features: '', image: '', status: 'available', view: 'ocean',
+    features: '', image: '', images: '', status: 'available', view: 'ocean',
 };
 
 const statusConfig = {
@@ -54,7 +54,10 @@ export default function RoomManagement() {
             name: room.name, roomNumber: room.roomNumber || '', type: room.type, price: room.price,
             guests: room.guests, description: room.description,
             features: (room.features || []).join(', '),
-            image: room.image, status: room.status, view: room.view || 'ocean',
+            image: room.image, 
+            status: room.status, 
+            view: room.view || 'ocean',
+            images: (room.images || []).join(', '),
         });
         setModalOpen(true);
     };
@@ -68,6 +71,7 @@ export default function RoomManagement() {
                 price: Number(form.price),
                 guests: Number(form.guests),
                 features: form.features.split(',').map(f => f.trim()).filter(Boolean),
+                images: form.images.split(',').map(f => f.trim()).filter(Boolean),
             };
             if (editingRoom) {
                 const updated = await updateRoom(editingRoom._id, payload);
@@ -113,6 +117,21 @@ export default function RoomManagement() {
         }
     };
 
+    const handleCheckOut = async (bookingId, roomNumber) => {
+        if (!window.confirm('Are you sure you want to check out this guest? This will mark the booking as completed and make the room available.')) return;
+        try {
+            await updateBookingStatus(bookingId, 'completed');
+            // After marking booking as completed, we also mark the room as available in DB
+            if (roomNumber) {
+                await updateRoomStatusByNumber(roomNumber, 'available');
+            }
+            load();
+            showToast('Guest checked out successfully and room is now available');
+        } catch (e) {
+            showToast(e.message, 'error');
+        }
+    };
+
     const filtered = rooms.filter(r => {
         const matchSearch = r.name.toLowerCase().includes(search.toLowerCase()) ||
             r.type.toLowerCase().includes(search.toLowerCase());
@@ -122,8 +141,8 @@ export default function RoomManagement() {
     });
 
     const counts = {
-        available: rooms.filter(r => r.status === 'available').length,
-        occupied: rooms.filter(r => r.status === 'occupied').length,
+        available: rooms.filter(r => r.status === 'available' && !r.activeBooking).length,
+        occupied: rooms.filter(r => r.status === 'occupied' || r.activeBooking).length,
         maintenance: rooms.filter(r => r.status === 'maintenance').length,
     };
 
@@ -229,9 +248,11 @@ export default function RoomManagement() {
                                             <BedDouble size={40} className="text-navy-300" />
                                         </div>
                                     )}
-                                    <div className={`absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
-                                        <StatusIcon size={11} />
-                                        {cfg.label}
+                                    <div className={`absolute top-3 right-3 flex flex-col items-end gap-1.5`}>
+                                        <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold border shadow-sm flex items-center gap-1 capitalize ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+                                            <StatusIcon size={11} />
+                                            {cfg.label}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="p-4">
@@ -240,7 +261,32 @@ export default function RoomManagement() {
                                         <span className="text-lg font-bold text-teal-600 flex-shrink-0">${room.price}<span className="text-xs font-normal text-navy-400">/night</span></span>
                                     </div>
                                     <p className="text-xs text-navy-600 font-bold mb-1">Room No: {room.roomNumber || 'N/A'}</p>
-                                    <p className="text-xs text-navy-400 capitalize mb-3">{room.type} · {room.guests} guests · {room.view} view</p>
+                                    <p className="text-xs text-navy-400 capitalize mb-1">{room.type} · {room.guests} guests · {room.view} view</p>
+
+                                    {room.activeBooking ? (
+                                        <div className="mb-3 p-2 bg-red-50 border border-red-100 rounded-lg">
+                                            <div className="flex justify-between items-start mb-1">
+                                                <p className="text-[10px] uppercase font-bold text-red-600">Guest Currently Staying</p>
+                                                <p className="text-[9px] font-bold text-navy-400">#{room.activeBooking.bookingId}</p>
+                                            </div>
+                                            <p className="text-xs font-semibold text-navy-900 truncate">
+                                                {room.activeBooking.user?.firstName || room.activeBooking.guestInfo?.firstName} {room.activeBooking.user?.lastName || room.activeBooking.guestInfo?.lastName}
+                                            </p>
+                                            <p className="text-[10px] font-medium text-red-500 mb-2">
+                                                {new Date(room.activeBooking.checkIn).toLocaleDateString(undefined, {month:'short', day:'numeric'})} — {new Date(room.activeBooking.checkOut).toLocaleDateString(undefined, {month:'short', day:'numeric'})}
+                                            </p>
+                                            <button 
+                                                onClick={() => handleCheckOut(room.activeBooking._id, room.roomNumber)}
+                                                className="w-full flex items-center justify-center gap-1.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-[10px] font-bold transition-colors"
+                                            >
+                                                <LogOut size={12} /> Check Out Guest
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="mb-3 py-1.5 border-y border-dashed border-navy-100">
+                                            <p className="text-[10px] text-navy-300 text-center font-medium">Ready for guests</p>
+                                        </div>
+                                    )}
 
                                     
                                     <div className="flex gap-1 mb-3">
@@ -319,8 +365,12 @@ export default function RoomManagement() {
                                     <input value={form.view} onChange={e => setForm({ ...form, view: e.target.value })} placeholder="e.g. ocean, garden, pool" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
                                 <div className="col-span-2">
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Image URL *</label>
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Main Image URL *</label>
                                     <input required value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} placeholder="https://..." className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                </div>
+                                <div className="col-span-2">
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Additional Image URLs <span className="text-navy-400 normal-case font-normal">(comma-separated)</span></label>
+                                    <input value={form.images} onChange={e => setForm({ ...form, images: e.target.value })} placeholder="https://image1.jpg, https://image2.jpg..." className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
                                 <div className="col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Description *</label>

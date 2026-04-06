@@ -3,7 +3,7 @@ import {
     UserPlus, Search, Mail, Phone, Shield, Edit2, Trash2, X, Eye, EyeOff,
     User, MapPin, Calendar, CheckCircle, XCircle, Clock, RefreshCw,
 } from 'lucide-react';
-import { fetchUsers, createUser as apiCreateUser, updateUser as apiUpdateUser, deleteUser as apiDeleteUser } from '../../utils/api';
+import { fetchUsers, createUser as apiCreateUser, updateUser as apiUpdateUser, deleteUser as apiDeleteUser, fetchBookings } from '../../utils/api';
 import Toast from '../../components/admin_components/Toast';
 import { useToast } from '../../components/admin_components/useToast';
 
@@ -18,7 +18,6 @@ const normalise = (u) => ({
     role: ROLE_MAP[u.role] || 'Guest',
     status: u.status || 'Active',
     joinDate: u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '',
-    location: u.location || '',
     totalBookings: u.totalBookings || 0,
     totalSpent: u.totalSpent || 0,
     avatar: `${u.firstName?.[0] || ''}${u.lastName?.[0] || ''}`.toUpperCase(),
@@ -39,8 +38,10 @@ const UserManagement = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [saving, setSaving] = useState(false);
     const [newUser, setNewUser] = useState({
-        firstName: '', lastName: '', email: '', phone: '', role: 'Guest', status: 'Active', location: '', password: '',
+        firstName: '', lastName: '', email: '', phone: '', role: 'Guest', status: 'Active', password: '',
     });
+    const [userBookings, setUserBookings] = useState([]);
+    const [loadingBookings, setLoadingBookings] = useState(false);
 
     const roles = ['Guest', 'Staff', 'Admin'];
     const statuses = ['Active', 'Inactive', 'Suspended'];
@@ -61,7 +62,7 @@ const UserManagement = () => {
 
     const openAddModal = () => {
         setIsEditing(false);
-        setNewUser({ firstName: '', lastName: '', email: '', phone: '', role: 'Guest', status: 'Active', location: '', password: '' });
+        setNewUser({ firstName: '', lastName: '', email: '', phone: '', role: 'Guest', status: 'Active', password: '' });
         setIsModalOpen(true);
     };
 
@@ -76,7 +77,6 @@ const UserManagement = () => {
             phone: user.phone,
             role: user.role,
             status: user.status,
-            location: user.location || '',
             password: '',
         });
         setIsModalOpen(true);
@@ -103,7 +103,6 @@ const UserManagement = () => {
                 email: newUser.email, 
                 phone: newUser.phone,
                 role: ROLE_TO_API[newUser.role] || 'guest',
-                location: newUser.location,
                 status: newUser.status
             };
             if (newUser.password) payload.password = newUser.password;
@@ -266,7 +265,19 @@ const UserManagement = () => {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-1">
-                                                <button onClick={() => { setSelectedUser(user); setIsDetailOpen(true); }} className="p-2 hover:bg-blue-50 rounded-lg text-navy-400 hover:text-blue-600 transition-colors"><Eye size={16} /></button>
+                                                <button onClick={async () => {
+                                                    setSelectedUser(user);
+                                                    setIsDetailOpen(true);
+                                                    setLoadingBookings(true);
+                                                    try {
+                                                        const bData = await fetchBookings({ userId: user.id });
+                                                        setUserBookings(bData.bookings || []);
+                                                    } catch (e) {
+                                                        console.error(e);
+                                                    } finally {
+                                                        setLoadingBookings(false);
+                                                    }
+                                                }} className="p-2 hover:bg-blue-50 rounded-lg text-navy-400 hover:text-blue-600 transition-colors"><Eye size={16} /></button>
                                                 <button onClick={() => openEditModal(user)} className="p-2 hover:bg-navy-100 rounded-lg text-navy-400 hover:text-navy-600 transition-colors"><Edit2 size={16} /></button>
                                                 <button onClick={() => handleDelete(user.id)} className="p-2 hover:bg-red-50 rounded-lg text-navy-400 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
                                             </div>
@@ -328,10 +339,6 @@ const UserManagement = () => {
                                     </select>
                                 </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-navy-700 mb-1">Location</label>
-                                <input type="text" value={newUser.location} onChange={e => setNewUser({ ...newUser, location: e.target.value })} className="w-full px-4 py-2 border border-navy-200 rounded-lg" />
-                            </div>
                             <div className="flex gap-3 pt-4">
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2 border border-navy-200 rounded-lg">Cancel</button>
                                 <button type="submit" disabled={saving} className="flex-1 bg-navy-900 text-white rounded-lg py-2 flex items-center justify-center gap-2 disabled:opacity-50">
@@ -359,7 +366,6 @@ const UserManagement = () => {
                         <div className="bg-navy-50 rounded-xl p-4 space-y-3 text-sm">
                             <div className="flex items-center"><Mail size={16} className="text-navy-400 mr-3" />{selectedUser.email}</div>
                             <div className="flex items-center"><Phone size={16} className="text-navy-400 mr-3" />{selectedUser.phone}</div>
-                            <div className="flex items-center"><MapPin size={16} className="text-navy-400 mr-3" />{selectedUser.location}</div>
                             <div className="flex items-center"><Calendar size={16} className="text-navy-400 mr-3" />Joined {selectedUser.joinDate}</div>
                         </div>
                         <div>
@@ -368,6 +374,37 @@ const UserManagement = () => {
                                 {statuses.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
+                        
+                        {/* Guest Booking History section */}
+                        {selectedUser.role === 'Guest' && (
+                            <div className="pt-4 border-t border-navy-100">
+                                <h3 className="font-bold text-navy-900 mb-3 text-sm">Booking History</h3>
+                                {loadingBookings ? (
+                                    <div className="flex justify-center py-4"><RefreshCw size={16} className="animate-spin text-navy-400" /></div>
+                                ) : userBookings.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {userBookings.map((b) => (
+                                            <div key={b._id} className="bg-white border text-sm border-navy-100 rounded-lg p-3 shadow-sm">
+                                                <div className="flex justify-between items-start mb-1">
+                                                    <span className="font-bold text-navy-900">{b.room?.name || 'Unknown Room'}</span>
+                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase ${
+                                                        b.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
+                                                        b.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                                                        b.status === 'confirmed' ? 'bg-blue-100 text-blue-700' :
+                                                        'bg-amber-100 text-amber-700'
+                                                    }`}>{b.status}</span>
+                                                </div>
+                                                <p className="text-xs text-navy-500">{new Date(b.checkIn).toLocaleDateString()} to {new Date(b.checkOut).toLocaleDateString()}</p>
+                                                <p className="text-xs font-medium text-teal-600 mt-1">Total: ${b.total}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-navy-400 italic">No bookings found for this user.</p>
+                                )}
+                            </div>
+                        )}
+                        
                         <div className="flex gap-3 pt-6">
                             <button onClick={() => openEditModal(selectedUser)} className="flex-1 bg-navy-900 text-white rounded-lg py-2.5 flex items-center justify-center gap-2"><Edit2 size={16} /> Edit</button>
                             <button onClick={() => { handleDelete(selectedUser.id); setIsDetailOpen(false); }} className="flex-1 bg-red-50 text-red-600 rounded-lg py-2.5 flex items-center justify-center gap-2"><Trash2 size={16} /> Delete</button>
