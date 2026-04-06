@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Reveal from "../components/Reveal"
 import Footer from "../components/Footer"
+import { FaFacebook, FaInstagram, FaXTwitter } from 'react-icons/fa6'
+import { SiTripadvisor } from 'react-icons/si'
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -21,7 +23,7 @@ const ContactUs = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
-    
+
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const response = await fetch(`${API_URL}/contact`, {
@@ -41,7 +43,7 @@ const ContactUs = () => {
       setIsSubmitting(false)
       setIsSubmitted(true)
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
-      
+
       setTimeout(() => setIsSubmitted(false), 4000)
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -265,10 +267,10 @@ const ContactUs = () => {
                 <h3 className="font-bold text-navy-900 mb-4">Follow Us</h3>
                 <div className="flex gap-3">
                   {[
-                    { name: 'Facebook', icon: 'f', color: 'hover:bg-blue-600', link: 'https://www.facebook.com/share/1D7ZsRJQKY/' },
-                    { name: 'Instagram', icon: '📷', color: 'hover:bg-pink-600' },
-                    { name: 'Twitter', icon: '𝕏', color: 'hover:bg-gray-800' },
-                    { name: 'TripAdvisor', icon: '🦉', color: 'hover:bg-green-600' },
+                    { name: 'Facebook', icon: <FaFacebook />, color: 'hover:bg-blue-600', link: 'https://www.facebook.com/share/1D7ZsRJQKY/' },
+                    { name: 'Instagram', icon: <FaInstagram />, color: 'hover:bg-pink-600', link: 'https://www.instagram.com/dutch_point_beach_resort?igsh=MTdyc2Nuc3ZpcTNxdQ==' },
+                    { name: 'Twitter', icon: <FaXTwitter />, color: 'hover:bg-gray-800' },
+                    { name: 'TripAdvisor', icon: <SiTripadvisor />, color: 'hover:bg-green-600' },
                   ].map((social) => (
                     <a
                       key={social.name}
