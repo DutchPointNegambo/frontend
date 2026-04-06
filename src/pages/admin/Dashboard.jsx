@@ -40,6 +40,7 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState(null);
+    const [chartMode, setChartMode] = useState('revenue'); // 'revenue' or 'count'
 
     const adminName = (() => {
         try {
@@ -68,8 +69,8 @@ const Dashboard = () => {
     };
 
     useEffect(() => { load(); }, []);
-
-    const maxRevenue = Math.max(...monthly.map(m => m.revenue), 1);
+    
+    const maxVal = Math.max(...monthly.map(m => m[chartMode] || 0), 1);
 
     const statCards = [
         {
@@ -84,6 +85,7 @@ const Dashboard = () => {
             value: stats ? `$${Number(stats.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00',
             icon: DollarSign,
             color: 'from-amber-500 to-amber-600',
+            link: '/admin/reports',
         },
         {
             title: 'Total Customers',
@@ -167,16 +169,28 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-navy-100 p-6">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
                         <div>
-                            <h3 className="text-base font-bold text-navy-900">Revenue Overview</h3>
-                            <p className="text-xs text-navy-400 mt-0.5">{new Date().getFullYear()} — monthly breakdown</p>
+                            <h3 className="text-base font-bold text-navy-900">Performance Overview</h3>
+                            <p className="text-xs text-navy-400 mt-0.5">{new Date().getFullYear()} — monthly bookings through site</p>
                         </div>
-                        <div className="flex gap-3 text-xs text-navy-500">
-                            <span className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-full bg-teal-500 inline-block" />
-                                Revenue
-                            </span>
+                        <div className="flex bg-navy-50 p-1 rounded-xl border border-navy-100 shadow-sm">
+                            <button
+                                onClick={() => setChartMode('revenue')}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${chartMode === 'revenue' ? 'bg-white text-teal-600 shadow-sm' : 'text-navy-400 hover:text-navy-600'}`}
+                            >
+                                <span className="flex items-center gap-1.5">
+                                    <DollarSign size={13} /> Revenue
+                                </span>
+                            </button>
+                            <button
+                                onClick={() => setChartMode('count')}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${chartMode === 'count' ? 'bg-white text-teal-600 shadow-sm' : 'text-navy-400 hover:text-navy-600'}`}
+                            >
+                                <span className="flex items-center gap-1.5">
+                                    <ClipboardList size={13} /> Bookings
+                                </span>
+                            </button>
                         </div>
                     </div>
 
@@ -185,23 +199,28 @@ const Dashboard = () => {
                             <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
                         </div>
                     ) : (
-                        <div className="flex items-end gap-1.5 h-48">
+                        <div className="flex items-end gap-2 h-44 mt-4 px-2">
                             {MONTHS.map((month, i) => {
-                                const val = monthly[i]?.revenue || 0;
-                                const heightPct = maxRevenue > 0 ? (val / maxRevenue) * 100 : 0;
+                                const mData = monthly[i];
+                                const val = mData ? mData[chartMode] : 0;
+                                const heightPct = maxVal > 0 ? (val / maxVal) * 100 : 0;
                                 return (
-                                    <div key={month} className="flex-1 flex flex-col items-center gap-1 group relative">
+                                    <div key={month} className="flex-1 flex flex-col items-center gap-2 group relative h-full justify-end">
                                         <div
-                                            className="w-full bg-teal-500 rounded-t-md transition-all duration-500 hover:bg-teal-600 cursor-default min-h-[4px]"
+                                            className={`w-full bg-gradient-to-t ${chartMode === 'revenue' ? 'from-teal-500 to-teal-400' : 'from-blue-500 to-blue-400'} rounded-t-lg transition-all duration-700 hover:brightness-110 cursor-default shadow-sm min-h-[4px]`}
                                             style={{ height: `${Math.max(heightPct, 2)}%` }}
                                         >
-                                            {val > 0 && (
-                                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-navy-900 text-white text-[10px] px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
-                                                    ${val.toLocaleString()}
+                                            {/* Tooltip Content */}
+                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-navy-900/95 backdrop-blur-sm text-white p-2.5 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl border border-white/10 text-xs">
+                                                <p className="font-bold border-b border-white/10 pb-1 mb-1">{MONTHS[i]} Statistics</p>
+                                                <div className="space-y-0.5">
+                                                    <p className="flex justify-between gap-4 text-white/70">Revenue: <span className="text-white font-mono">${mData?.revenue?.toLocaleString() || 0}</span></p>
+                                                    <p className="flex justify-between gap-4 text-white/70">Bookings: <span className="text-white font-mono">{mData?.count || 0}</span></p>
                                                 </div>
-                                            )}
+                                                <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-navy-900/95" />
+                                            </div>
                                         </div>
-                                        <span className="text-[9px] text-navy-400 uppercase tracking-wide">{month}</span>
+                                        <span className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">{month}</span>
                                     </div>
                                 );
                             })}
