@@ -18,9 +18,9 @@ const AdminLayout = () => {
     return (
         <div className="flex bg-slate-50 min-h-screen">
             <Sidebar />
-            <div className="flex-1 ml-64 flex flex-col h-screen">
+            <div className="flex-1 ml-64 flex flex-col h-screen min-w-0">
                 {/* Top Header */}
-                <header className="h-16 bg-white border-b border-navy-100 flex items-center justify-between px-8 z-10 sticky top-0">
+                <header className="h-16 bg-white border-b border-navy-100 flex items-center justify-between px-8 z-[100] sticky top-0">
                     <h2 className="text-lg font-bold text-navy-900 tracking-tight">Admin Dashboard</h2>
                     <div className="flex items-center gap-4">
                         <NotificationCenter />

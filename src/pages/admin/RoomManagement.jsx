@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     Plus, Search, Edit2, Trash2, X, BedDouble,
-    CheckCircle, WrenchIcon, XCircle, RefreshCw, Save, LogOut
+    CheckCircle, WrenchIcon, XCircle, RefreshCw, Save, LogOut, UserCircle
 } from 'lucide-react';
 import { fetchRooms, createRoom, updateRoom, deleteRoom, updateRoomStatusByNumber, updateBookingStatus } from '../../utils/api';
 import Toast from '../../components/admin_components/Toast';
@@ -264,25 +264,39 @@ export default function RoomManagement() {
                                     <p className="text-xs text-navy-400 capitalize mb-1">{room.type} · {room.guests} guests · {room.view} view</p>
 
                                     {room.activeBooking ? (
-                                        <div className="mb-3 p-2 bg-red-50 border border-red-100 rounded-lg">
-                                            <div className="flex justify-between items-start mb-1">
-                                                <p className="text-[10px] uppercase font-bold text-red-600">Guest Currently Staying</p>
-                                                <p className="text-[9px] font-bold text-navy-400">#{room.activeBooking.bookingId}</p>
+                                        <div className="mb-3 p-3 bg-red-50 border border-red-100 rounded-xl">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div>
+                                                    <p className="text-[10px] uppercase font-bold text-red-600">Guest Currently Staying</p>
+                                                    <p className="text-[9px] font-bold text-navy-400">ID: #{room.activeBooking.bookingId}</p>
+                                                </div>
+                                                <div className="px-2 py-0.5 bg-red-100 rounded text-[9px] font-bold text-red-700">
+                                                    {room.activeBooking.nights} Night{room.activeBooking.nights !== 1 ? 's' : ''}
+                                                </div>
                                             </div>
-                                            <p className="text-xs font-semibold text-navy-900 truncate">
+                                            <p className="text-xs font-bold text-navy-900 truncate flex items-center gap-1.5 mb-2">
+                                                <UserCircle size={14} className="text-navy-400" />
                                                 {room.activeBooking.user?.firstName || room.activeBooking.guestInfo?.firstName} {room.activeBooking.user?.lastName || room.activeBooking.guestInfo?.lastName}
                                             </p>
-                                            <p className="text-[10px] font-medium text-red-500 mb-2">
-                                                {new Date(room.activeBooking.checkIn).toLocaleDateString(undefined, {month:'short', day:'numeric'})} — {new Date(room.activeBooking.checkOut).toLocaleDateString(undefined, {month:'short', day:'numeric'})}
-                                            </p>
+                                            <div className="grid grid-cols-2 gap-2 mb-3 bg-white/50 p-2 rounded-lg border border-red-50">
+                                                <div>
+                                                    <p className="text-[9px] text-navy-400 uppercase font-bold">Check-In</p>
+                                                    <p className="text-[10px] font-bold text-navy-800">{new Date(room.activeBooking.checkIn).toLocaleDateString()}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[9px] text-navy-400 uppercase font-bold">Check-Out</p>
+                                                    <p className="text-[10px] font-bold text-navy-800">{new Date(room.activeBooking.checkOut).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
                                             <button 
                                                 onClick={() => handleCheckOut(room.activeBooking._id, room.roomNumber)}
-                                                className="w-full flex items-center justify-center gap-1.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-[10px] font-bold transition-colors"
+                                                className="w-full flex items-center justify-center gap-1.5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[11px] font-bold transition-all shadow-sm hover:shadow-md"
                                             >
-                                                <LogOut size={12} /> Check Out Guest
+                                                <LogOut size={13} /> Check Out Guest
                                             </button>
                                         </div>
                                     ) : (
+
                                         <div className="mb-3 py-1.5 border-y border-dashed border-navy-100">
                                             <p className="text-[10px] text-navy-300 text-center font-medium">Ready for guests</p>
                                         </div>
