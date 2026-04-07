@@ -10,9 +10,9 @@ import { useToast } from '../../components/admin_components/useToast';
 
 const STATUS_FLOW = {
     pending: { next: ['confirmed', 'cancelled'], color: 'bg-amber-50 text-amber-700 border-amber-200' },
-    confirmed: { next: ['completed', 'cancelled'], color: 'bg-blue-50 text-blue-700 border-blue-200' },
+    confirmed: { next: ['pending', 'completed', 'cancelled'], color: 'bg-blue-50 text-blue-700 border-blue-200' },
     completed: { next: [], color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-    cancelled: { next: [], color: 'bg-red-50 text-red-700 border-red-200' },
+    cancelled: { next: ['pending'], color: 'bg-red-50 text-red-700 border-red-200' },
 };
 
 const StatusIcon = ({ status }) => {
@@ -167,9 +167,13 @@ export default function BookingManagement() {
                                     const cfg = STATUS_FLOW[b.status] || STATUS_FLOW.pending;
                                     const isUpdating = updatingId === b._id;
                                     return (
-                                        <tr key={b._id} className="hover:bg-navy-50/40 transition-colors">
+                                        <tr 
+                                            key={b._id} 
+                                            onClick={() => setSelectedBooking(b)}
+                                            className="hover:bg-navy-50/60 transition-colors cursor-pointer group/row"
+                                        >
                                             <td className="px-5 py-4">
-                                                <span className="font-mono text-xs text-navy-600 bg-navy-50 px-2 py-1 rounded-lg">
+                                                <span className="font-mono text-xs text-navy-600 bg-navy-50 px-2 py-1 rounded-lg group-hover/row:bg-white transition-colors">
                                                     {b.bookingId || b._id.slice(-8).toUpperCase()}
                                                 </span>
                                             </td>
@@ -181,7 +185,7 @@ export default function BookingManagement() {
                                             </td>
                                             <td className="px-5 py-4">
                                                 <p className="text-sm font-medium text-navy-800">{b.room?.name || 'N/A'}</p>
-                                                <p className="text-xs text-navy-400 capitalize">{b.room?.type || ''}</p>
+                                                <p className="text-xs text-navy-400">No: {b.room?.roomNumber || '—'} · <span className="capitalize">{b.room?.type || ''}</span></p>
                                             </td>
                                             <td className="px-5 py-4 text-sm text-navy-600">{formatDate(b.checkIn)}</td>
                                             <td className="px-5 py-4 text-sm text-navy-600">{formatDate(b.checkOut)}</td>
@@ -194,7 +198,7 @@ export default function BookingManagement() {
                                                     {b.status}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
                                                 <div className="flex items-center justify-end gap-1">
                                                     <button
                                                         onClick={() => setSelectedBooking(b)}
@@ -206,11 +210,12 @@ export default function BookingManagement() {
                                                     {cfg.next.map(ns => (
                                                         <button
                                                             key={ns}
-                                                            onClick={() => handleStatusChange(b._id, ns)}
+                                                            onClick={(e) => { e.stopPropagation(); handleStatusChange(b._id, ns); }}
                                                             disabled={isUpdating}
                                                             className={`px-2.5 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors disabled:opacity-50 ${
                                                                 ns === 'confirmed' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' :
                                                                 ns === 'completed' ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' :
+                                                                ns === 'pending' ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' :
                                                                 'bg-red-50 text-red-600 hover:bg-red-100'
                                                             }`}
                                                         >
@@ -295,7 +300,7 @@ export default function BookingManagement() {
                                 <p className="text-xs font-semibold text-navy-500 uppercase tracking-wide mb-3">Room</p>
                                 <div className="flex items-center gap-2 text-sm text-navy-700">
                                     <BedDouble size={14} className="text-navy-400" />
-                                    {selectedBooking.room?.name || 'N/A'} · <span className="capitalize text-navy-500">{selectedBooking.room?.type}</span>
+                                    {selectedBooking.room?.name || 'N/A'} (No: {selectedBooking.room?.roomNumber || '—'}) · <span className="capitalize text-navy-500">{selectedBooking.room?.type}</span>
                                 </div>
                             </div>
 
@@ -353,6 +358,7 @@ export default function BookingManagement() {
                                                 className={`flex-1 py-2 rounded-xl text-sm font-medium capitalize transition-colors ${
                                                     ns === 'confirmed' ? 'bg-blue-600 text-white hover:bg-blue-700' :
                                                     ns === 'completed' ? 'bg-emerald-600 text-white hover:bg-emerald-700' :
+                                                    ns === 'pending' ? 'bg-amber-500 text-white hover:bg-amber-600' :
                                                     'bg-red-500 text-white hover:bg-red-600'
                                                 } disabled:opacity-50`}
                                             >

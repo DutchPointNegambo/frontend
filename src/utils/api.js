@@ -1,6 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// ── Helpers ───────────────────────────────────────────────────
+//Helpers
 
 const authHeaders = () => {
     const userInfo = localStorage.getItem('userInfo');
@@ -22,7 +22,7 @@ const handleResponse = async (res) => {
     return data;
 };
 
-// ── Auth ──────────────────────────────────────────────────────
+//Auth
 
 export async function registerUser(payload) {
     const res = await fetch(`${API_URL}/auth/register`, {
@@ -67,7 +67,7 @@ export async function updateUserProfile(payload) {
     return handleResponse(res);
 }
 
-// ── Admin: Dashboard ──────────────────────────────────────────
+//Admin: Dashboard
 
 export async function fetchDashboardStats() {
     const res = await fetch(`${API_URL}/admin/stats`, { headers: authHeaders() });
@@ -79,7 +79,7 @@ export async function fetchMonthlyRevenue(year) {
     return handleResponse(res);
 }
 
-// ── Admin: Users ──────────────────────────────────────────────
+//Admin: Users
 
 export async function fetchUsers(params = {}) {
     const qs = new URLSearchParams(params).toString();
@@ -118,7 +118,7 @@ export async function deleteUser(id) {
     return handleResponse(res);
 }
 
-// ── Admin: Rooms ──────────────────────────────────────────────
+//Admin: Rooms 
 
 export async function fetchRooms(params = {}) {
     const qs = new URLSearchParams(params).toString();
@@ -140,6 +140,15 @@ export async function updateRoom(id, payload) {
         method: 'PUT',
         headers: authHeaders(),
         body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function updateRoomStatusByNumber(roomNumber, status) {
+    const res = await fetch(`${API_URL}/admin/rooms/number/${roomNumber}/status`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ status }),
     });
     return handleResponse(res);
 }
@@ -180,7 +189,7 @@ export async function fetchGalleryRooms() {
   return handleResponse(res);
 }
 
-// ── Packages ──────────────────────────────────────────────────
+//Packages
 
 export async function fetchPackagesByType(type) {
     const res = await fetch(`${API_URL}/packages?type=${type}`);
@@ -219,7 +228,7 @@ export async function deletePackage(id) {
     return handleResponse(res);
 }
 
-// ── Admin: Bookings ───────────────────────────────────────────
+//Admin: Bookings
 
 export async function fetchBookings(params = {}) {
     const qs = new URLSearchParams(params).toString();
@@ -236,7 +245,7 @@ export async function updateBookingStatus(id, status) {
     return handleResponse(res);
 }
 
-// ── Public: Bookings ──────────────────────────────────────────
+//Public: Bookings 
 
 export async function createBooking(payload) {
     const res = await fetch(`${API_URL}/bookings`, {
@@ -247,7 +256,7 @@ export async function createBooking(payload) {
     return handleResponse(res);
 }
 
-// ── Admin: Staff ──────────────────────────────────────────────
+//Admin: Staff
 
 export async function fetchStaff(params = {}) {
     const qs = new URLSearchParams(params).toString();
@@ -281,7 +290,7 @@ export async function deleteStaff(id) {
     return handleResponse(res);
 }
 
-// ── Admin: Reports ────────────────────────────────────────────
+//Admin: Reports
 
 export async function fetchReportSummary(params = {}) {
     const qs = new URLSearchParams(params).toString();
@@ -290,6 +299,37 @@ export async function fetchReportSummary(params = {}) {
 }
 
 export async function fetchMonthlyReport(year) {
-    const res = await fetch(`${API_URL}/admin/reports/monthly?year=${year}`, { headers: authHeaders() });
+    const res = await fetch(`${API_URL}/admin/reports/monthly?year=${year}`, {
+        headers: authHeaders(),
+    });
+    return handleResponse(res);
+}
+
+export async function fetchBookingReport({ from, to }) {
+    const res = await fetch(`${API_URL}/admin/reports/bookings?from=${from || ''}&to=${to || ''}`, {
+        headers: authHeaders(),
+    });
+    return handleResponse(res);
+}
+
+// Admin: Notifications
+export async function fetchNotifications() {
+    const res = await fetch(`${API_URL}/admin/notifications`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function markNotificationRead(id) {
+    const res = await fetch(`${API_URL}/admin/notifications/${id}/read`, {
+        method: 'PUT',
+        headers: authHeaders()
+    });
+    return handleResponse(res);
+}
+
+export async function markAllNotificationsRead() {
+    const res = await fetch(`${API_URL}/admin/notifications/read-all`, {
+        method: 'PUT',
+        headers: authHeaders()
+    });
     return handleResponse(res);
 }
