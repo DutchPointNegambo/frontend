@@ -1,15 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { fetchGalleryRooms } from '../utils/api'
-import Footer from '../components/Footer'
 
 const CATEGORIES = ['All', 'Rooms', 'Events', 'Resort', 'Dining']
 
-const FALLBACK_ROOMS = [
-    'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
-]
+// const FALLBACK_ROOMS = [
+//     'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80',
+//     'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
+//     'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=800&q=80',
+//     'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
+// ]
 
 const EVENT_IMAGES = [
     { url: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&q=80', title: 'Grand Wedding' },
@@ -44,7 +43,7 @@ const Gallery = () => {
             try {
                 // Fetch dynamic room images
                 const roomsData = await fetchGalleryRooms()
-                const roomImages = (roomsData || []).flatMap(room => 
+                const roomImages = (roomsData || []).flatMap(room =>
                     (room.images || []).map(imgUrl => ({
                         url: imgUrl,
                         title: room.name,
@@ -129,7 +128,7 @@ const Gallery = () => {
             <section className="relative h-[40vh] md:h-[50vh] flex items-center justify-center overflow-hidden">
                 <div
                     className="absolute inset-0 bg-cover bg-center animate-hero-zoom"
-                    style={{ backgroundImage: "url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=2000&q=80')" }}
+                    style={{ backgroundImage: "url('https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325413/unnamed_6_lun1kc.webp')" }}
                 />
                 <div className="absolute inset-0 bg-navy-950/60" />
 
@@ -229,7 +228,6 @@ const Gallery = () => {
                     </a>
                 </div>
             </section>
-            <Footer />
         </div>
     )
 }
