@@ -5,7 +5,7 @@ import Footer from '../components/Footer'
 import BookingModal from '../components/BookingModal'
 
 const today = new Date().toISOString().split('T')[0]
-const checkInTime = "12:00 AM - 2:00 PM";
+const checkInTime = "12:00 PM - 2:00 PM";
 const checkOutTime = "9:00 AM - 11:00 AM";
 const DaycheckInTime = "9:00 AM - 7:00 PM";
 

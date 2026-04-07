@@ -15,6 +15,7 @@ import Gallery from './pages/Gallery'
 import AddRoomForm from './components/admin_components/AddRoomForm'
 import useIdleTimeout from './hooks/useIdleTimeout'
 import Navbar from './components/Navbar'
+import ScrollToTop from './components/ScrollToTop'
 
 
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
@@ -39,6 +40,7 @@ function App() {
 
   return (
     <>
+      <ScrollToTop />
       {shouldShowNavbar && <Navbar />}
       <main className={mainPadding}>
       <Suspense fallback={<div className="h-screen flex items-center justify-center text-navy-500 font-bold">Loading...</div>}>
