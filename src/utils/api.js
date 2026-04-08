@@ -67,6 +67,33 @@ export async function updateUserProfile(payload) {
     return handleResponse(res);
 }
 
+export async function forgotPassword(payload) {
+    const res = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function verifyOTP(payload) {
+    const res = await fetch(`${API_URL}/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function resetPassword(payload) {
+    const res = await fetch(`${API_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
 //Admin: Dashboard
 
 export async function fetchDashboardStats() {
@@ -333,3 +360,44 @@ export async function markAllNotificationsRead() {
     });
     return handleResponse(res);
 }
+
+export async function deleteNotification(id) {
+    const res = await fetch(`${API_URL}/admin/notifications/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+    });
+    return handleResponse(res);
+}
+
+export async function deleteReadNotifications() {
+    const res = await fetch(`${API_URL}/admin/notifications/delete-read`, {
+        method: 'DELETE',
+        headers: authHeaders()
+    });
+    return handleResponse(res);
+}
+
+
+// Admin: Feedbacks/Contacts
+export async function fetchFeedbacks() {
+    const res = await fetch(`${API_URL}/admin/contacts`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function updateFeedbackStatus(id, status) {
+    const res = await fetch(`${API_URL}/admin/contacts/${id}/status`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ status })
+    });
+    return handleResponse(res);
+}
+
+export async function deleteFeedback(id) {
+    const res = await fetch(`${API_URL}/admin/contacts/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+    });
+    return handleResponse(res);
+}
+

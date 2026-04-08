@@ -4,6 +4,7 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import React, { Suspense, lazy } from 'react'
 import SignIn from './pages/SignIn'
 import Login from './pages/Login'
+import ForgotPassword from './pages/ForgotPassword'
 import Profile from './pages/Profile'
 import DayOutingRooms from './pages/DayOutingRooms'
 import DeluxeRooms from './pages/deluxeRooms' 
@@ -27,6 +28,7 @@ const BookingManagement = lazy(() => import('./pages/admin/BookingManagement'))
 const FoodOrdering = lazy(() => import('./pages/admin/FoodOrdering'))
 const Reports = lazy(() => import('./pages/admin/Reports'))
 const Staff = lazy(() => import('./pages/admin/Staff'))
+const FeedbackManagement = lazy(() => import('./pages/admin/FeedbackManagement'))
 function App() {
 
   useIdleTimeout(15);
@@ -49,6 +51,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/event" element={<EventManagement />} />
           <Route path="/DayOutingRooms" element={<DayOutingRooms />} />
@@ -70,6 +73,7 @@ function App() {
             <Route path="food" element={<FoodOrdering />} />
             <Route path="reports" element={<Reports />} />
             <Route path="staff" element={<Staff />} />
+            <Route path="feedback" element={<FeedbackManagement />} />
           </Route>
         </Routes>
       </Suspense>

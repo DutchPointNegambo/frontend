@@ -180,9 +180,9 @@ const Login = () => {
                   <label htmlFor="login-password" className="block text-xs font-bold text-navy-400 uppercase tracking-widest">
                     Password
                   </label>
-                  <a href="#" className="text-[10px] font-bold text-teal-600 hover:text-teal-700 tracking-widest uppercase transition-colors">
+                  <Link to="/forgot-password" size={18} className="text-[10px] font-bold text-teal-600 hover:text-teal-700 tracking-widest uppercase transition-colors">
                     Forgot Key?
-                  </a>
+                  </Link>
                 </div>
                 <div className="relative">
                   <input
