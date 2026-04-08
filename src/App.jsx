@@ -27,6 +27,7 @@ const BookingManagement = lazy(() => import('./pages/admin/BookingManagement'))
 const FoodOrdering = lazy(() => import('./pages/admin/FoodOrdering'))
 const Reports = lazy(() => import('./pages/admin/Reports'))
 const Staff = lazy(() => import('./pages/admin/Staff'))
+const FeedbackManagement = lazy(() => import('./pages/admin/FeedbackManagement'))
 function App() {
 
   useIdleTimeout(15);
@@ -70,6 +71,7 @@ function App() {
             <Route path="food" element={<FoodOrdering />} />
             <Route path="reports" element={<Reports />} />
             <Route path="staff" element={<Staff />} />
+            <Route path="feedback" element={<FeedbackManagement />} />
           </Route>
         </Routes>
       </Suspense>

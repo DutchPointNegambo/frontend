@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
     UtensilsCrossed,
+    MessageSquare,
     Users,
     UserCircle,
     CalendarCheck,
@@ -42,10 +43,12 @@ const Sidebar = () => {
             label: 'Operations',
             items: [
                 { name: 'Food & Menu', icon: UtensilsCrossed, path: '/admin/food' },
+                { name: 'Guest Feedback', icon: MessageSquare, path: '/admin/feedback' },
                 { name: 'Reports', icon: FileBarChart, path: '/admin/reports' },
             ],
         },
     ];
+
 
     const adminName = (() => {
         try {

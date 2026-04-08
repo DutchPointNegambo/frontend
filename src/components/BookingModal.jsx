@@ -95,7 +95,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                     </button>
                 </div>
 
-                <div className="p-8">
+                <div className="p-8 max-h-[calc(100vh-14rem)] overflow-y-auto">
                     {/* Progress Indicator */}
                     {step < 3 && (
                         <div className="flex items-center justify-center gap-4 mb-8">
