@@ -103,21 +103,6 @@ const Footer = () => {
                 <span>dutchpointresort@gmail.com</span>
               </li>
             </ul>
-
-            {/* Newsletter */}
-            <div>
-              <h4 className="text-white font-semibold mb-3 text-sm">Newsletter</h4>
-              <div className="flex">
-                <input
-                  type="email"
-                  placeholder="Your email"
-                  className="flex-1 bg-white/10 border border-white/10 rounded-l-xl px-4 py-2.5 text-sm text-white placeholder:text-navy-400 focus:outline-none focus:border-teal-500 transition-colors"
-                />
-                <button className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-4 py-2.5 rounded-r-xl text-sm font-semibold hover:from-teal-600 hover:to-teal-700 transition-all duration-300">
-                  →
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -130,8 +115,8 @@ const Footer = () => {
               © 2026 Dutch Point Negombo Beach Resort. All rights reserved.
             </p>
             <div className="flex items-center gap-6 text-sm text-navy-400">
-              <a href="#" className="hover:text-teal-400 transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-teal-400 transition-colors">Terms of Service</a>
+              <Link to="/privacy-policy" className="hover:text-teal-400 transition-colors">Privacy Policy</Link>
+              <Link to="/terms-of-service" className="hover:text-teal-400 transition-colors">Terms of Service</Link>
             </div>
           </div>
         </div>

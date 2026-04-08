@@ -477,13 +477,16 @@ const LuxuryRooms = () => {
                                                         <span className="text-navy-800 font-semibold text-sm">{new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {checkOutTime}</span>
                                                     </div>
                                                 )}
-                                                <div className="col-span-2 bg-gradient-to-r from-navy-50 to-amber-50/50 rounded-xl px-3 py-2 flex justify-between">
+                                                <div className="col-span-2 bg-gradient-to-r from-navy-50 to-amber-50/50 rounded-xl px-3 py-2 flex justify-between items-center">
                                                     <span className="text-navy-500 text-sm">
                                                         {selectedPackage === 'day-use' ? 'Day Use' : `${calcNights()} Night${calcNights() > 1 ? 's' : ''}`}
                                                     </span>
-                                                    <span className="text-navy-900 font-bold text-sm">
-                                                        {formatPrice(selectedRoom.price * (selectedPackage === 'day-use' ? 1 : calcNights()))} Total
-                                                    </span>
+                                                    <div className="text-right">
+                                                        <span className="text-navy-900 font-bold text-sm block">
+                                                            {formatPrice(selectedRoom.price * (selectedPackage === 'day-use' ? 1 : calcNights()))} Total
+                                                        </span>
+                                                        <span className="text-[10px] text-red-500 font-bold uppercase tracking-wider">Non-refundable</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
