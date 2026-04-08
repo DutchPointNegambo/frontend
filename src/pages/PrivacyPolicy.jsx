@@ -19,10 +19,10 @@ const sections = [
       },
       {
         subtitle: 'Contact Form Submissions',
-        text: 'When you submit our contact form, we collect your name, email address, phone number, subject line, and message content to respond to your inquiry.',
+        text: 'When you submit our contact form, we collect your full name, email address, phone number (optional), subject line, and message content to respond to your inquiry.',
       },
       {
-        subtitle: 'Event Booking Information',
+        subtitle: 'Event Reservation Information',
         text: 'For event bookings, we additionally collect the event type, event date, time slot preference, number of guests, decoration preferences, and food package selection.',
       },
     ],
@@ -59,7 +59,7 @@ const sections = [
     content: [
       {
         subtitle: 'Firebase / Google Authentication',
-        text: 'We use Google Firebase for "Sign in with Google" functionality. When you use this feature, your authentication is processed by Google. Please refer to Google\'s Privacy Policy for details on how they handle your data.',
+        text: 'We use Google Firebase for "Sign in with Google" functionality. When you use this feature, your authentication data (UID, display name, email, and profile photo) is processed by Google/Firebase. Please refer to Google\'s Privacy Policy for details.',
       },
       {
         subtitle: 'Cloudinary (Image Hosting)',
@@ -67,7 +67,7 @@ const sections = [
       },
       {
         subtitle: 'Google Places API',
-        text: 'We use the Google Places API to display real customer reviews and ratings from Google Maps on our website. This is public review data and does not involve sharing your personal information.',
+        text: 'We use the Google Places API (v1) to display real customer reviews and ratings from our Google Maps listing on our website. This data is public and is fetched directly from Google.',
       },
       {
         subtitle: 'Google Maps',
@@ -254,15 +254,15 @@ const PrivacyPolicy = () => {
               {section.id === 'contact' && (
                 <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {[
-                    { icon: '📍', label: 'Address', value: '111/1c Pitipana St, Negombo 11500, Sri Lanka' },
-                    { icon: '📞', label: 'Phone', value: '0764219211' },
-                    { icon: '✉️', label: 'Email', value: 'dutchpointresort@gmail.com' },
+                    { label: 'Address', value: '111/1c Pitipana St, Negombo 11500, Sri Lanka' },
+                    { label: 'Phone', value: '0764219211' },
+                    { label: 'Email', value: 'dutchpointresort@gmail.com' },
                   ].map((c) => (
                     <div
                       key={c.label}
                       className="bg-white/5 border border-white/10 rounded-xl p-4 text-center"
                     >
-                      <div className="text-2xl mb-2">{c.icon}</div>
+
                       <div className="text-teal-400 text-xs font-semibold uppercase tracking-wide mb-1">{c.label}</div>
                       <div className="text-navy-300 text-xs leading-relaxed">{c.value}</div>
                     </div>
