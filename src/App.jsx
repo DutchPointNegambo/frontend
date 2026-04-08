@@ -4,6 +4,7 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import React, { Suspense, lazy } from 'react'
 import SignIn from './pages/SignIn'
 import Login from './pages/Login'
+import ForgotPassword from './pages/ForgotPassword'
 import Profile from './pages/Profile'
 import DayOutingRooms from './pages/DayOutingRooms'
 import DeluxeRooms from './pages/deluxeRooms' 
@@ -48,6 +49,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/event" element={<EventManagement />} />
           <Route path="/DayOutingRooms" element={<DayOutingRooms />} />
