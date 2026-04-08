@@ -536,6 +536,7 @@ const DayOutingRooms = () => {
                                                     <div>
                                                         <span className="text-[10px] text-navy-400 block uppercase tracking-widest">Package Price</span>
                                                         <span className="text-2xl sm:text-3xl font-extrabold text-navy-900 italic">{formatPrice(selectedRoom.price)}/-</span>
+                                                        <span className="text-[10px] text-red-500 font-bold uppercase tracking-wider block mt-1">Non-refundable</span>
                                                     </div>
                                                     <div className="text-right">
                                                         <span className="text-[10px] text-navy-400 block uppercase tracking-widest">Capacity</span>

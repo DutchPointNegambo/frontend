@@ -130,7 +130,7 @@ const Footer = () => {
               © 2026 Dutch Point Negombo Beach Resort. All rights reserved.
             </p>
             <div className="flex items-center gap-6 text-sm text-navy-400">
-              <a href="#" className="hover:text-teal-400 transition-colors">Privacy Policy</a>
+              <Link to="/privacy-policy" className="hover:text-teal-400 transition-colors">Privacy Policy</Link>
               <a href="#" className="hover:text-teal-400 transition-colors">Terms of Service</a>
             </div>
           </div>
