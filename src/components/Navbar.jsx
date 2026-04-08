@@ -13,7 +13,7 @@ const Navbar = () => {
     { name: 'Home', path: '/' },
     // { name: 'Offers', path: '#' },
     { name: 'Gallery', path: '/gallery' },
-    { name: 'Events', path: '/event' },
+    // { name: 'Events', path: '/event' },
   ]
 
   const roomCategories = [
@@ -102,11 +102,15 @@ const Navbar = () => {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
                 </svg>
+                <span
+                  className={`absolute bottom-0 left-0 w-full h-0.5 transition-all duration-300 transform origin-left ${shouldShowSolidNavbar ? 'bg-navy-950' : 'bg-teal-400'
+                    } ${roomCategories.some(cat => isActive(cat.path)) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}
+                />
               </button>
 
               {/* Dropdown Menu - Bridge to prevent hover loss */}
               <div
-                className={`absolute left-0 top-full pt-2 w-56 transition-all duration-300 transform origin-top-left ${isRoomsDropdownOpen
+                className={`absolute left-1/2 -translate-x-1/2 top-full pt-2 w-56 transition-all duration-300 transform origin-top ${isRoomsDropdownOpen
                   ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto'
                   : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
                   }`}
@@ -114,27 +118,27 @@ const Navbar = () => {
                 <div className={`rounded-xl overflow-hidden shadow-2xl ${shouldShowSolidNavbar ? 'bg-white' : 'bg-navy-950/90 backdrop-blur-md border border-white/10'
                   }`}>
                   <div className="py-2">
-                  {roomCategories.map((category) => (
-                    <Link
-                      key={category.name}
-                      to={category.path}
-                      className={`block px-5 py-3 text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${shouldShowSolidNavbar
-                        ? isActive(category.path)
-                          ? 'bg-teal-50 text-teal-600'
-                          : 'text-navy-700 hover:bg-navy-50 hover:text-navy-950'
-                        : isActive(category.path)
-                          ? 'bg-teal-400/20 text-teal-400'
-                          : 'text-white/80 hover:bg-white/10 hover:text-white'
-                        }`}
-                    >
-                      {category.name}
-                    </Link>
-                  ))}
+                    {roomCategories.map((category) => (
+                      <Link
+                        key={category.name}
+                        to={category.path}
+                        className={`block px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-center transition-all duration-300 ${shouldShowSolidNavbar
+                          ? isActive(category.path)
+                            ? 'bg-teal-50 text-teal-600'
+                            : 'text-navy-700 hover:bg-navy-50 hover:text-navy-950'
+                          : isActive(category.path)
+                            ? 'bg-teal-400/20 text-teal-400'
+                            : 'text-white/80 hover:bg-white/10 hover:text-white'
+                          }`}
+                      >
+                        {category.name}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
           {/* Logo - Center */}
           <div className="flex-shrink-0 flex justify-center w-32 md:w-44 overflow-visible">
@@ -196,7 +200,7 @@ const Navbar = () => {
                     to="/profile"
                     className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 border-2 whitespace-nowrap ${shouldShowSolidNavbar
                       ? 'border-navy-950 text-navy-950 hover:bg-navy-950 hover:text-white'
-                      : isHomePage 
+                      : isHomePage
                         ? 'border-navy-950/30 text-navy-950 hover:bg-navy-950 hover:text-white hover:border-navy-950'
                         : 'border-white/30 text-white hover:bg-white/10 hover:border-white'
                       }`}

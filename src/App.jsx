@@ -13,6 +13,8 @@ import LuxuryRooms from './pages/luxuryRooms'
 import AboutUs from './pages/AboutUs'
 import ContactUs from './pages/ContactUs'
 import Gallery from './pages/Gallery'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import TermsOfService from './pages/TermsOfService'
 import AddRoomForm from './components/admin_components/AddRoomForm'
 import useIdleTimeout from './hooks/useIdleTimeout'
 import Navbar from './components/Navbar'
@@ -60,6 +62,8 @@ function App() {
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/contact-us" element={<ContactUs />} />
           <Route path="/gallery" element={<Gallery />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/addRoom" element={<AddRoomForm />} />
           
           {/* Admin Routes */}
