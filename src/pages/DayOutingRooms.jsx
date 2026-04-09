@@ -461,10 +461,10 @@ const DayOutingRooms = () => {
                                         className={`card-shine group relative bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer border-2 transform hover:-translate-y-1 ${selectedRoom?._id === room._id ? 'border-teal-500 scale-[1.01] animate-selected-ring' : 'border-transparent hover:border-teal-200'}`}
                                         style={{ animationDelay: `${idx * 120}ms` }}
                                     >
-                                        {(room.isAvailable === false || room.status === 'occupied') && (
+                                        {(room.isAvailable === false || room.status === 'maintenance') && (
                                             <div className="absolute inset-0 z-10 bg-navy-900/40 backdrop-blur-[2px] flex items-center justify-center pointer-events-none">
-                                                <div className="bg-red-500 text-white px-6 py-2 rounded-full font-bold text-lg shadow-2xl rotate-[-10deg] animate-pulse">
-                                                    Occupied
+                                                <div className={`${room.status === 'maintenance' ? 'bg-amber-600' : 'bg-red-500'} text-white px-6 py-2 rounded-full font-bold text-lg shadow-2xl rotate-[-10deg] animate-pulse`}>
+                                                    {room.status === 'maintenance' ? 'Maintenance' : 'Occupied'}
                                                 </div>
                                             </div>
                                         )}
@@ -486,14 +486,14 @@ const DayOutingRooms = () => {
                                                 <div className="flex flex-wrap items-center justify-between gap-2 mt-4">
                                                     <div><span className="text-xs text-navy-400 block">Package Price</span><span className="text-xl sm:text-2xl font-extrabold text-navy-900 italic">{formatPrice(room.price)}/-</span></div>
                                                     <button
-                                                        disabled={room.isAvailable === false || room.status === 'occupied'}
-                                                        className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 ${(room.isAvailable === false || room.status === 'occupied')
+                                                        disabled={room.isAvailable === false || room.status === 'maintenance'}
+                                                        className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 ${(room.isAvailable === false || room.status === 'maintenance')
                                                             ? 'bg-navy-200 text-navy-400 cursor-not-allowed'
                                                             : selectedRoom?._id === room._id
                                                                 ? 'bg-teal-50 text-teal-600 shadow-lg border border-teal-200'
                                                                 : 'bg-navy-900 text-white hover:bg-navy-700 shadow-md hover:shadow-lg'
                                                             }`}>
-                                                        {(room.isAvailable === false || room.status === 'occupied') ? 'Not Available' : selectedRoom?._id === room._id ? 'Selected' : 'Select Room'}
+                                                        {room.status === 'maintenance' ? 'Maintenance' : room.isAvailable === false ? 'Not Available' : selectedRoom?._id === room._id ? 'Selected' : 'Select Room'}
                                                     </button>
                                                 </div>
                                             </div>
@@ -589,8 +589,8 @@ const DayOutingRooms = () => {
                                                         <p className="text-teal-500 text-xs mt-1">Redirecting to booking page…</p>
                                                     </div>
                                                 ) : (
-                                                    <button onClick={handleConfirmBooking} disabled={!outingDate || availability === false || availability === 'checking' || selectedRoom?.isAvailable === false || selectedRoom?.status === 'occupied'} className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow transition-all duration-300 hover:from-teal-600 hover:to-teal-700 transform hover:-translate-y-0.5 active:translate-y-0">
-                                                        {(selectedRoom?.isAvailable === false || selectedRoom?.status === 'occupied') ? 'Room Occupied' : !outingDate ? 'Select Date First' : 'Confirm Booking'}
+                                                    <button onClick={handleConfirmBooking} disabled={!outingDate || availability === false || availability === 'checking' || selectedRoom?.isAvailable === false || selectedRoom?.status === 'maintenance'} className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow transition-all duration-300 hover:from-teal-600 hover:to-teal-700 transform hover:-translate-y-0.5 active:translate-y-0">
+                                                        {selectedRoom?.status === 'maintenance' ? 'Maintenance Mode' : (selectedRoom?.isAvailable === false) ? 'Room Occupied' : !outingDate ? 'Select Date First' : 'Confirm Booking'}
                                                     </button>
                                                 )}
                                             </div>
