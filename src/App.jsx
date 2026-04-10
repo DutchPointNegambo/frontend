@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
@@ -24,6 +25,7 @@ import useIdleTimeout from './hooks/useIdleTimeout'
 import Navbar from './components/Navbar'
 import ScrollToTop from './components/ScrollToTop'
 
+
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'))
 const UserManagement = lazy(() => import('./pages/admin/UserManagement'))
@@ -35,6 +37,7 @@ const Staff = lazy(() => import('./pages/admin/Staff'))
 const FeedbackManagement = lazy(() => import('./pages/admin/FeedbackManagement'))
 
 function App() {
+
   useIdleTimeout(15);
   
   const location = useLocation();
@@ -86,6 +89,7 @@ function App() {
     </main>
     </CartProvider>
   )
+
 }
 
 export default App;

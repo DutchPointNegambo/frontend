@@ -27,6 +27,7 @@ const Navbar = () => {
     { name: 'Semi-Luxury Rooms', path: '/semiLuxuryRooms' },
     { name: 'Luxury Rooms', path: '/luxuryRooms' },
     { name: 'Day Outing', path: '/DayOutingRooms' },
+
   ]
 
   const rightNavItems = [
