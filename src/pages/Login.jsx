@@ -1,15 +1,21 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import Reveal from "../components/Reveal"
-import { loginUser } from '../utils/api'
+import { googleSignIn, loginUser } from '../utils/api'
+import { useAuth } from '../context/AuthContext'
+import { auth, googleProvider, signInWithPopup } from '../firebase'
+import { GoogleAuthProvider } from 'firebase/auth'
 
 const Login = () => {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const [error, setError] = useState('')
 
@@ -27,11 +33,56 @@ const Login = () => {
       const data = await loginUser(formData)
 
       // Success
-      localStorage.setItem('userInfo', JSON.stringify(data))
+      login(data)
       alert('Logged in successfully!')
-      navigate('/')
+      
+      if (data.role === 'admin') {
+        navigate('/admin')
+      } else if (data.role === 'staff') {
+        navigate('/admin/staff')
+      } else {
+        navigate('/')
+      }
     } catch (err) {
       setError(err.message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    setIsSubmitting(true)
+    setError('')
+
+    try {
+      const result = await signInWithPopup(auth, googleProvider)
+      const user = result.user
+      const credential = GoogleAuthProvider.credentialFromResult(result)
+      const googleIdToken = credential?.idToken
+
+      if (!googleIdToken) {
+        throw new Error('Google sign-in did not return a valid token')
+      }
+
+      const data = await googleSignIn({
+        idToken: googleIdToken,
+        googleId: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+      })
+
+      login(data)
+
+      if (data.role === 'admin') {
+        navigate('/admin')
+      } else if (data.role === 'staff') {
+        navigate('/admin/staff')
+      } else {
+        navigate('/')
+      }
+    } catch (err) {
+      setError(err.message || 'Google sign-in failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -129,20 +180,29 @@ const Login = () => {
                   <label htmlFor="login-password" className="block text-xs font-bold text-navy-400 uppercase tracking-widest">
                     Password
                   </label>
-                  <a href="#" className="text-[10px] font-bold text-teal-600 hover:text-teal-700 tracking-widest uppercase transition-colors">
+                  <Link to="/forgot-password" size={18} className="text-[10px] font-bold text-teal-600 hover:text-teal-700 tracking-widest uppercase transition-colors">
                     Forgot Key?
-                  </a>
+                  </Link>
                 </div>
-                <input
-                  type="password"
-                  id="login-password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2.5 bg-sand-50/50 border border-navy-100 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all outline-none text-navy-900 text-sm placeholder:text-navy-300"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="login-password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2.5 bg-sand-50/50 border border-navy-100 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all outline-none text-navy-900 text-sm placeholder:text-navy-300 pr-12"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-navy-400 hover:text-teal-600 transition-colors p-1"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               <button
@@ -165,6 +225,8 @@ const Login = () => {
 
             <button
               type="button"
+              onClick={handleGoogleSignIn}
+              disabled={isSubmitting}
               className="w-full flex items-center justify-center gap-3 px-6 py-2.5 border border-navy-100 rounded-xl text-sm font-bold text-navy-700 hover:bg-navy-50 transition-all group"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">

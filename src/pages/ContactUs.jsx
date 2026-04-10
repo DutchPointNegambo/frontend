@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import Reveal from "../components/Reveal"
+import Footer from "../components/Footer"
+import { FaFacebook, FaInstagram, FaXTwitter } from 'react-icons/fa6'
+import { SiTripadvisor } from 'react-icons/si'
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -17,25 +20,46 @@ const ContactUs = () => {
     setFormData({ ...formData, [name]: value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
-    setTimeout(() => {
+
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_URL}/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong');
+      }
+
       setIsSubmitting(false)
       setIsSubmitted(true)
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
+
       setTimeout(() => setIsSubmitted(false), 4000)
-    }, 1500)
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setIsSubmitting(false);
+      alert('Failed to send message: ' + error.message);
+    }
   }
 
   return (
     <div className="w-full overflow-hidden">
-     
+
       <section className="relative h-[45vh] min-h-[360px] flex items-center justify-center">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
+            backgroundImage: `url('https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325412/2025-12-21_tilqwn.webp')`,
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-navy-950/70 via-navy-900/60 to-navy-950/80" />
@@ -52,7 +76,7 @@ const ContactUs = () => {
         </div>
       </section>
 
-      
+
       <section className="relative -mt-12 z-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -72,7 +96,7 @@ const ContactUs = () => {
               {
                 icon: '✉️',
                 title: 'Email',
-                lines: ['temp@mail.com'],
+                lines: ['dutchpointresort@gmail.com'],
                 gradient: 'from-gold-500 to-gold-600',
               },
               {
@@ -99,7 +123,7 @@ const ContactUs = () => {
         </div>
       </section>
 
-      
+
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -220,7 +244,7 @@ const ContactUs = () => {
               </div>
             </Reveal>
 
-          
+
             <div>
               <span className="text-teal-600 font-semibold text-sm tracking-widest uppercase">Find Us</span>
               <h2 className="text-3xl font-bold text-navy-900 mt-3 mb-8" style={{ fontFamily: 'var(--font-serif)' }}>
@@ -243,14 +267,14 @@ const ContactUs = () => {
                 <h3 className="font-bold text-navy-900 mb-4">Follow Us</h3>
                 <div className="flex gap-3">
                   {[
-                    { name: 'Facebook', icon: 'f', color: 'hover:bg-blue-600' },
-                    { name: 'Instagram', icon: '📷', color: 'hover:bg-pink-600' },
-                    { name: 'Twitter', icon: '𝕏', color: 'hover:bg-gray-800' },
-                    { name: 'TripAdvisor', icon: '🦉', color: 'hover:bg-green-600' },
+                    { name: 'Facebook', icon: <FaFacebook />, color: 'hover:bg-blue-600', link: 'https://www.facebook.com/share/1D7ZsRJQKY/' },
+                    { name: 'Instagram', icon: <FaInstagram />, color: 'hover:bg-pink-600', link: 'https://www.instagram.com/dutch_point_beach_resort?igsh=MTdyc2Nuc3ZpcTNxdQ==' },
+                    { name: 'Twitter', icon: <FaXTwitter />, color: 'hover:bg-gray-800' },
+                    { name: 'TripAdvisor', icon: <SiTripadvisor />, color: 'hover:bg-green-600' },
                   ].map((social) => (
                     <a
                       key={social.name}
-                      href="#"
+                      href={social.link}
                       className={`w-11 h-11 bg-navy-100 rounded-xl flex items-center justify-center text-navy-600 ${social.color} hover:text-white transition-all duration-300 text-sm font-bold`}
                       title={social.name}
                     >
@@ -263,6 +287,7 @@ const ContactUs = () => {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   )
 }
