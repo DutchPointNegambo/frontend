@@ -90,7 +90,7 @@ const ContactUs = () => {
               {
                 icon: '📞',
                 title: 'Phone',
-                lines: ['0764219211'],
+                lines: ['0312263340'],
                 gradient: 'from-blue-500 to-blue-600',
               },
               {

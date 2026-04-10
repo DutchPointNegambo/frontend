@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchRoomsByCategory, checkRoomAvailability, fetchPackagesByType } from '../utils/api'
 import Footer from '../components/Footer'
-import BookingModal from '../components/BookingModal'
 
 const today = new Date().toISOString().split('T')[0]
 
@@ -66,9 +65,7 @@ const DayOutingRooms = () => {
     const [outingDate, setOutingDate] = useState(state?.checkIn || '')
     const [guests, setGuests] = useState(state?.guests || '1')
     const [availability, setAvailability] = useState(null)
-    const [bookingSuccess, setBookingSuccess] = useState(false)
     const [lightboxIndex, setLightboxIndex] = useState(null)
-    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
     const [packages, setPackages] = useState([])
     const [packagesLoading, setPackagesLoading] = useState(false)
     const [packagesError, setPackagesError] = useState(null)
@@ -129,7 +126,6 @@ const DayOutingRooms = () => {
         setError(null)
         setSelectedRoom(null)
         setAvailability(null)
-        setBookingSuccess(false)
         fetchRoomsByCategory('couple', null, outingDate, outingDate)
             .then(data => {
                 const normalized = data.map(normalizeRoom);
@@ -138,7 +134,7 @@ const DayOutingRooms = () => {
             })
             .catch(() => setError('Unable to load rooms. Please try again.'))
             .finally(() => setLoading(false))
-    }, [guests, outingDate, bookingSuccess])
+    }, [guests, outingDate])
 
     const handleSelectCategory = (cat) => {
         setSelectedCategory(cat)
@@ -157,7 +153,6 @@ const DayOutingRooms = () => {
 
     const handleSelectRoom = (room) => {
         setSelectedRoom(room)
-        setBookingSuccess(false)
         setAvailability(null)
     }
 
@@ -178,20 +173,10 @@ const DayOutingRooms = () => {
 
     const handleConfirmBooking = () => {
         if (!selectedRoom || !outingDate) return
-        setIsBookingModalOpen(true)
+        navigate('/contact-us')
     }
 
-    const handleBookingSuccess = () => {
-        setBookingSuccess(true)
-        setAvailability(null)
-        // Refresh rooms to show updated status
-        fetchRoomsByCategory('couple', null, outingDate, outingDate)
-            .then(data => {
-                const normalized = data.map(normalizeRoom);
-                const filtered = normalized.filter(room => room.guests >= parseInt(guests));
-                setRooms(filtered);
-            })
-    }
+
 
 
 
@@ -583,16 +568,9 @@ const DayOutingRooms = () => {
                                                     </ul>
                                                 </div>
 
-                                                {bookingSuccess ? (
-                                                    <div className="bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-2xl p-4 text-center animate-scale-in">
-                                                        <p className="text-teal-700 font-bold">Booking Confirmed!</p>
-                                                        <p className="text-teal-500 text-xs mt-1">Redirecting to booking page…</p>
-                                                    </div>
-                                                ) : (
-                                                    <button onClick={handleConfirmBooking} disabled={!outingDate || availability === false || availability === 'checking' || selectedRoom?.isAvailable === false || selectedRoom?.status === 'maintenance'} className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow transition-all duration-300 hover:from-teal-600 hover:to-teal-700 transform hover:-translate-y-0.5 active:translate-y-0">
-                                                        {selectedRoom?.status === 'maintenance' ? 'Maintenance Mode' : (selectedRoom?.isAvailable === false) ? 'Room Occupied' : !outingDate ? 'Select Date First' : 'Confirm Booking'}
-                                                    </button>
-                                                )}
+                                                <button onClick={handleConfirmBooking} disabled={!outingDate || availability === false || availability === 'checking' || selectedRoom?.isAvailable === false || selectedRoom?.status === 'maintenance'} className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow transition-all duration-300 hover:from-teal-600 hover:to-teal-700 transform hover:-translate-y-0.5 active:translate-y-0">
+                                                    {selectedRoom?.status === 'maintenance' ? 'Maintenance Mode' : (selectedRoom?.isAvailable === false) ? 'Room Occupied' : !outingDate ? 'Select Date First' : 'Confirm Booking'}
+                                                </button>
                                             </div>
                                         </div>
                                     ) : (
@@ -740,16 +718,6 @@ const DayOutingRooms = () => {
             )}
             <Footer />
 
-            <BookingModal
-                isOpen={isBookingModalOpen}
-                onClose={() => setIsBookingModalOpen(false)}
-                room={selectedRoom}
-                checkIn={outingDate}
-                checkOut={outingDate}
-                guests={guests}
-                selectedPackage="day-use"
-                onSuccess={handleBookingSuccess}
-            />
         </div>
     )
 }
