@@ -19,6 +19,24 @@ import AddRoomForm from './components/admin_components/AddRoomForm'
 import useIdleTimeout from './hooks/useIdleTimeout'
 import Navbar from './components/Navbar'
 import ScrollToTop from './components/ScrollToTop'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { CartProvider } from './context/CartContext';
+import Sidebar from './components/admin_components/Sidebar';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Dashboard from './pages/admin/Dashboard';
+import FoodOrdering from './pages/admin/FoodOrdering';
+import Staff from './pages/admin/Staff';
+import Reports from './pages/admin/Reports';
+import UserManagement from './pages/admin/UserManagement';
+import Home from './pages/Home';
+import SignIn from './pages/SignIn';
+import Login from './pages/Login';
+import EventManagement from './pages/eventManagement';
+import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/ContactUs';
+import FoodItems from './pages/other/foods/FoodItems';
 
 
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
@@ -81,6 +99,32 @@ function App() {
       </Suspense>
     </main>    </>
   )
+    <CartProvider>
+    <Router>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+        <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />
+        <Route path="/about-us" element={<PublicLayout><AboutUs /></PublicLayout>} />
+        <Route path="/contact-us" element={<PublicLayout><ContactUs /></PublicLayout>} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/events" element={<PublicLayout><EventManagement /></PublicLayout>} />
+        <Route path="/foods" element={<PublicLayout><FoodItems /></PublicLayout>} />
+
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLayout><Dashboard /></AdminLayout>} />
+        <Route path="/admin/rooms" element={<AdminLayout><PlaceholderPage title="Room Management" /></AdminLayout>} />
+        <Route path="/admin/bookings" element={<AdminLayout><PlaceholderPage title="Booking Management" /></AdminLayout>} />
+        <Route path="/admin/users" element={<AdminLayout><UserManagement /></AdminLayout>} />
+        <Route path="/admin/food" element={<AdminLayout><FoodOrdering /></AdminLayout>} />
+        <Route path="/admin/staff" element={<AdminLayout><Staff /></AdminLayout>} />
+        <Route path="/admin/finance" element={<AdminLayout><Reports /></AdminLayout>} />
+        <Route path="/admin/reports" element={<AdminLayout><Reports /></AdminLayout>} />
+      </Routes>
+    </Router>
+    </CartProvider>
+  );
 }
 
 export default App;
