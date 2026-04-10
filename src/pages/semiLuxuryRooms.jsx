@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchRoomsByCategory, checkRoomAvailability } from '../utils/api'
 import Footer from '../components/Footer'
-import BookingModal from '../components/BookingModal'
 
 const today = new Date().toISOString().split('T')[0]
 
@@ -66,9 +65,7 @@ const SemiLuxuryRooms = () => {
     const [checkOut, setCheckOut] = useState(state?.checkOut || '')
     const [guests, setGuests] = useState(state?.guests || '1')
     const [availability, setAvailability] = useState(null)
-    const [bookingSuccess, setBookingSuccess] = useState(false)
     const [lightboxIndex, setLightboxIndex] = useState(null)
-    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
     const navigate = useNavigate()
 
     const openLightbox = (idx) => setLightboxIndex(idx)
@@ -109,7 +106,6 @@ const SemiLuxuryRooms = () => {
         setError(null)
         setSelectedRoom(null)
         setAvailability(null)
-        setBookingSuccess(false)
         fetchRoomsByCategory('semiluxury', selectedPackage, checkIn, checkOut)
             .then(data => {
                 const normalized = data.map(normalizeRoom);
@@ -118,11 +114,10 @@ const SemiLuxuryRooms = () => {
             })
             .catch(() => setError('Unable to load rooms. Please try again.'))
             .finally(() => setLoading(false))
-    }, [selectedPackage, guests, checkIn, checkOut, bookingSuccess])
+    }, [selectedPackage, guests, checkIn, checkOut])
 
     const handleSelectRoom = (room) => {
         setSelectedRoom(room)
-        setBookingSuccess(false)
         setAvailability(null)
     }
 
@@ -154,20 +149,10 @@ const SemiLuxuryRooms = () => {
 
     const handleConfirmBooking = () => {
         if (!selectedRoom || !checkIn || (selectedPackage !== 'day-use' && !checkOut)) return
-        setIsBookingModalOpen(true)
+        navigate('/contact-us')
     }
 
-    const handleBookingSuccess = () => {
-        setBookingSuccess(true)
-        setAvailability(null)
-        // Refresh rooms to show updated status
-        fetchRoomsByCategory('semiluxury', selectedPackage, checkIn, checkOut)
-            .then(data => {
-                const normalized = data.map(normalizeRoom);
-                const filtered = normalized.filter(room => room.guests >= parseInt(guests));
-                setRooms(filtered);
-            })
-    }
+
 
     const calcNights = () => {
         if (!checkIn || !checkOut) return 0
@@ -525,18 +510,12 @@ const SemiLuxuryRooms = () => {
                                                 ))}
                                             </ul>
                                         </div>
-                                        {bookingSuccess ? (
-                                            <div className="bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-2xl p-4 text-center animate-scale-in">
-                                                <p className="text-teal-700 font-bold">Booking Confirmed!</p>
-                                                <p className="text-teal-500 text-xs mt-1">Redirecting…</p>
-                                            </div>
-                                        ) : (
-                                            <button onClick={handleConfirmBooking}
-                                                disabled={!checkIn || (selectedPackage !== 'day-use' && (!checkOut || calcNights() <= 0)) || availability === false || availability === 'checking' || selectedRoom?.isAvailable === false || selectedRoom?.status === 'maintenance'}
-                                                className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-teal-600 hover:to-teal-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow">
-                                                {selectedRoom?.status === 'maintenance' ? 'Maintenance Mode' : selectedRoom?.isAvailable === false ? 'Room Occupied' : !checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
-                                            </button>
-                                        )}
+                                        <button onClick={handleConfirmBooking}
+                                            disabled={!checkIn || (selectedPackage !== 'day-use' && (!checkOut || calcNights() <= 0)) || availability === false || availability === 'checking' || selectedRoom?.isAvailable === false || selectedRoom?.status === 'maintenance'}
+                                            className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-teal-600 hover:to-teal-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow">
+                                            {selectedRoom?.status === 'maintenance' ? 'Maintenance Mode' : selectedRoom?.isAvailable === false ? 'Room Occupied' : !checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
+                                        </button>
+
                                         <p className="text-center text-navy-400 text-xs">Check dates & times before booking</p>
                                     </div>
                                 </div>
@@ -552,17 +531,6 @@ const SemiLuxuryRooms = () => {
                 </div>
             </section>
             <Footer />
-
-            <BookingModal
-                isOpen={isBookingModalOpen}
-                onClose={() => setIsBookingModalOpen(false)}
-                room={selectedRoom}
-                checkIn={checkIn}
-                checkOut={checkOut}
-                guests={guests}
-                selectedPackage={selectedPackage}
-                onSuccess={handleBookingSuccess}
-            />
         </div>
     )
 }

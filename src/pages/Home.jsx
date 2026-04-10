@@ -136,14 +136,14 @@ const Home = () => {
 
       {/* ===== HERO SECTION: VISION 1 - EDITORIAL BOUTIQUE ===== */}
       <section className="relative min-h-[90vh] lg:min-h-screen flex items-center bg-white overflow-hidden pt-36 md:pt-48 lg:pt-20 pb-20 lg:pb-0">
-        
+
         {/* Background Accent Gradients */}
         <div className="absolute top-0 right-0 w-1/2 h-full bg-sand-50/50 -z-0 hidden lg:block"></div>
         <div className="absolute top-0 left-0 w-64 h-64 bg-teal-500/5 rounded-full -ml-32 -mt-32 blur-3xl"></div>
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            
+
             {/* Left Column: Typography & Story */}
             <div className="text-left order-2 lg:order-1">
               <Reveal>
@@ -164,7 +164,7 @@ const Home = () => {
                 </p>
 
                 <div className="flex flex-wrap items-center gap-6 mb-12">
-                  <button 
+                  <button
                     onClick={handleBookNow}
                     className="px-10 py-5 bg-navy-950 text-white font-bold rounded-full hover:bg-navy-900 transition-all duration-300 uppercase tracking-widest text-xs shadow-xl shadow-navy-950/20 transform hover:-translate-y-1"
                   >
@@ -194,15 +194,15 @@ const Home = () => {
             <div className="relative order-1 lg:order-2 mb-12 lg:mb-0">
               <Reveal delay={0.3} width="100%">
                 <div className="relative">
-                  
+
                   {/* Backdrop Decorative Card */}
                   <div className="absolute -inset-4 lg:-inset-8 border-2 border-sand-100 rounded-[3rem] lg:rounded-[5rem] -z-10 transform rotate-3"></div>
-                  
+
                   {/* Main Image Masked */}
                   <div className="relative h-[450px] md:h-[600px] w-full rounded-[2.5rem] lg:rounded-[4.5rem] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)]">
-                    <img 
-                      src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325414/615939793_122116670343131125_2666782521558393514_n_pjxfqw.jpg" 
-                      alt="Dutch Point Resort" 
+                    <img
+                      src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325414/615939793_122116670343131125_2666782521558393514_n_pjxfqw.jpg"
+                      alt="Dutch Point Resort"
                       className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-[2000ms]"
                     />
                     <div className="absolute inset-0 bg-navy-950/10 mix-blend-overlay"></div>
@@ -210,9 +210,9 @@ const Home = () => {
 
                   {/* Floating Detail Image */}
                   <div className="absolute -bottom-10 lg:-bottom-16 -left-10 lg:-left-20 w-40 h-56 lg:w-56 lg:h-72 rounded-3xl lg:rounded-[2.5rem] overflow-hidden shadow-2xl border-4 lg:border-8 border-white hidden sm:block transform -rotate-6 hover:rotate-0 transition-transform duration-700">
-                    <img 
-                      src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325413/unnamed_6_lun1kc.webp" 
-                      alt="Detail" 
+                    <img
+                      src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325413/unnamed_6_lun1kc.webp"
+                      alt="Detail"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -220,15 +220,15 @@ const Home = () => {
                   {/* Floating Circular Badge */}
                   <div className="absolute -top-6 -right-6 lg:-top-10 lg:-right-10 w-24 h-24 lg:w-32 lg:h-32 bg-white rounded-full flex items-center justify-center p-2 shadow-2xl border border-navy-50 animate-float">
                     <div className="w-full h-full rounded-full border-2 border-dashed border-sand-200 flex items-center justify-center text-center p-2">
-                       <span className="text-[8px] lg:text-[10px] font-bold text-navy-900 uppercase tracking-widest">Negombo's Finest</span>
+                      <span className="text-[8px] lg:text-[10px] font-bold text-navy-900 uppercase tracking-widest">Negombo's Finest</span>
                     </div>
                   </div>
 
                   {/* Secondary Context Image Tip */}
                   <div className="absolute bottom-10 -right-12 w-32 h-32 lg:w-44 lg:h-44 rounded-full overflow-hidden shadow-2xl border-4 border-white hidden xl:block">
-                     <img 
-                      src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325414/unnamed_avhkpc.webp" 
-                      alt="Lobby Experience" 
+                    <img
+                      src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325414/unnamed_avhkpc.webp"
+                      alt="Lobby Experience"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -241,10 +241,10 @@ const Home = () => {
 
         {/* Scroll Indicator */}
         <div className="absolute bottom-10 left-8 hidden lg:block">
-             <div className="flex flex-col items-center gap-12 w-6">
-                <span className="text-navy-300 text-[10px] font-bold uppercase tracking-[0.4em] rotate-90 whitespace-nowrap mb-8">Scroll Perspective</span>
-                <div className="w-[1px] h-24 bg-gradient-to-b from-navy-100 to-transparent"></div>
-             </div>
+          <div className="flex flex-col items-center gap-12 w-6">
+            <span className="text-navy-300 text-[10px] font-bold uppercase tracking-[0.4em] rotate-90 whitespace-nowrap mb-8">Scroll Perspective</span>
+            <div className="w-[1px] h-24 bg-gradient-to-b from-navy-100 to-transparent"></div>
+          </div>
         </div>
       </section>
 
@@ -666,9 +666,9 @@ const Home = () => {
 
             <div className="space-y-4 text-left">
               {[
-                { q: "What are the check-in and check-out times?", a: "Standard check-in time is 2:00 PM and check-out time is 12:00 PM. We offer early check-in and late check-out based on availability." },
+                { q: "What are the check-in and check-out times?", a: "For full-day visits, check-in is available between 12:00 PM and 2:00 PM, while check-out is between 9:00 AM and 11:00 AM. For day visits, check-in starts at 9:00 AM and check-out is at 7:00 PM." },
                 { q: "Is there free Wi-Fi?", a: "Yes, high-speed Wi-Fi is complimentary for all guests and is available throughout the resort, including guest rooms and the beach area." },
-                { q: "Do you offer airport transfers?", a: "Yes, we provide comfortable airport pickup and drop-off services. Please contact our front desk 24 hours in advance to arrange your transport." },
+                { q: "Do you offer airport transfers?", a: "We currently do not provide airport pickup or drop-off services. Please contact our front desk if you need assistance with alternative transport arrangements." },
                 { q: "Are pets allowed?", a: "To ensure the comfort and tranquility of all our guests, we currently do not allow pets on the resort premises." }
               ].map((faq, idx) => (
                 <Reveal key={idx} delay={idx * 0.1} width="100%">
