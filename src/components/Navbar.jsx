@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Trash2, X, Plus, Minus } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -9,11 +9,13 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const cartRef = useRef(null)
+  const mobileCartRef = useRef(null)
   const [isRoomsDropdownOpen, setIsRoomsDropdownOpen] = useState(false)
 
   const location = useLocation()
   const { cartItems, cartCount, cartTotal, removeFromCart, updateQuantity, clearCart } = useCart()
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
 
   const leftNavItems = [
     { name: 'Home', path: '/' },
@@ -47,7 +49,9 @@ const Navbar = () => {
   // Close cart dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (cartRef.current && !cartRef.current.contains(event.target)) {
+      const isInsideDesktop = cartRef.current && cartRef.current.contains(event.target)
+      const isInsideMobile = mobileCartRef.current && mobileCartRef.current.contains(event.target)
+      if (!isInsideDesktop && !isInsideMobile) {
         setIsCartOpen(false)
       }
     }
@@ -293,12 +297,15 @@ const Navbar = () => {
                       </div>
                       <div className="flex gap-3">
                         <button
-                          onClick={clearCart}
+                          onClick={() => { clearCart(); setIsCartOpen(false); }}
                           className="flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest border-2 border-navy-200 text-navy-600 hover:bg-navy-100 transition-all duration-300"
                         >
                           Clear Cart
                         </button>
-                        <button className="flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest bg-teal-500 text-white hover:bg-teal-600 transition-all duration-300 shadow-lg shadow-teal-500/20">
+                        <button
+                          onClick={() => { setIsCartOpen(false); navigate('/checkout'); }}
+                          className="flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest bg-teal-500 text-white hover:bg-teal-600 transition-all duration-300 shadow-lg shadow-teal-500/20"
+                        >
                           Checkout
                         </button>
                       </div>
@@ -379,7 +386,7 @@ const Navbar = () => {
           {/* Mobile: Cart + Menu button */}
           <div className="lg:hidden flex items-center gap-2">
             {/* Mobile Cart Icon */}
-            <div className="relative" ref={cartRef}>
+            <div className="relative" ref={mobileCartRef}>
               <button
                 onClick={() => setIsCartOpen(!isCartOpen)}
                 className={`relative p-2 rounded-xl transition-all duration-300 ${shouldShowSolidNavbar
