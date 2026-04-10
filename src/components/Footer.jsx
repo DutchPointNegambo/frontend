@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { FaFacebookF, FaInstagram, FaXTwitter } from 'react-icons/fa6'
+import { SiTripadvisor } from 'react-icons/si'
 
 const Footer = () => {
   return (
@@ -21,14 +23,14 @@ const Footer = () => {
             {/* Social Icons */}
             <div className="flex gap-3">
               {[
-                { label: 'Facebook', icon: 'f' },
-                { label: 'Instagram', icon: '✦' },
-                { label: 'Twitter', icon: '𝕏' },
-                { label: 'TripAdvisor', icon: '★' },
+                { label: 'Facebook', icon: <FaFacebookF />, link: 'https://www.facebook.com/share/1D7ZsRJQKY/' },
+                { label: 'Instagram', icon: <FaInstagram />, link: 'https://www.instagram.com/dutch_point_beach_resort?igsh=MTdyc2Nuc3ZpcTNxdQ==' },
+                { label: 'Twitter', icon: <FaXTwitter />, link: '#' },
+                { label: 'TripAdvisor', icon: <SiTripadvisor />, link: '#' },
               ].map((s) => (
                 <a
                   key={s.label}
-                  href="#"
+                  href={s.link}
                   aria-label={s.label}
                   className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center text-white/70 hover:bg-teal-500 hover:text-white transition-all duration-300 text-xs font-bold"
                 >
@@ -44,8 +46,8 @@ const Footer = () => {
             <ul className="space-y-3">
               {[
                 { name: 'Home', path: '/' },
-                { name: 'Rooms & Suites', path: '/rooms' },
-                { name: 'Events', path: '/events' },
+                { name: 'Rooms & Suites', path: '/deluxeRooms' },
+                { name: 'Events', path: '/event' },
                 { name: 'Gallery', path: '/gallery' },
               ].map((link) => (
                 <li key={link.name}>
@@ -98,24 +100,9 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2">
                 <span>✉️</span>
-                <span>temp@mail.com</span>
+                <span>dutchpointresort@gmail.com</span>
               </li>
             </ul>
-
-            {/* Newsletter */}
-            <div>
-              <h4 className="text-white font-semibold mb-3 text-sm">Newsletter</h4>
-              <div className="flex">
-                <input
-                  type="email"
-                  placeholder="Your email"
-                  className="flex-1 bg-white/10 border border-white/10 rounded-l-xl px-4 py-2.5 text-sm text-white placeholder:text-navy-400 focus:outline-none focus:border-teal-500 transition-colors"
-                />
-                <button className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-4 py-2.5 rounded-r-xl text-sm font-semibold hover:from-teal-600 hover:to-teal-700 transition-all duration-300">
-                  →
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -128,8 +115,8 @@ const Footer = () => {
               © 2026 Dutch Point Negombo Beach Resort. All rights reserved.
             </p>
             <div className="flex items-center gap-6 text-sm text-navy-400">
-              <a href="#" className="hover:text-teal-400 transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-teal-400 transition-colors">Terms of Service</a>
+              <Link to="/privacy-policy" className="hover:text-teal-400 transition-colors">Privacy Policy</Link>
+              <Link to="/terms-of-service" className="hover:text-teal-400 transition-colors">Terms of Service</Link>
             </div>
           </div>
         </div>
