@@ -19,6 +19,7 @@ import Gallery from './pages/Gallery'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
 import FoodItems from './pages/other/foods/FoodItems'
+import Checkout from './pages/Checkout'
 
 import AddRoomForm from './components/admin_components/AddRoomForm'
 import useIdleTimeout from './hooks/useIdleTimeout'
@@ -62,6 +63,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/event" element={<EventManagement />} />
           <Route path="/foods" element={<FoodItems />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/DayOutingRooms" element={<DayOutingRooms />} />
           <Route path="/deluxeRooms" element={<DeluxeRooms />} />
           <Route path="/semiLuxuryRooms" element={<SemiLuxuryRooms />} />
