@@ -317,6 +317,56 @@ export async function deleteStaff(id) {
     return handleResponse(res);
 }
 
+export async function getEmployeeQR(id) {
+    const res = await fetch(`${API_URL}/admin/staff/${id}/qr`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+//Admin: Attendance
+
+export async function scanAttendance(employeeId) {
+    const res = await fetch(`${API_URL}/admin/attendance/scan`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ employeeId }),
+    });
+    return handleResponse(res);
+}
+
+export async function fetchAttendance(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/admin/attendance?${qs}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function fetchTodayAttendance() {
+    const res = await fetch(`${API_URL}/admin/attendance/today`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function fetchAttendanceReport(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/admin/attendance/report?${qs}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function updateAttendance(id, payload) {
+    const res = await fetch(`${API_URL}/admin/attendance/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+//Admin: Payroll
+
+export async function fetchPayroll(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/admin/payroll?${qs}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
 //Admin: Reports
 
 export async function fetchReportSummary(params = {}) {
