@@ -1,19 +1,27 @@
-import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { ShoppingCart, Trash2, X, Plus, Minus } from 'lucide-react'
+import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext.jsx'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const cartRef = useRef(null)
+  const mobileCartRef = useRef(null)
   const [isRoomsDropdownOpen, setIsRoomsDropdownOpen] = useState(false)
+
   const location = useLocation()
+  const { cartItems, cartCount, cartTotal, removeFromCart, updateQuantity, clearCart } = useCart()
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
 
   const leftNavItems = [
     { name: 'Home', path: '/' },
-    // { name: 'Offers', path: '#' },
+    { name: 'Dining', path: '/foods' },
     { name: 'Gallery', path: '/gallery' },
-    // { name: 'Events', path: '/event' },
+    { name: 'Events', path: '/event' },
   ]
 
   const roomCategories = [
@@ -21,6 +29,7 @@ const Navbar = () => {
     { name: 'Semi-Luxury Rooms', path: '/semiLuxuryRooms' },
     { name: 'Luxury Rooms', path: '/luxuryRooms' },
     { name: 'Day Outing', path: '/DayOutingRooms' },
+
   ]
 
   const rightNavItems = [
@@ -35,6 +44,19 @@ const Navbar = () => {
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Close cart dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const isInsideDesktop = cartRef.current && cartRef.current.contains(event.target)
+      const isInsideMobile = mobileCartRef.current && mobileCartRef.current.contains(event.target)
+      if (!isInsideDesktop && !isInsideMobile) {
+        setIsCartOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   const isActive = (path) => location.pathname === path
@@ -178,6 +200,121 @@ const Navbar = () => {
               </Link>
             ))}
 
+            {/* Cart Icon */}
+            <div className="relative" ref={cartRef}>
+              <button
+                onClick={() => setIsCartOpen(!isCartOpen)}
+                className={`relative p-2 rounded-xl transition-all duration-300 ${shouldShowSolidNavbar
+                  ? 'text-navy-700 hover:text-navy-950 hover:bg-navy-50'
+                  : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+              >
+                <ShoppingCart size={20} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-teal-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-bounce shadow-lg shadow-teal-500/30">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Cart Dropdown */}
+              {isCartOpen && (
+                <div className="absolute right-0 top-full mt-3 w-96 bg-white rounded-2xl shadow-2xl border border-navy-100/50 overflow-hidden z-[100]"
+                  style={{ animation: 'slideDown 0.3s ease-out' }}
+                >
+                  {/* Cart Header */}
+                  <div className="flex items-center justify-between px-6 py-4 bg-navy-950">
+                    <h3 className="text-white font-bold text-sm uppercase tracking-widest flex items-center gap-2">
+                      <ShoppingCart size={16} />
+                      Your Cart ({cartCount})
+                    </h3>
+                    <button
+                      onClick={() => setIsCartOpen(false)}
+                      className="text-white/60 hover:text-white transition-colors"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  {/* Cart Items */}
+                  <div className="max-h-80 overflow-y-auto">
+                    {cartItems.length === 0 ? (
+                      <div className="py-12 text-center">
+                        <ShoppingCart size={40} className="text-navy-200 mx-auto mb-3" />
+                        <p className="text-navy-400 text-sm font-medium">Your cart is empty</p>
+                        <p className="text-navy-300 text-xs mt-1">Browse our menu and add delicious dishes!</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-navy-50">
+                        {cartItems.map((item) => (
+                          <div key={item.id} className="px-6 py-4 flex items-center gap-4 hover:bg-navy-50/50 transition-colors">
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-bold text-navy-950 truncate">{item.name}</h4>
+                              <p className="text-teal-600 font-bold text-xs mt-0.5">
+                                ${(item.numericPrice * item.quantity).toFixed(2)}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                className="w-7 h-7 rounded-lg bg-navy-100 hover:bg-navy-200 flex items-center justify-center transition-colors"
+                              >
+                                <Minus size={12} className="text-navy-700" />
+                              </button>
+                              <span className="w-8 text-center text-sm font-bold text-navy-950">
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                className="w-7 h-7 rounded-lg bg-navy-100 hover:bg-navy-200 flex items-center justify-center transition-colors"
+                              >
+                                <Plus size={12} className="text-navy-700" />
+                              </button>
+                            </div>
+                            <button
+                              onClick={() => removeFromCart(item.id)}
+                              className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Cart Footer */}
+                  {cartItems.length > 0 && (
+                    <div className="border-t border-navy-100 px-6 py-4 bg-navy-50/30">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm font-bold text-navy-600 uppercase tracking-widest">Total</span>
+                        <span className="text-xl font-bold text-navy-950">${cartTotal.toFixed(2)}</span>
+                      </div>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => { clearCart(); setIsCartOpen(false); }}
+                          className="flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest border-2 border-navy-200 text-navy-600 hover:bg-navy-100 transition-all duration-300"
+                        >
+                          Clear Cart
+                        </button>
+                        <button
+                          onClick={() => { setIsCartOpen(false); navigate('/checkout'); }}
+                          className="flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest bg-teal-500 text-white hover:bg-teal-600 transition-all duration-300 shadow-lg shadow-teal-500/20"
+                        >
+                          Checkout
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* Auth Buttons */}
             <div className="flex items-center space-x-3 ml-2">
               {user ? (
@@ -246,8 +383,27 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="lg:hidden">
+          {/* Mobile: Cart + Menu button */}
+          <div className="lg:hidden flex items-center gap-2">
+            {/* Mobile Cart Icon */}
+            <div className="relative" ref={mobileCartRef}>
+              <button
+                onClick={() => setIsCartOpen(!isCartOpen)}
+                className={`relative p-2 rounded-xl transition-all duration-300 ${shouldShowSolidNavbar
+                  ? 'text-navy-950 hover:bg-navy-50'
+                  : 'text-white hover:bg-white/10'
+                  }`}
+              >
+                <ShoppingCart size={20} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-teal-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg shadow-teal-500/30">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* Mobile menu button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={`p-2 rounded-xl transition-all duration-300 ${shouldShowSolidNavbar
@@ -426,6 +582,14 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      {/* Slide-down animation keyframes */}
+      <style>{`
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </nav>
   )
 }

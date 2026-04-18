@@ -1,11 +1,14 @@
-import Home from './pages/Home'
-import EventManagement from './pages/eventManagement'
-import { Routes, Route, useLocation } from 'react-router-dom'
+
 import React, { Suspense, lazy } from 'react'
+import { Routes, Route, useLocation } from 'react-router-dom'
+import { CartProvider } from './context/CartContext'
+
+import Home from './pages/Home'
 import SignIn from './pages/SignIn'
 import Login from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
 import Profile from './pages/Profile'
+import EventManagement from './pages/eventManagement'
 import DayOutingRooms from './pages/DayOutingRooms'
 import DeluxeRooms from './pages/deluxeRooms' 
 import SemiLuxuryRooms from './pages/semiLuxuryRooms'
@@ -15,6 +18,9 @@ import ContactUs from './pages/ContactUs'
 import Gallery from './pages/Gallery'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
+import FoodItems from './pages/other/foods/FoodItems'
+import Checkout from './pages/Checkout'
+
 import AddRoomForm from './components/admin_components/AddRoomForm'
 import useIdleTimeout from './hooks/useIdleTimeout'
 import Navbar from './components/Navbar'
@@ -29,7 +35,9 @@ const BookingManagement = lazy(() => import('./pages/admin/BookingManagement'))
 const FoodOrdering = lazy(() => import('./pages/admin/FoodOrdering'))
 const Reports = lazy(() => import('./pages/admin/Reports'))
 const Staff = lazy(() => import('./pages/admin/Staff'))
+const AttendanceScanner = lazy(() => import('./pages/admin/AttendanceScanner'))
 const FeedbackManagement = lazy(() => import('./pages/admin/FeedbackManagement'))
+
 function App() {
 
   useIdleTimeout(15);
@@ -43,7 +51,7 @@ function App() {
   const mainPadding = shouldShowNavbar && !isHomePage ? 'pt-20 md:pt-24' : '';
 
   return (
-    <>
+    <CartProvider>
       <ScrollToTop />
       {shouldShowNavbar && <Navbar />}
       <main className={mainPadding}>
@@ -55,6 +63,8 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/event" element={<EventManagement />} />
+          <Route path="/foods" element={<FoodItems />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/DayOutingRooms" element={<DayOutingRooms />} />
           <Route path="/deluxeRooms" element={<DeluxeRooms />} />
           <Route path="/semiLuxuryRooms" element={<SemiLuxuryRooms />} />
@@ -75,12 +85,15 @@ function App() {
             <Route path="food" element={<FoodOrdering />} />
             <Route path="reports" element={<Reports />} />
             <Route path="staff" element={<Staff />} />
+            <Route path="attendance-scanner" element={<AttendanceScanner />} />
             <Route path="feedback" element={<FeedbackManagement />} />
           </Route>
         </Routes>
       </Suspense>
-    </main>    </>
+    </main>
+    </CartProvider>
   )
+
 }
 
 export default App;
