@@ -240,7 +240,7 @@ const Staff = () => {
                                         }`}>{emp.status}</span>
                                     </td>
                                     <td className="px-6 py-4 text-sm font-medium text-navy-700 font-mono">
-                                        {emp.salary ? `$${Number(emp.salary).toLocaleString()}` : '—'}
+                                        {emp.salary ? `Rs. ${Number(emp.salary).toLocaleString()}` : '—'}
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-1">
@@ -450,11 +450,11 @@ const Staff = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-navy-100">
                     <p className="text-navy-500 text-sm mb-1">Total Payroll Cost</p>
-                    <h3 className="text-3xl font-bold text-navy-900">${payrollData.totals?.totalPayroll?.toLocaleString() || '0'}</h3>
+                    <h3 className="text-3xl font-bold text-navy-900">Rs. {payrollData.totals?.totalPayroll?.toLocaleString() || '0'}</h3>
                 </div>
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-navy-100">
                     <p className="text-navy-500 text-sm mb-1">Total Deductions</p>
-                    <h3 className="text-3xl font-bold text-orange-500">${payrollData.totals?.totalDeductions?.toLocaleString() || '0'}</h3>
+                    <h3 className="text-3xl font-bold text-orange-500">Rs. {payrollData.totals?.totalDeductions?.toLocaleString() || '0'}</h3>
                 </div>
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-navy-100">
                     <p className="text-navy-500 text-sm mb-1">Employees</p>
@@ -506,9 +506,9 @@ const Staff = () => {
                                             <span className={`text-sm font-medium ${pay.lateDays > 0 ? 'text-orange-600' : 'text-navy-400'}`}>{pay.lateDays}</span>
                                         </td>
                                         <td className="px-6 py-4 text-center text-sm font-mono text-navy-600">{pay.totalWorkHours}h</td>
-                                        <td className="px-6 py-4 text-right font-mono text-sm">${pay.salary?.toLocaleString()}</td>
-                                        <td className="px-6 py-4 text-right font-mono text-sm text-red-600">{pay.deductions > 0 ? `-$${pay.deductions.toLocaleString()}` : '$0'}</td>
-                                        <td className="px-6 py-4 text-right font-bold text-navy-900 font-mono">${pay.netPay?.toLocaleString()}</td>
+                                        <td className="px-6 py-4 text-right font-mono text-sm">Rs. {pay.salary?.toLocaleString()}</td>
+                                        <td className="px-6 py-4 text-right font-mono text-sm text-red-600">{pay.deductions > 0 ? `-Rs. ${pay.deductions.toLocaleString()}` : 'Rs. 0'}</td>
+                                        <td className="px-6 py-4 text-right font-bold text-navy-900 font-mono">Rs. {pay.netPay?.toLocaleString()}</td>
                                         <td className="px-6 py-4">
                                             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                                                 pay.status === 'Calculated' ? 'bg-emerald-50 text-emerald-700' :
@@ -599,7 +599,7 @@ const Staff = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Monthly Salary ($)</label>
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Monthly Salary (Rs.)</label>
                                     <input type="number" min="0" value={form.salary} onChange={e => setForm({...form, salary: e.target.value})} placeholder="e.g. 3500" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
                                 <div>
