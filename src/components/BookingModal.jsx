@@ -66,7 +66,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
         }
     };
 
-    const formatPrice = (price) => `LKR ${price.toLocaleString()}`;
+    const formatPrice = (price) => `Rs. ${price.toLocaleString()}`;
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-navy-900/60 backdrop-blur-sm animate-fade-in">
