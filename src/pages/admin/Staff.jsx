@@ -7,7 +7,7 @@ import QRCodeBadge from '../../components/admin_components/QRCodeBadge';
 import QRScanner from '../../components/admin_components/QRScanner';
 
 const DEPARTMENTS = ['Operations', 'Kitchen', 'Front Desk', 'Housekeeping', 'Dining', 'Security', 'Maintenance', 'Finance', 'HR'];
-const EMPTY_FORM = { name: '', email: '', phone: '', jobTitle: '', department: 'Front Desk', status: 'Active', salary: '', hireDate: '' };
+const EMPTY_FORM = { name: '', email: '', phone: '', jobTitle: '', password: '', department: 'Front Desk', status: 'Active', salary: '', hireDate: '' };
 
 const Staff = () => {
     const { toast, showToast, clearToast } = useToast();
@@ -58,6 +58,7 @@ const Staff = () => {
         setForm({
             name: staff.name, email: staff.email, phone: staff.phone || '',
             jobTitle: staff.jobTitle, department: staff.department,
+            password: '', // Keep empty when editing unless changing
             status: staff.status, salary: staff.salary, hireDate: staff.hireDate ? staff.hireDate.split('T')[0] : '',
         });
         setModalOpen(true);
@@ -605,6 +606,19 @@ const Staff = () => {
                                 <div>
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Hire Date</label>
                                     <input type="date" value={form.hireDate} onChange={e => setForm({...form, hireDate: e.target.value})} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                </div>
+                                <div className="col-span-2">
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">
+                                        Password {editingStaff ? '(Leave blank to keep current)' : '*'}
+                                    </label>
+                                    <input 
+                                        required={!editingStaff} 
+                                        type="password" 
+                                        value={form.password} 
+                                        onChange={e => setForm({...form, password: e.target.value})} 
+                                        placeholder="••••••••" 
+                                        className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" 
+                                    />
                                 </div>
                             </div>
                             <div className="flex gap-3 pt-2">
