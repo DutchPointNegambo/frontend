@@ -451,3 +451,20 @@ export async function deleteFeedback(id) {
     return handleResponse(res);
 }
 
+// Orders
+export async function createOrder(payload) {
+    const res = await fetch(`${API_URL}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function confirmOrderPayment(id) {
+    const res = await fetch(`${API_URL}/orders/${id}/confirm-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse(res);
+}

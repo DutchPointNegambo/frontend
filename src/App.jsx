@@ -20,6 +20,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
 import FoodItems from './pages/other/foods/FoodItems'
 import Checkout from './pages/Checkout'
+import PaymentSuccess from './pages/PaymentSuccess'
 
 import AddRoomForm from './components/admin_components/AddRoomForm'
 import useIdleTimeout from './hooks/useIdleTimeout'
@@ -75,6 +76,7 @@ function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/addRoom" element={<AddRoomForm />} />
+          <Route path="/payment-success/:orderId" element={<PaymentSuccess />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>

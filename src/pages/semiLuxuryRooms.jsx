@@ -176,7 +176,7 @@ const SemiLuxuryRooms = () => {
 
 
 
-    const formatPrice = (price) => `LKR ${price.toLocaleString()}`
+    const formatPrice = (price) => `Rs. ${price.toLocaleString()}`
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-navy-50 via-white to-navy-50/30">

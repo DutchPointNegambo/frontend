@@ -256,7 +256,7 @@ const Navbar = () => {
                             <div className="flex-1 min-w-0">
                               <h4 className="text-sm font-bold text-navy-950 truncate">{item.name}</h4>
                               <p className="text-teal-600 font-bold text-xs mt-0.5">
-                                ${(item.numericPrice * item.quantity).toFixed(2)}
+                                Rs. {(item.numericPrice * item.quantity).toFixed(2)}
                               </p>
                             </div>
                             <div className="flex items-center gap-1">
@@ -293,7 +293,7 @@ const Navbar = () => {
                     <div className="border-t border-navy-100 px-6 py-4 bg-navy-50/30">
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-sm font-bold text-navy-600 uppercase tracking-widest">Total</span>
-                        <span className="text-xl font-bold text-navy-950">${cartTotal.toFixed(2)}</span>
+                        <span className="text-xl font-bold text-navy-950">Rs. {cartTotal.toFixed(2)}</span>
                       </div>
                       <div className="flex gap-3">
                         <button
