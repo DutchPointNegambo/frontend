@@ -52,8 +52,16 @@ export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, { cartItems: [] });
 
   const addToCart = (item) => {
-    // Parse price string to number for calculations
-    const numericPrice = parseFloat(item.price.replace('$', ''));
+    // Prioritize numericPrice if provided directly (e.g. from FoodItems)
+    // Otherwise fallback to parsing the price string
+    let numericPrice = item.numericPrice;
+    
+    if (numericPrice === undefined) {
+      const priceString = String(item.price || '0');
+      const cleanPrice = priceString.replace(/Rs\./g, '').replace(/,/g, '').replace(/[^\d.]/g, '');
+      numericPrice = parseFloat(cleanPrice) || 0;
+    }
+    
     dispatch({
       type: 'ADD_TO_CART',
       payload: { ...item, numericPrice },

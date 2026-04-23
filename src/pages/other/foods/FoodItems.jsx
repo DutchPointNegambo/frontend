@@ -23,7 +23,8 @@ const FoodItems = () => {
           id: 1,
           name: "Gourmet Sri Lankan Fish Curry",
           description: "A traditional Negombo style fish curry prepared with fresh catch of the day, infused with authentic spices and served with fragrant basmati rice and accompaniments.",
-          price: "$28.00",
+          price: "Rs. 8,400.00",
+          numericPrice: 8400,
           rating: 5,
           prepTime: "25-30 min",
           image: "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -32,7 +33,8 @@ const FoodItems = () => {
           id: 2,
           name: "Premium Seafood Platter",
           description: "An indulgent selection of grilled lobster, jumbo prawns, calamari, and lagoon crabs, served with garlic herb butter and seasonal roasted vegetables.",
-          price: "$65.00",
+          price: "Rs. 19,500.00",
+          numericPrice: 19500,
           rating: 5,
           prepTime: "35-40 min",
           image: "https://images.unsplash.com/photo-1551248429-40975aa4de74?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -41,7 +43,8 @@ const FoodItems = () => {
           id: 3,
           name: "Luxury Tropical Breakfast",
           description: "A decadent start to your day featuring exotic seasonal fruits, artisanal pastries, avocado on sourdough with poached eggs, and fresh premium coffee.",
-          price: "$22.00",
+          price: "Rs. 6,600.00",
+          numericPrice: 6600,
           rating: 4.8,
           prepTime: "15-20 min",
           image: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -55,7 +58,8 @@ const FoodItems = () => {
           id: 4,
           name: "Chicken Fried Rice",
           description: "A classic Sri Lankan favorite — wok-tossed basmati rice stir-fried with tender chicken pieces, fresh vegetables, scrambled egg, and a blend of aromatic soy and chili seasoning.",
-          price: "$12.00",
+          price: "Rs. 1,100.00",
+          numericPrice: 1100,
           rating: 4.9,
           prepTime: "15-20 min",
           image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -64,7 +68,8 @@ const FoodItems = () => {
           id: 5,
           name: "Seafood Fried Rice",
           description: "A coastal delight loaded with prawns, calamari, and crab meat, tossed with fragrant rice, crispy vegetables, and a hint of garlic butter and lime.",
-          price: "$18.00",
+          price: "Rs. 1,300.00",
+          numericPrice: 1300,
           rating: 5,
           prepTime: "20-25 min",
           image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -73,7 +78,8 @@ const FoodItems = () => {
           id: 6,
           name: "Egg Fried Rice",
           description: "Simple yet delicious — fluffy basmati rice wok-fried with scrambled eggs, spring onions, and a touch of sesame oil, served with a side of chili paste.",
-          price: "$8.00",
+          price: "Rs. 850.00",
+          numericPrice: 850,
           rating: 4.7,
           prepTime: "10-15 min",
           image: "https://images.unsplash.com/photo-1596560548464-f010549b84d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -82,7 +88,8 @@ const FoodItems = () => {
           id: 7,
           name: "Vegetable Fried Rice",
           description: "A vibrant and healthy option featuring seasonal garden vegetables, tofu, and cashew nuts stir-fried with fragrant rice and traditional Sri Lankan spices.",
-          price: "$9.00",
+          price: "Rs. 800.00",
+          numericPrice: 800,
           rating: 4.6,
           prepTime: "10-15 min",
           image: "https://images.unsplash.com/photo-1645696301019-35adcc18fc12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -91,7 +98,8 @@ const FoodItems = () => {
           id: 8,
           name: "Prawn Fried Rice",
           description: "Succulent jumbo prawns stir-fried with aromatic rice, bell peppers, leeks, and a special house blend sauce that gives it a signature smoky flavor.",
-          price: "$16.00",
+          price: "Rs. 1,250.00",
+          numericPrice: 1250,
           rating: 4.9,
           prepTime: "15-20 min",
           image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -100,7 +108,8 @@ const FoodItems = () => {
           id: 9,
           name: "Mixed Fried Rice",
           description: "The ultimate Sri Lankan fried rice experience — chicken, prawns, and egg combined with crispy vegetables, fried chillies, and our chef's secret seasoning.",
-          price: "$15.00",
+          price: "Rs. 1,300.00",
+          numericPrice: 1300,
           rating: 5,
           prepTime: "20-25 min",
           image: "https://images.unsplash.com/photo-1551326844-4df70f78d0e9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -114,7 +123,8 @@ const FoodItems = () => {
           id: 10,
           name: "Chicken Kottu",
           description: "Shredded godamba roti chopped on the hot griddle with spiced chicken, leeks, eggs, and a rich curry sauce — the rhythmic sound and smoky aroma make this a true Sri Lankan experience.",
-          price: "$11.00",
+          price: "Rs. 950.00",
+          numericPrice: 950,
           rating: 5,
           prepTime: "15-20 min",
           image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -123,7 +133,8 @@ const FoodItems = () => {
           id: 11,
           name: "Cheese Kottu",
           description: "A modern twist on the classic — crispy roti strips stir-chopped with chicken, vegetables, and generously topped with melted mozzarella cheese and a creamy curry gravy.",
-          price: "$14.00",
+          price: "Rs. 1,100.00",
+          numericPrice: 1100,
           rating: 4.9,
           prepTime: "15-20 min",
           image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -132,7 +143,8 @@ const FoodItems = () => {
           id: 12,
           name: "Seafood Kottu",
           description: "Fresh prawns, calamari, and fish pieces chopped with godamba roti, seasoned vegetables, and a spicy coastal curry sauce — a Negombo specialty.",
-          price: "$17.00",
+          price: "Rs. 1,200.00",
+          numericPrice: 1200,
           rating: 5,
           prepTime: "20-25 min",
           image: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -141,7 +153,8 @@ const FoodItems = () => {
           id: 13,
           name: "Egg Kottu",
           description: "A budget-friendly favorite — shredded roti chopped with scrambled eggs, onions, green chillies, and curry leaves, served with a side of spicy pol sambol.",
-          price: "$7.00",
+          price: "Rs. 750.00",
+          numericPrice: 750,
           rating: 4.7,
           prepTime: "10-15 min",
           image: "https://images.unsplash.com/photo-1574484284002-952d92456975?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -150,7 +163,8 @@ const FoodItems = () => {
           id: 14,
           name: "Vegetable Kottu",
           description: "A wholesome vegetarian delight — godamba roti chopped with fresh cabbage, carrots, leeks, green beans, and a mild yet flavorful vegetable curry sauce.",
-          price: "$8.00",
+          price: "Rs. 700.00",
+          numericPrice: 700,
           rating: 4.6,
           prepTime: "10-15 min",
           image: "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -159,7 +173,8 @@ const FoodItems = () => {
           id: 15,
           name: "Mixed Kottu",
           description: "The chef's special — a generous combination of chicken, prawns, and egg with shredded roti, stir-chopped with aromatic spices and topped with crispy onions.",
-          price: "$15.00",
+          price: "Rs. 1,150.00",
+          numericPrice: 1150,
           rating: 5,
           prepTime: "20-25 min",
           image: "https://images.unsplash.com/photo-1606491956689-2ea866880e5e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"

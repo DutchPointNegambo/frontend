@@ -258,7 +258,7 @@ export default function RoomManagement() {
                                 <div className="p-4">
                                     <div className="flex items-start justify-between gap-2 mb-1">
                                         <h3 className="font-bold text-navy-900 text-sm leading-tight">{room.name}</h3>
-                                        <span className="text-lg font-bold text-teal-600 flex-shrink-0">${room.price}<span className="text-xs font-normal text-navy-400">/night</span></span>
+                                        <span className="text-lg font-bold text-teal-600 flex-shrink-0">Rs. {room.price}<span className="text-xs font-normal text-navy-400">/night</span></span>
                                     </div>
                                     <p className="text-xs text-navy-600 font-bold mb-1">Room No: {room.roomNumber || 'N/A'}</p>
                                     <p className="text-xs text-navy-400 capitalize mb-1">{room.type} · {room.guests} guests · {room.view} view</p>
@@ -367,7 +367,7 @@ export default function RoomManagement() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Price / Night ($) *</label>
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Price / Night (Rs.) *</label>
                                     <input required type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="e.g. 250" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
                                 <div>

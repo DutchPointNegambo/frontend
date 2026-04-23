@@ -197,7 +197,7 @@ const DayOutingRooms = () => {
 
     const formatPrice = (price) => {
         if (price === undefined || price === null) return 'N/A';
-        return `LKR ${price.toLocaleString()}`;
+        return `Rs. ${price.toLocaleString()}`;
     }
 
     return (
