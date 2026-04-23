@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Check, X, CheckCircle, AlertCircle, Info } from 'lucide-react';
-import { fetchNotifications, markNotificationRead, markAllNotificationsRead } from '../../utils/api';
+import { fetchNotifications, markNotificationRead, markAllNotificationsRead, deleteNotification, deleteReadNotifications } from '../../utils/api';
 import { Link } from 'react-router-dom';
 
 const NotificationCenter = () => {
@@ -61,6 +61,29 @@ const NotificationCenter = () => {
         }
     };
 
+    const handleDelete = async (id, e) => {
+        if (e) e.preventDefault();
+        try {
+            await deleteNotification(id);
+            setNotifications(prev => prev.filter(n => n._id !== id));
+        } catch (error) {
+            console.error('Error deleting notification:', error);
+        }
+    };
+
+    const handleDeleteRead = async () => {
+        try {
+            setLoading(true);
+            await deleteReadNotifications();
+            setNotifications(prev => prev.filter(n => !n.read));
+        } catch (error) {
+            console.error('Error deleting read notifications:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     const getIcon = (type) => {
         switch (type) {
             case 'NEW_BOOKING': return <CheckCircle className="text-teal-500" size={18} />;
@@ -95,8 +118,8 @@ const NotificationCenter = () => {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-3 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-navy-100 z-50 overflow-hidden transform origin-top-right transition-all">
-                    <div className="p-4 border-b border-navy-50 flex justify-between items-center bg-navy-50/50">
+                <div className="absolute right-0 mt-3 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-navy-100 z-[999] overflow-hidden transform origin-top-right transition-all">
+                    <div className="p-4 border-b border-navy-50 flex justify-between items-center bg-white">
                         <h3 className="font-bold text-navy-900 text-sm">Notifications</h3>
                         {unreadCount > 0 && (
                             <button
@@ -105,6 +128,15 @@ const NotificationCenter = () => {
                                 className="text-[11px] font-semibold text-teal-600 hover:text-teal-700 transition flex items-center gap-1 disabled:opacity-50"
                             >
                                 <Check size={12} /> Mark all read
+                            </button>
+                        )}
+                        {notifications.some(n => n.read) && (
+                            <button
+                                onClick={handleDeleteRead}
+                                disabled={loading}
+                                className="text-[11px] font-semibold text-red-500 hover:text-red-600 transition flex items-center gap-1 ml-3 disabled:opacity-50"
+                            >
+                                <X size={12} /> Delete read
                             </button>
                         )}
                     </div>
@@ -151,6 +183,13 @@ const NotificationCenter = () => {
                                                                 <Check size={14} />
                                                             </button>
                                                         )}
+                                                        <button
+                                                            onClick={(e) => handleDelete(notif._id, e)}
+                                                            className="text-navy-300 hover:text-red-500 transition-colors p-1 ml-1"
+                                                            title="Delete"
+                                                        >
+                                                            <X size={14} />
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>

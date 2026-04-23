@@ -317,6 +317,56 @@ export async function deleteStaff(id) {
     return handleResponse(res);
 }
 
+export async function getEmployeeQR(id) {
+    const res = await fetch(`${API_URL}/admin/staff/${id}/qr`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+//Admin: Attendance
+
+export async function scanAttendance(employeeId) {
+    const res = await fetch(`${API_URL}/admin/attendance/scan`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ employeeId }),
+    });
+    return handleResponse(res);
+}
+
+export async function fetchAttendance(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/admin/attendance?${qs}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function fetchTodayAttendance() {
+    const res = await fetch(`${API_URL}/admin/attendance/today`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function fetchAttendanceReport(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/admin/attendance/report?${qs}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function updateAttendance(id, payload) {
+    const res = await fetch(`${API_URL}/admin/attendance/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+//Admin: Payroll
+
+export async function fetchPayroll(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/admin/payroll?${qs}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
 //Admin: Reports
 
 export async function fetchReportSummary(params = {}) {
@@ -357,6 +407,64 @@ export async function markAllNotificationsRead() {
     const res = await fetch(`${API_URL}/admin/notifications/read-all`, {
         method: 'PUT',
         headers: authHeaders()
+    });
+    return handleResponse(res);
+}
+
+export async function deleteNotification(id) {
+    const res = await fetch(`${API_URL}/admin/notifications/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+    });
+    return handleResponse(res);
+}
+
+export async function deleteReadNotifications() {
+    const res = await fetch(`${API_URL}/admin/notifications/delete-read`, {
+        method: 'DELETE',
+        headers: authHeaders()
+    });
+    return handleResponse(res);
+}
+
+
+// Admin: Feedbacks/Contacts
+export async function fetchFeedbacks() {
+    const res = await fetch(`${API_URL}/admin/contacts`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function updateFeedbackStatus(id, status) {
+    const res = await fetch(`${API_URL}/admin/contacts/${id}/status`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ status })
+    });
+    return handleResponse(res);
+}
+
+export async function deleteFeedback(id) {
+    const res = await fetch(`${API_URL}/admin/contacts/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+    });
+    return handleResponse(res);
+}
+
+// Orders
+export async function createOrder(payload) {
+    const res = await fetch(`${API_URL}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function confirmOrderPayment(id) {
+    const res = await fetch(`${API_URL}/orders/${id}/confirm-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
     });
     return handleResponse(res);
 }

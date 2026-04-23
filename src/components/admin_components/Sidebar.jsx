@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
     UtensilsCrossed,
+    MessageSquare,
     Users,
     UserCircle,
     CalendarCheck,
@@ -11,6 +12,7 @@ import {
     LogOut,
     ExternalLink,
     ChevronRight,
+    ScanLine,
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -36,16 +38,19 @@ const Sidebar = () => {
             items: [
                 { name: 'Users', icon: UserCircle, path: '/admin/users' },
                 { name: 'Staff & HR', icon: Users, path: '/admin/staff' },
+                { name: 'QR Scanner', icon: ScanLine, path: '/admin/attendance-scanner' },
             ],
         },
         {
             label: 'Operations',
             items: [
                 { name: 'Food & Menu', icon: UtensilsCrossed, path: '/admin/food' },
+                { name: 'Guest Feedback', icon: MessageSquare, path: '/admin/feedback' },
                 { name: 'Reports', icon: FileBarChart, path: '/admin/reports' },
             ],
         },
     ];
+
 
     const adminName = (() => {
         try {

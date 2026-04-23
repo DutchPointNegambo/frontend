@@ -5,8 +5,8 @@ import { fetchReportSummary, fetchMonthlyReport, fetchBookingReport } from '../.
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const fmt = (n) => {
-    if (!n && n !== 0) return '$0';
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
+    if (!n && n !== 0) return 'Rs. 0';
+    return `Rs. ${Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 };
 
 const downloadCSV = (filename, rows) => {
