@@ -2,6 +2,7 @@
 import React, { Suspense, lazy } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
+import { Toaster } from 'react-hot-toast'
 
 import Home from './pages/Home'
 import SignIn from './pages/SignIn'
@@ -40,6 +41,7 @@ const Reports = lazy(() => import('./pages/admin/Reports'))
 const Staff = lazy(() => import('./pages/admin/Staff'))
 const AttendanceScanner = lazy(() => import('./pages/admin/AttendanceScanner'))
 const FeedbackManagement = lazy(() => import('./pages/admin/FeedbackManagement'))
+const OrderManagement = lazy(() => import('./pages/admin/OrderManagement'))
 
 function App() {
 
@@ -56,6 +58,7 @@ function App() {
   return (
     <CartProvider>
       <ScrollToTop />
+      <Toaster position="top-center" reverseOrder={false} />
       {shouldShowNavbar && <Navbar />}
       <main className={mainPadding}>
       <Suspense fallback={<div className="h-screen flex items-center justify-center text-navy-500 font-bold">Loading...</div>}>
@@ -90,6 +93,7 @@ function App() {
             <Route path="rooms" element={<RoomManagement />} />
             <Route path="bookings" element={<BookingManagement />} />
             <Route path="food" element={<FoodOrdering />} />
+            <Route path="orders" element={<OrderManagement />} />
             <Route path="reports" element={<Reports />} />
             <Route path="staff" element={<Staff />} />
             <Route path="attendance-scanner" element={<AttendanceScanner />} />
