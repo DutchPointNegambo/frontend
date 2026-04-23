@@ -468,3 +468,29 @@ export async function confirmOrderPayment(id) {
     });
     return handleResponse(res);
 }
+
+// Staff Self Management
+export async function fetchMyProfile() {
+    const res = await fetch(`${API_URL}/staff/profile`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function updateMyProfile(payload) {
+    const res = await fetch(`${API_URL}/staff/profile`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(payload)
+    });
+    return handleResponse(res);
+}
+
+export async function fetchMyAttendance(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/staff/attendance?${qs}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function fetchMyLastPayroll() {
+    const res = await fetch(`${API_URL}/staff/payroll/last`, { headers: authHeaders() });
+    return handleResponse(res);
+}

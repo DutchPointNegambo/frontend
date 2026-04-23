@@ -21,6 +21,8 @@ import TermsOfService from './pages/TermsOfService'
 import FoodItems from './pages/other/foods/FoodItems'
 import Checkout from './pages/Checkout'
 import PaymentSuccess from './pages/PaymentSuccess'
+import EmployeeDashboard from "./pages/EmployeeDashboard"
+import EmployeeLayout from "./pages/employee/EmployeeLayout"
 
 import AddRoomForm from './components/admin_components/AddRoomForm'
 import useIdleTimeout from './hooks/useIdleTimeout'
@@ -44,7 +46,7 @@ function App() {
   useIdleTimeout(15);
   
   const location = useLocation();
-  const hideNavbarRoutes = ['/admin', '/addRoom'];
+  const hideNavbarRoutes = ['/admin', '/addRoom', '/employee'];
   const shouldShowNavbar = !hideNavbarRoutes.some(route => location.pathname.startsWith(route));
   
 
@@ -77,6 +79,9 @@ function App() {
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/addRoom" element={<AddRoomForm />} />
           <Route path="/payment-success/:orderId" element={<PaymentSuccess />} />
+          <Route path="/employee" element={<EmployeeLayout />}>
+            <Route path="dashboard" element={<EmployeeDashboard />} />
+          </Route>
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
