@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchRoomsByCategory, checkRoomAvailability, fetchPackagesByType } from '../utils/api'
 import Footer from '../components/Footer'
+import BookingModal from '../components/BookingModal'
 
 const today = new Date().toISOString().split('T')[0]
 
@@ -66,6 +67,7 @@ const DayOutingRooms = () => {
     const [guests, setGuests] = useState(state?.guests || '1')
     const [availability, setAvailability] = useState(null)
     const [lightboxIndex, setLightboxIndex] = useState(null)
+    const [showBookingModal, setShowBookingModal] = useState(false)
     const [packages, setPackages] = useState([])
     const [packagesLoading, setPackagesLoading] = useState(false)
     const [packagesError, setPackagesError] = useState(null)
@@ -173,7 +175,7 @@ const DayOutingRooms = () => {
 
     const handleConfirmBooking = () => {
         if (!selectedRoom || !outingDate) return
-        navigate('/contact-us')
+        setShowBookingModal(true)
     }
 
 
@@ -182,7 +184,7 @@ const DayOutingRooms = () => {
 
     const formatPrice = (price) => {
         if (price === undefined || price === null) return 'N/A';
-        return `LKR ${price.toLocaleString()}`;
+        return `Rs. ${price.toLocaleString()}`;
     }
 
     return (
@@ -716,6 +718,16 @@ const DayOutingRooms = () => {
                     </div>
                 </section>
             )}
+            <BookingModal
+                isOpen={showBookingModal}
+                onClose={() => { setShowBookingModal(false) }}
+                room={selectedRoom}
+                checkIn={outingDate}
+                checkOut={outingDate}
+                guests={guests}
+                selectedPackage="day-use"
+                onSuccess={() => { setAvailability(null) }}
+            />
             <Footer />
 
         </div>

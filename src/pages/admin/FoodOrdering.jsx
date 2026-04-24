@@ -3,11 +3,11 @@ import { Plus, Edit2, Trash2, Search, Filter } from 'lucide-react';
 
 const FoodOrdering = () => {
     const [menuItems, setMenuItems] = useState([
-        { id: 1, name: 'Burger Royale', category: 'Main Course', price: 12.99, status: 'Available', image: '🍔' },
-        { id: 2, name: 'Truffle Fries', category: 'Sides', price: 6.50, status: 'Available', image: '🍟' },
-        { id: 3, name: 'Vanilla Shake', category: 'Beverages', price: 5.00, status: 'Out of Stock', image: '🥤' },
-        { id: 4, name: 'Caesar Salad', category: 'Starters', price: 8.99, status: 'Available', image: '🥗' },
-        { id: 5, name: 'Grilled Salmon', category: 'Main Course', price: 18.50, status: 'Available', image: '🐟' },
+        { id: 1, name: 'Chicken Kottu', category: 'Main Course', price: 950.00, status: 'Available', image: '🍗' },
+        { id: 2, name: 'Egg Fried Rice', category: 'Main Course', price: 850.00, status: 'Available', image: '🍚' },
+        { id: 3, name: 'Vegetable Kottu', category: 'Main Course', price: 700.00, status: 'Out of Stock', image: '🥬' },
+        { id: 4, name: 'Seafood Fried Rice', category: 'Main Course', price: 1300.00, status: 'Available', image: '🦐' },
+        { id: 5, name: 'Mixed Kottu', category: 'Main Course', price: 1150.00, status: 'Available', image: '🍱' },
     ]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -86,7 +86,7 @@ const FoodOrdering = () => {
                                 </span>
                             </div>
                             <h3 className="font-bold text-navy-900 text-lg">{item.name}</h3>
-                            <p className="text-2xl font-bold text-blue-600 mt-2">${item.price.toFixed(2)}</p>
+                            <p className="text-2xl font-bold text-blue-600 mt-2">Rs. {item.price.toFixed(2)}</p>
 
                             <div className="flex gap-2 mt-4 pt-4 border-t border-navy-50 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button className="flex-1 py-2 bg-navy-50 text-navy-600 rounded-lg hover:bg-navy-100 flex items-center justify-center font-medium text-sm">
@@ -122,7 +122,7 @@ const FoodOrdering = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-navy-700 mb-1">Price ($)</label>
+                                    <label className="block text-sm font-medium text-navy-700 mb-1">Price (Rs.)</label>
                                     <input
                                         required
                                         type="number"

@@ -40,7 +40,7 @@ const decorationOptions = [
     {
         id: 'simple',
         name: 'Simple',
-        price: 500,
+        price: 150000,
         image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&q=80',
         description: 'Clean, minimal decor with a fresh and cheerful feel.',
         includes: [
@@ -54,7 +54,7 @@ const decorationOptions = [
     {
         id: 'elegant',
         name: 'Elegant',
-        price: 1000,
+        price: 300000,
         image: 'https://images.unsplash.com/photo-1478146059778-26e0a2309283?w=600&q=80',
         description: 'Sophisticated styling with premium floral arrangements.',
         includes: [
@@ -69,7 +69,7 @@ const decorationOptions = [
     {
         id: 'royal',
         name: 'Royal',
-        price: 2000,
+        price: 600000,
         image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600&q=80',
         description: 'Opulent, show-stopping luxury befitting royalty.',
         includes: [
@@ -88,7 +88,7 @@ const foodPackages = [
     {
         id: 'standard',
         name: 'Standard',
-        pricePerHead: 25,
+        pricePerHead: 7500,
         image: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=600&q=80',
         description: 'A satisfying spread of classic favourites for every guest.',
         includes: [
@@ -103,7 +103,7 @@ const foodPackages = [
     {
         id: 'premium',
         name: 'Premium',
-        pricePerHead: 45,
+        pricePerHead: 13500,
         image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80',
         description: 'Elevated dining with richer ingredients and wider choices.',
         includes: [
@@ -119,7 +119,7 @@ const foodPackages = [
     {
         id: 'luxury',
         name: 'Luxury',
-        pricePerHead: 75,
+        pricePerHead: 22500,
         image: 'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600&q=80',
         description: 'A full fine-dining experience with live cooking stations.',
         includes: [
@@ -281,7 +281,7 @@ const EventManagement = () => {
                                 </div>
                                 <div className="flex justify-between border-t border-gray-200 pt-3 mt-3">
                                     <span className="text-gray-700 font-bold">Total</span>
-                                    <span className="font-bold text-teal-600 text-lg">${bookingSuccess.totalAmount?.toLocaleString()}</span>
+                                    <span className="font-bold text-teal-600 text-lg">Rs. {bookingSuccess.totalAmount?.toLocaleString()}</span>
                                 </div>
                             </div>
                             <p className="text-gray-400 text-xs text-center">A confirmation will be sent to {bookingSuccess.guestInfo?.email}</p>
@@ -538,7 +538,7 @@ const EventManagement = () => {
                                                 <div className="p-4 bg-white">
                                                     <div className="flex justify-between items-center mb-1">
                                                         <span className="font-bold text-gray-900 capitalize">{deco.name}</span>
-                                                        <span className="text-teal-600 font-bold">${deco.price}</span>
+                                                        <span className="text-teal-600 font-bold">Rs. {deco.price.toLocaleString()}</span>
                                                     </div>
                                                     <p className="text-gray-500 text-xs mb-3">{deco.description}</p>
                                                     <div>
@@ -590,7 +590,7 @@ const EventManagement = () => {
                                                 <div className="p-4 bg-white">
                                                     <div className="flex justify-between items-center mb-1">
                                                         <span className="font-bold text-gray-900 capitalize">{food.name}</span>
-                                                        <span className="text-teal-600 font-bold">${food.pricePerHead}<span className="text-xs font-normal text-gray-400">/head</span></span>
+                                                        <span className="text-teal-600 font-bold">Rs. {food.pricePerHead.toLocaleString()}<span className="text-xs font-normal text-gray-400">/head</span></span>
                                                     </div>
                                                     <p className="text-gray-500 text-xs mb-3">{food.description}</p>
                                                     <div>
@@ -656,20 +656,20 @@ const EventManagement = () => {
                                                     <p className="text-white/60 text-xs">Decoration</p>
                                                     <p className="font-medium text-sm capitalize">{selectedDeco?.name}</p>
                                                 </div>
-                                                <span className="font-semibold">${selectedDeco?.price}</span>
+                                                <span className="font-semibold">Rs. {selectedDeco?.price.toLocaleString()}</span>
                                             </div>
                                             {/* Food */}
                                             <div className="flex justify-between items-center py-3 border-b border-white/10">
                                                 <div>
-                                                    <p className="text-white/60 text-xs">Food ({guestCount} × ${selectedFood?.pricePerHead})</p>
+                                                    <p className="text-white/60 text-xs">Food ({guestCount} × Rs. {selectedFood?.pricePerHead.toLocaleString()})</p>
                                                     <p className="font-medium text-sm capitalize">{selectedFood?.name} Package</p>
                                                 </div>
-                                                <span className="font-semibold">${(selectedFood?.pricePerHead || 0) * guestCount}</span>
+                                                <span className="font-semibold">Rs. {((selectedFood?.pricePerHead || 0) * guestCount).toLocaleString()}</span>
                                             </div>
                                             {/* Total */}
                                             <div className="flex justify-between items-center pt-4">
                                                 <span className="text-lg font-bold">Total Estimate</span>
-                                                <span className="text-2xl font-bold text-teal-400">${totalAmount.toLocaleString()}</span>
+                                                <span className="text-2xl font-bold text-teal-400">Rs. {totalAmount.toLocaleString()}</span>
                                             </div>
                                         </div>
 
@@ -720,7 +720,7 @@ const EventManagement = () => {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-white/60">Total</span>
-                                    <span className="font-bold text-teal-300">${totalAmount.toLocaleString()}</span>
+                                    <span className="font-bold text-teal-300">Rs. {totalAmount.toLocaleString()}</span>
                                 </div>
                             </div>
                         </div>

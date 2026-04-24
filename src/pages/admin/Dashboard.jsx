@@ -82,7 +82,7 @@ const Dashboard = () => {
         },
         {
             title: 'Total Revenue',
-            value: stats ? `$${Number(stats.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00',
+            value: stats ? `Rs. ${Number(stats.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Rs. 0.00',
             icon: DollarSign,
             color: 'from-amber-500 to-amber-600',
             link: '/admin/reports',
@@ -214,7 +214,7 @@ const Dashboard = () => {
                                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-navy-900/95 backdrop-blur-sm text-white p-2.5 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl border border-white/10 text-xs">
                                                 <p className="font-bold border-b border-white/10 pb-1 mb-1">{MONTHS[i]} Statistics</p>
                                                 <div className="space-y-0.5">
-                                                    <p className="flex justify-between gap-4 text-white/70">Revenue: <span className="text-white font-mono">${mData?.revenue?.toLocaleString() || 0}</span></p>
+                                                    <p className="flex justify-between gap-4 text-white/70">Revenue: <span className="text-white font-mono">Rs. {mData?.revenue?.toLocaleString() || 0}</span></p>
                                                     <p className="flex justify-between gap-4 text-white/70">Bookings: <span className="text-white font-mono">{mData?.count || 0}</span></p>
                                                 </div>
                                                 <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-navy-900/95" />

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchRoomsByCategory, checkRoomAvailability } from '../utils/api'
 import Footer from '../components/Footer'
+import BookingModal from '../components/BookingModal'
 
 const today = new Date().toISOString().split('T')[0]
 
@@ -66,6 +67,7 @@ const SemiLuxuryRooms = () => {
     const [guests, setGuests] = useState(state?.guests || '1')
     const [availability, setAvailability] = useState(null)
     const [lightboxIndex, setLightboxIndex] = useState(null)
+    const [showBookingModal, setShowBookingModal] = useState(false)
     const navigate = useNavigate()
 
     const openLightbox = (idx) => setLightboxIndex(idx)
@@ -149,7 +151,7 @@ const SemiLuxuryRooms = () => {
 
     const handleConfirmBooking = () => {
         if (!selectedRoom || !checkIn || (selectedPackage !== 'day-use' && !checkOut)) return
-        navigate('/contact-us')
+        setShowBookingModal(true)
     }
 
 
@@ -161,7 +163,7 @@ const SemiLuxuryRooms = () => {
 
 
 
-    const formatPrice = (price) => `LKR ${price.toLocaleString()}`
+    const formatPrice = (price) => `Rs. ${price.toLocaleString()}`
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-navy-50 via-white to-navy-50/30">
@@ -530,6 +532,16 @@ const SemiLuxuryRooms = () => {
                     </div>
                 </div>
             </section>
+            <BookingModal
+                isOpen={showBookingModal}
+                onClose={() => { setShowBookingModal(false) }}
+                room={selectedRoom}
+                checkIn={checkIn}
+                checkOut={selectedPackage === 'day-use' ? checkIn : checkOut}
+                guests={guests}
+                selectedPackage={selectedPackage}
+                onSuccess={() => { setAvailability(null) }}
+            />
             <Footer />
         </div>
     )

@@ -12,6 +12,7 @@ import {
     LogOut,
     ExternalLink,
     ChevronRight,
+    ScanLine,
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -37,6 +38,7 @@ const Sidebar = () => {
             items: [
                 { name: 'Users', icon: UserCircle, path: '/admin/users' },
                 { name: 'Staff & HR', icon: Users, path: '/admin/staff' },
+                { name: 'QR Scanner', icon: ScanLine, path: '/admin/attendance-scanner' },
             ],
         },
         {
