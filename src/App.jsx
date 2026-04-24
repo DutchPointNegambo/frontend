@@ -2,6 +2,7 @@
 import React, { Suspense, lazy } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
+import { Toaster } from 'react-hot-toast'
 
 import Home from './pages/Home'
 import SignIn from './pages/SignIn'
@@ -21,6 +22,8 @@ import TermsOfService from './pages/TermsOfService'
 import FoodItems from './pages/other/foods/FoodItems'
 import Checkout from './pages/Checkout'
 import PaymentSuccess from './pages/PaymentSuccess'
+import EmployeeDashboard from "./pages/EmployeeDashboard"
+import EmployeeLayout from "./pages/employee/EmployeeLayout"
 
 import AddRoomForm from './components/admin_components/AddRoomForm'
 import useIdleTimeout from './hooks/useIdleTimeout'
@@ -38,13 +41,14 @@ const Reports = lazy(() => import('./pages/admin/Reports'))
 const Staff = lazy(() => import('./pages/admin/Staff'))
 const AttendanceScanner = lazy(() => import('./pages/admin/AttendanceScanner'))
 const FeedbackManagement = lazy(() => import('./pages/admin/FeedbackManagement'))
+const OrderManagement = lazy(() => import('./pages/admin/OrderManagement'))
 
 function App() {
 
   useIdleTimeout(15);
   
   const location = useLocation();
-  const hideNavbarRoutes = ['/admin', '/addRoom'];
+  const hideNavbarRoutes = ['/admin', '/addRoom', '/employee'];
   const shouldShowNavbar = !hideNavbarRoutes.some(route => location.pathname.startsWith(route));
   
 
@@ -54,6 +58,7 @@ function App() {
   return (
     <CartProvider>
       <ScrollToTop />
+      <Toaster position="top-center" reverseOrder={false} />
       {shouldShowNavbar && <Navbar />}
       <main className={mainPadding}>
       <Suspense fallback={<div className="h-screen flex items-center justify-center text-navy-500 font-bold">Loading...</div>}>
@@ -77,6 +82,9 @@ function App() {
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/addRoom" element={<AddRoomForm />} />
           <Route path="/payment-success/:orderId" element={<PaymentSuccess />} />
+          <Route path="/employee" element={<EmployeeLayout />}>
+            <Route path="dashboard" element={<EmployeeDashboard />} />
+          </Route>
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
@@ -85,6 +93,7 @@ function App() {
             <Route path="rooms" element={<RoomManagement />} />
             <Route path="bookings" element={<BookingManagement />} />
             <Route path="food" element={<FoodOrdering />} />
+            <Route path="orders" element={<OrderManagement />} />
             <Route path="reports" element={<Reports />} />
             <Route path="staff" element={<Staff />} />
             <Route path="attendance-scanner" element={<AttendanceScanner />} />

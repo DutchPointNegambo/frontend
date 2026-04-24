@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, Calendar, Download, RefreshCw, ClipboardList } from 'lucide-react';
-import { fetchReportSummary, fetchMonthlyReport, fetchBookingReport } from '../../utils/api';
+import { fetchReportSummary, fetchMonthlyReport, fetchBookingReport, fetchOrderReport } from '../../utils/api';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -28,6 +28,7 @@ const Reports = () => {
     const [toDate, setToDate] = useState(() => new Date().toISOString().split('T')[0]);
     
     const [summary, setSummary] = useState(null);
+    const [foodSummary, setFoodSummary] = useState(null);
     const [monthly, setMonthly] = useState([]);
     const [loading, setLoading] = useState(true);
     const [chartMode, setChartMode] = useState('revenue'); // 'revenue' or 'count'
@@ -35,12 +36,14 @@ const Reports = () => {
     const load = useCallback(async () => {
         setLoading(true);
         try {
-            const [s, m] = await Promise.all([
+            const [s, m, f] = await Promise.all([
                 fetchReportSummary({ from: fromDate, to: toDate }),
-                fetchMonthlyReport(year)
+                fetchMonthlyReport(year),
+                fetchOrderReport({ from: fromDate, to: toDate })
             ]);
             setSummary(s);
             setMonthly(Array.isArray(m) ? m : []);
+            setFoodSummary(f.summary);
         } catch (e) {
             console.warn('Reports API error:', e.message);
         } finally {
@@ -215,6 +218,67 @@ const Reports = () => {
                         </button>
                     </div>
                 </div>
+            </div>
+
+            {/* Food Order Summary Section */}
+            <div className="bg-white rounded-xl border border-navy-100 p-6 shadow-sm">
+                <div className="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 className="text-lg font-bold text-navy-900">Food Order Summary</h3>
+                        <p className="text-xs text-navy-400 mt-0.5">Performance for the selected date range</p>
+                    </div>
+                    <div className="px-4 py-2 bg-teal-50 text-teal-700 rounded-lg font-bold text-sm">
+                        Total Revenue: {fmt(foodSummary?.totalRevenue || 0)}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="p-4 bg-navy-50/50 rounded-xl border border-navy-100">
+                        <p className="text-xs font-bold text-navy-400 uppercase mb-1">Total Orders</p>
+                        <p className="text-2xl font-black text-navy-900">{foodSummary?.totalOrders || 0}</p>
+                    </div>
+                    <div className="p-4 bg-green-50/50 rounded-xl border border-green-100">
+                        <p className="text-xs font-bold text-green-600 uppercase mb-1">Delivered</p>
+                        <p className="text-2xl font-black text-green-700">{foodSummary?.statusCounts?.delivered || 0}</p>
+                    </div>
+                    <div className="p-4 bg-amber-50/50 rounded-xl border border-amber-100">
+                        <p className="text-xs font-bold text-amber-600 uppercase mb-1">Pending/Preparing</p>
+                        <p className="text-2xl font-black text-amber-700">
+                            {(foodSummary?.statusCounts?.pending || 0) + (foodSummary?.statusCounts?.preparing || 0)}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-red-50/50 rounded-xl border border-red-100">
+                        <p className="text-xs font-bold text-red-600 uppercase mb-1">Cancelled</p>
+                        <p className="text-2xl font-black text-red-700">{foodSummary?.statusCounts?.cancelled || 0}</p>
+                    </div>
+                </div>
+
+                {foodSummary?.popularItems && Object.keys(foodSummary.popularItems).length > 0 && (
+                    <div className="mt-8">
+                        <h4 className="text-sm font-bold text-navy-900 mb-4">Most Popular Items</h4>
+                        <div className="space-y-3">
+                            {Object.entries(foodSummary.popularItems)
+                                .sort(([,a], [,b]) => b - a)
+                                .slice(0, 5)
+                                .map(([name, count]) => (
+                                    <div key={name} className="flex items-center gap-4">
+                                        <div className="flex-1">
+                                            <div className="flex justify-between text-xs mb-1">
+                                                <span className="text-navy-700 font-medium">{name}</span>
+                                                <span className="font-bold text-navy-900">{count} sold</span>
+                                            </div>
+                                            <div className="w-full bg-navy-50 rounded-full h-1.5">
+                                                <div 
+                                                    className="bg-teal-500 h-1.5 rounded-full" 
+                                                    style={{ width: `${Math.min((count / foodSummary.totalOrders) * 100, 100)}%` }} 
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
