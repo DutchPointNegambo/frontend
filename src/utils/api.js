@@ -461,6 +461,28 @@ export async function createOrder(payload) {
     return handleResponse(res);
 }
 
+// Admin: Orders
+export async function fetchAdminOrders(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/orders?${qs}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function updateAdminOrderStatus(id, payload) {
+    const res = await fetch(`${API_URL}/orders/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function fetchOrderReport(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/orders/report?${qs}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
 export async function confirmOrderPayment(id) {
     const res = await fetch(`${API_URL}/orders/${id}/confirm-payment`, {
         method: 'POST',

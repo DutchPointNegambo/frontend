@@ -13,11 +13,14 @@ import {
     ExternalLink,
     ChevronRight,
     ScanLine,
+    Truck,
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const Sidebar = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const menuGroups = [
         {
@@ -45,6 +48,7 @@ const Sidebar = () => {
             label: 'Operations',
             items: [
                 { name: 'Food & Menu', icon: UtensilsCrossed, path: '/admin/food' },
+                { name: 'Food Orders', icon: Truck, path: '/admin/orders' },
                 { name: 'Guest Feedback', icon: MessageSquare, path: '/admin/feedback' },
                 { name: 'Reports', icon: FileBarChart, path: '/admin/reports' },
             ],
@@ -60,8 +64,7 @@ const Sidebar = () => {
     })();
 
     const handleLogout = () => {
-        localStorage.removeItem('userInfo');
-        navigate('/login');
+        logout();
     };
 
     const isActive = (path) =>

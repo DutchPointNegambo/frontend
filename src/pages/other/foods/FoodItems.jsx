@@ -6,6 +6,16 @@ import { useCart } from '../../../context/CartContext';
 const FoodItems = () => {
   const { addToCart } = useCart();
   const [addedItems, setAddedItems] = useState({});
+  const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
+  const [inquiryData, setInquiryData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    date: '',
+    guests: '2',
+    message: 'I am interested in booking a Private Beach Dinner.'
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAddToCart = (item) => {
     addToCart(item);
@@ -23,8 +33,8 @@ const FoodItems = () => {
           id: 1,
           name: "Gourmet Sri Lankan Fish Curry",
           description: "A traditional Negombo style fish curry prepared with fresh catch of the day, infused with authentic spices and served with fragrant basmati rice and accompaniments.",
-          price: "Rs. 8,400.00",
-          numericPrice: 8400,
+          price: "Rs. 1,350.00",
+          numericPrice: 1350,
           rating: 5,
           prepTime: "25-30 min",
           image: "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -33,8 +43,8 @@ const FoodItems = () => {
           id: 2,
           name: "Premium Seafood Platter",
           description: "An indulgent selection of grilled lobster, jumbo prawns, calamari, and lagoon crabs, served with garlic herb butter and seasonal roasted vegetables.",
-          price: "Rs. 19,500.00",
-          numericPrice: 19500,
+          price: "Rs. 2,800.00",
+          numericPrice: 2800,
           rating: 5,
           prepTime: "35-40 min",
           image: "https://images.unsplash.com/photo-1551248429-40975aa4de74?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -43,8 +53,8 @@ const FoodItems = () => {
           id: 3,
           name: "Luxury Tropical Breakfast",
           description: "A decadent start to your day featuring exotic seasonal fruits, artisanal pastries, avocado on sourdough with poached eggs, and fresh premium coffee.",
-          price: "Rs. 6,600.00",
-          numericPrice: 6600,
+          price: "Rs. 1,100.00",
+          numericPrice: 1100,
           rating: 4.8,
           prepTime: "15-20 min",
           image: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -295,7 +305,10 @@ const FoodItems = () => {
                     Elevate your romantic evening with a private dinner on the golden sands of Negombo. 
                     Enjoy a customized menu under the stars with the soothing melody of the Indian Ocean as your backdrop.
                   </p>
-                  <button className="px-8 py-4 bg-teal-500 hover:bg-teal-400 text-white font-bold rounded-xl transition-all duration-300 uppercase tracking-widest text-xs">
+                  <button 
+                    onClick={() => setIsInquiryModalOpen(true)}
+                    className="px-8 py-4 bg-teal-500 hover:bg-teal-400 text-white font-bold rounded-xl transition-all duration-300 uppercase tracking-widest text-xs"
+                  >
                     Inquire Now
                   </button>
                 </Reveal>
@@ -315,6 +328,126 @@ const FoodItems = () => {
           </div>
         </div>
       </section>
+
+      {/* Inquiry Modal */}
+      {isInquiryModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-navy-950/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="relative p-8 md:p-12">
+              <button 
+                onClick={() => setIsInquiryModalOpen(false)}
+                className="absolute top-6 right-6 w-10 h-10 bg-navy-50 rounded-full flex items-center justify-center text-navy-400 hover:text-navy-900 transition-colors"
+              >
+                <ChevronRight size={24} className="rotate-180" />
+              </button>
+
+              <div className="mb-10">
+                <span className="text-teal-600 font-bold text-[10px] tracking-[0.3em] uppercase block mb-3">Reservations</span>
+                <h3 className="text-3xl font-bold text-navy-950 font-serif">Private Beach Dinner</h3>
+                <p className="text-navy-500 text-sm mt-2 italic">Customize your romantic evening by the shore.</p>
+              </div>
+
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setIsSubmitting(true);
+                try {
+                  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+                  const response = await fetch(`${API_URL}/contact`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      name: inquiryData.name,
+                      email: inquiryData.email,
+                      phone: inquiryData.phone,
+                      subject: 'Private Beach Dinner Inquiry',
+                      message: `${inquiryData.message}\n\nRequested Date: ${inquiryData.date}\nNumber of Guests: ${inquiryData.guests}`
+                    }),
+                  });
+                  if (response.ok) {
+                    alert('Inquiry sent successfully! We will contact you soon.');
+                    setIsInquiryModalOpen(false);
+                    setInquiryData({ name: '', email: '', phone: '', date: '', guests: '2', message: 'I am interested in booking a Private Beach Dinner.' });
+                  } else {
+                    throw new Error('Failed to send inquiry');
+                  }
+                } catch (err) {
+                  alert('Error: ' + err.message);
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1.5 block ml-1">Full Name</label>
+                    <input 
+                      required
+                      type="text" 
+                      placeholder="Your Name"
+                      value={inquiryData.name}
+                      onChange={(e) => setInquiryData({...inquiryData, name: e.target.value})}
+                      className="w-full px-5 py-3.5 bg-navy-50/50 border border-navy-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1.5 block ml-1">Email</label>
+                    <input 
+                      required
+                      type="email" 
+                      placeholder="Email Address"
+                      value={inquiryData.email}
+                      onChange={(e) => setInquiryData({...inquiryData, email: e.target.value})}
+                      className="w-full px-5 py-3.5 bg-navy-50/50 border border-navy-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1.5 block ml-1">Date</label>
+                    <input 
+                      required
+                      type="date" 
+                      value={inquiryData.date}
+                      onChange={(e) => setInquiryData({...inquiryData, date: e.target.value})}
+                      className="w-full px-5 py-3.5 bg-navy-50/50 border border-navy-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1.5 block ml-1">Guests</label>
+                    <select 
+                      value={inquiryData.guests}
+                      onChange={(e) => setInquiryData({...inquiryData, guests: e.target.value})}
+                      className="w-full px-5 py-3.5 bg-navy-50/50 border border-navy-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+                    >
+                      {[2,3,4,5,6].map(n => <option key={n} value={n}>{n} Persons</option>)}
+                      <option value="group">Large Group (7+)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1.5 block ml-1">Additional Message</label>
+                  <textarea 
+                    rows="3"
+                    placeholder="Tell us about any special requests..."
+                    value={inquiryData.message}
+                    onChange={(e) => setInquiryData({...inquiryData, message: e.target.value})}
+                    className="w-full px-5 py-3.5 bg-navy-50/50 border border-navy-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all resize-none"
+                  />
+                </div>
+
+                <button 
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-navy-950 text-white font-bold py-4 rounded-2xl hover:bg-teal-600 transition-all uppercase tracking-[0.2em] text-xs shadow-xl shadow-navy-900/10 disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Sending Inquiry...' : 'Submit Inquiry'}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
