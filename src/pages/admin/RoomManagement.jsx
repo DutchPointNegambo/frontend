@@ -345,12 +345,12 @@ export default function RoomManagement() {
                             </button>
                         </div>
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="col-span-1">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="col-span-1 sm:col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Room Name *</label>
                                     <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Ocean Suite" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
-                                <div className="col-span-1">
+                                <div className="col-span-1 sm:col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Room Number *</label>
                                     <input required value={form.roomNumber} onChange={e => setForm({ ...form, roomNumber: e.target.value })} placeholder="e.g. 101" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
@@ -378,19 +378,19 @@ export default function RoomManagement() {
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">View</label>
                                     <input value={form.view} onChange={e => setForm({ ...form, view: e.target.value })} placeholder="e.g. ocean, garden, pool" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
-                                <div className="col-span-2">
+                                <div className="col-span-1 sm:col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Main Image URL *</label>
                                     <input required value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} placeholder="https://..." className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
-                                <div className="col-span-2">
+                                <div className="col-span-1 sm:col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Additional Image URLs <span className="text-navy-400 normal-case font-normal">(comma-separated)</span></label>
                                     <input value={form.images} onChange={e => setForm({ ...form, images: e.target.value })} placeholder="https://image1.jpg, https://image2.jpg..." className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
-                                <div className="col-span-2">
+                                <div className="col-span-1 sm:col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Description *</label>
                                     <textarea required rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Room description..." className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" />
                                 </div>
-                                <div className="col-span-2">
+                                <div className="col-span-1 sm:col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Features <span className="text-navy-400 normal-case font-normal">(comma-separated)</span></label>
                                     <input value={form.features} onChange={e => setForm({ ...form, features: e.target.value })} placeholder="WiFi, AC, Mini Bar, Ocean View..." className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>

@@ -257,7 +257,7 @@ const OrderManagement = () => {
                         {/* Modal Body */}
                         <div className="flex-1 overflow-y-auto p-8 space-y-8">
                             {/* Guest Info */}
-                            <div className="grid grid-cols-2 gap-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                 <div>
                                     <h3 className="text-xs font-bold text-navy-400 uppercase tracking-widest mb-3">Guest Information</h3>
                                     <div className="space-y-2">
