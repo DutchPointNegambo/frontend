@@ -406,7 +406,6 @@ export default function RoomManagement() {
                                         />
                                     </div>
                                 </div>
-                                </div>
                                 <div className="col-span-1 sm:col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Description *</label>
                                     <textarea required rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Room description..." className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" />
