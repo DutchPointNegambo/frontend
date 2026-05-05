@@ -106,6 +106,11 @@ export async function fetchMonthlyRevenue(year) {
     return handleResponse(res);
 }
 
+export async function fetchAiSummary() {
+    const res = await fetch(`${API_URL}/ai/summary`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
 //Admin: Users
 
 export async function fetchUsers(params = {}) {
