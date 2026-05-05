@@ -6,6 +6,7 @@ import {
 import { fetchRooms, createRoom, updateRoom, deleteRoom, updateRoomStatusByNumber, updateBookingStatus } from '../../utils/api';
 import Toast from '../../components/admin_components/Toast';
 import { useToast } from '../../components/admin_components/useToast';
+import ImageUpload from '../../components/admin_components/ImageUpload';
 
 const ROOM_TYPES = ['deluxe', 'luxury', 'semiluxury', 'dayOuting', 'couple'];
 const STATUS_OPTIONS = ['available', 'occupied', 'maintenance'];
@@ -258,7 +259,7 @@ export default function RoomManagement() {
                                 <div className="p-4">
                                     <div className="flex items-start justify-between gap-2 mb-1">
                                         <h3 className="font-bold text-navy-900 text-sm leading-tight">{room.name}</h3>
-                                        <span className="text-lg font-bold text-teal-600 flex-shrink-0">Rs. {room.price}<span className="text-xs font-normal text-navy-400">/night</span></span>
+                                        <span className="text-lg font-bold text-teal-600 flex-shrink-0">${room.price}<span className="text-xs font-normal text-navy-400">/night</span></span>
                                     </div>
                                     <p className="text-xs text-navy-600 font-bold mb-1">Room No: {room.roomNumber || 'N/A'}</p>
                                     <p className="text-xs text-navy-400 capitalize mb-1">{room.type} · {room.guests} guests · {room.view} view</p>
@@ -367,7 +368,7 @@ export default function RoomManagement() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Price / Night (Rs.) *</label>
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Price / Night ($) *</label>
                                     <input required type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="e.g. 250" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
                                 <div>
@@ -379,12 +380,31 @@ export default function RoomManagement() {
                                     <input value={form.view} onChange={e => setForm({ ...form, view: e.target.value })} placeholder="e.g. ocean, garden, pool" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
                                 <div className="col-span-2">
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Main Image URL *</label>
-                                    <input required value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} placeholder="https://..." className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                    <ImageUpload 
+                                        label="Main Image *"
+                                        currentImage={form.image}
+                                        onUploadSuccess={(url) => setForm({ ...form, image: url })}
+                                    />
                                 </div>
                                 <div className="col-span-2">
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Additional Image URLs <span className="text-navy-400 normal-case font-normal">(comma-separated)</span></label>
-                                    <input value={form.images} onChange={e => setForm({ ...form, images: e.target.value })} placeholder="https://image1.jpg, https://image2.jpg..." className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Additional Image URLs <span className="text-navy-400 normal-case font-normal">(comma-separated or upload more)</span></label>
+                                    <div className="flex gap-2 mb-2">
+                                        <input 
+                                            value={form.images} 
+                                            onChange={e => setForm({ ...form, images: e.target.value })} 
+                                            placeholder="https://image1.jpg, https://image2.jpg..." 
+                                            className="flex-1 px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" 
+                                        />
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        <ImageUpload 
+                                            label=""
+                                            onUploadSuccess={(url) => {
+                                                const current = form.images ? form.images.split(',').map(i => i.trim()) : [];
+                                                setForm({ ...form, images: [...current, url].join(', ') });
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                                 <div className="col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Description *</label>
