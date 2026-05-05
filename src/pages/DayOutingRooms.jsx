@@ -679,7 +679,7 @@ const DayOutingRooms = () => {
                                     </div>
 
                                     <h4 className="text-xs font-bold text-navy-800 uppercase tracking-widest mb-4">Package Facilities</h4>
-                                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-8">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 mb-8">
                                         {pkg.facilities && pkg.facilities.map((item, i) => (
                                             <div key={i} className="flex items-center gap-2 text-[13px] text-navy-600 animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
                                                 <span className={`${selectedCategory === 'family' ? 'text-teal-500' : 'text-amber-500'} font-bold`}>•</span>

@@ -265,21 +265,27 @@ const UserManagement = () => {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-1">
-                                                <button onClick={async () => {
-                                                    setSelectedUser(user);
-                                                    setIsDetailOpen(true);
-                                                    setLoadingBookings(true);
-                                                    try {
-                                                        const bData = await fetchBookings({ userId: user.id });
-                                                        setUserBookings(bData.bookings || []);
-                                                    } catch (e) {
-                                                        console.error(e);
-                                                    } finally {
-                                                        setLoadingBookings(false);
-                                                    }
-                                                }} className="p-2 hover:bg-blue-50 rounded-lg text-navy-400 hover:text-blue-600 transition-colors"><Eye size={16} /></button>
-                                                <button onClick={() => openEditModal(user)} className="p-2 hover:bg-navy-100 rounded-lg text-navy-400 hover:text-navy-600 transition-colors"><Edit2 size={16} /></button>
-                                                <button onClick={() => handleDelete(user.id)} className="p-2 hover:bg-red-50 rounded-lg text-navy-400 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                                                <button 
+                                                    onClick={async () => {
+                                                        setSelectedUser(user);
+                                                        setIsDetailOpen(true);
+                                                        setLoadingBookings(true);
+                                                        try {
+                                                            const bData = await fetchBookings({ userId: user.id });
+                                                            setUserBookings(bData.bookings || []);
+                                                        } catch (e) {
+                                                            console.error(e);
+                                                        } finally {
+                                                            setLoadingBookings(false);
+                                                        }
+                                                    }} 
+                                                    className="p-2 bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-600 transition-all duration-200 group"
+                                                    title="View Profile"
+                                                >
+                                                    <Eye size={18} className="group-hover:scale-110 transition-transform" />
+                                                </button>
+                                                <button onClick={() => openEditModal(user)} className="p-2 hover:bg-navy-100 rounded-lg text-navy-400 hover:text-navy-600 transition-colors" title="Edit User"><Edit2 size={16} /></button>
+                                                <button onClick={() => handleDelete(user.id)} className="p-2 hover:bg-red-50 rounded-lg text-navy-400 hover:text-red-500 transition-colors" title="Delete User"><Trash2 size={16} /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -291,59 +297,76 @@ const UserManagement = () => {
             </div>
 
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-navy-900">{isEditing ? 'Edit User' : 'Add New User'}</h2>
-                            <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-navy-50 rounded-lg text-navy-400 hover:text-navy-600 transition-colors"><X size={20} /></button>
-                        </div>
-                        <form onSubmit={handleSaveUser} className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-navy-700 mb-1">First Name</label>
-                                    <input required type="text" value={newUser.firstName} onChange={e => setNewUser({ ...newUser, firstName: e.target.value })} className="w-full px-4 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-navy-700 mb-1">Last Name</label>
-                                    <input type="text" value={newUser.lastName} onChange={e => setNewUser({ ...newUser, lastName: e.target.value })} className="w-full px-4 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-navy-700 mb-1">Email</label>
-                                    <input required type="email" value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} className="w-full px-4 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-navy-700 mb-1">Phone</label>
-                                    <input required type="tel" pattern="[0-9]{10}" title="Ten digits only" value={newUser.phone} onChange={e => setNewUser({ ...newUser, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} className="w-full px-4 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                </div>
-                            </div>
+                <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md flex items-center justify-center z-[1000] p-4">
+                    <div className="bg-white rounded-3xl overflow-hidden w-full max-w-xl shadow-2xl border border-white/20">
+                        <div className="bg-navy-900 px-8 py-6 flex justify-between items-center text-white">
                             <div>
-                                <label className="block text-sm font-medium text-navy-700 mb-1">Password</label>
-                                <div className="relative">
-                                    <input required={!isEditing} type={showPassword ? 'text' : 'password'} minLength={8} value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} placeholder={isEditing ? 'Leave blank to keep current' : ''} className="w-full px-4 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-navy-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                                <h2 className="text-xl font-bold">{isEditing ? 'Edit User Profile' : 'Register New User'}</h2>
+                                <p className="text-navy-300 text-xs mt-1">{isEditing ? 'Modify account details and permissions' : 'Create a new account for guest or staff'}</p>
+                            </div>
+                            <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={20} /></button>
+                        </div>
+                        
+                        <form onSubmit={handleSaveUser} className="p-8 space-y-5">
+                            <div className="grid grid-cols-2 gap-5">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">First Name</label>
+                                    <div className="relative">
+                                        <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-300" />
+                                        <input required type="text" value={newUser.firstName} onChange={e => setNewUser({ ...newUser, firstName: e.target.value })} className="w-full pl-10 pr-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" placeholder="John" />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Last Name</label>
+                                    <input type="text" value={newUser.lastName} onChange={e => setNewUser({ ...newUser, lastName: e.target.value })} className="w-full px-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" placeholder="Doe" />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-navy-700 mb-1">Role</label>
-                                    <select value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })} className="w-full px-4 py-2 border border-navy-200 rounded-lg bg-white">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Email Address</label>
+                                    <div className="relative">
+                                        <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-300" />
+                                        <input required type="email" value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} className="w-full pl-10 pr-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" placeholder="john@example.com" />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Phone Number</label>
+                                    <div className="relative">
+                                        <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-300" />
+                                        <input required type="tel" pattern="[0-9]{10}" title="Ten digits only" value={newUser.phone} onChange={e => setNewUser({ ...newUser, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} className="w-full pl-10 pr-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" placeholder="0712345678" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Account Password</label>
+                                <div className="relative">
+                                    <Shield size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-300" />
+                                    <input required={!isEditing} type={showPassword ? 'text' : 'password'} minLength={8} value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} placeholder={isEditing ? 'Leave blank to keep current password' : 'At least 8 characters'} className="w-full pl-10 pr-12 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" />
+                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-navy-100 rounded-lg text-navy-400 transition-colors">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Access Role</label>
+                                    <select value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })} className="w-full px-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all appearance-none cursor-pointer font-medium">
                                         {roles.map(r => <option key={r} value={r}>{r}</option>)}
                                     </select>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-navy-700 mb-1">Status</label>
-                                    <select value={newUser.status} onChange={e => setNewUser({ ...newUser, status: e.target.value })} className="w-full px-4 py-2 border border-navy-200 rounded-lg bg-white">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Account Status</label>
+                                    <select value={newUser.status} onChange={e => setNewUser({ ...newUser, status: e.target.value })} className="w-full px-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all appearance-none cursor-pointer font-medium">
                                         {statuses.map(s => <option key={s} value={s}>{s}</option>)}
                                     </select>
                                 </div>
                             </div>
-                            <div className="flex gap-3 pt-4">
-                                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2 border border-navy-200 rounded-lg">Cancel</button>
-                                <button type="submit" disabled={saving} className="flex-1 bg-navy-900 text-white rounded-lg py-2 flex items-center justify-center gap-2 disabled:opacity-50">
-                                    {saving && <RefreshCw size={14} className="animate-spin" />}
-                                    {isEditing ? 'Save Changes' : 'Create User'}
+
+                            <div className="flex gap-4 pt-4">
+                                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 border border-navy-200 rounded-xl text-navy-600 font-semibold hover:bg-navy-50 transition-colors">Cancel</button>
+                                <button type="submit" disabled={saving} className="flex-[2] bg-navy-900 text-white rounded-xl py-3 font-semibold flex items-center justify-center gap-2 hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-900/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none">
+                                    {saving ? <RefreshCw size={18} className="animate-spin" /> : <CheckCircle size={18} />}
+                                    {isEditing ? 'Update User Details' : 'Complete Registration'}
                                 </button>
                             </div>
                         </form>
@@ -352,63 +375,130 @@ const UserManagement = () => {
             )}
 
             {isDetailOpen && selectedUser && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-end z-50">
-                    <div className="bg-white w-full max-w-md h-full shadow-2xl p-6 space-y-6 overflow-y-auto">
-                        <div className="flex justify-between items-center border-b border-navy-100 pb-4">
-                            <h2 className="text-xl font-bold">User Details</h2>
-                            <button onClick={() => setIsDetailOpen(false)}><X size={20} /></button>
+                <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm flex justify-end z-[1000]">
+                    <div className="bg-white w-full max-w-lg h-full shadow-2xl flex flex-col">
+                        {/* Header */}
+                        <div className="px-8 py-6 border-b border-navy-50 flex justify-between items-center bg-navy-50/30">
+                            <div>
+                                <h2 className="text-xl font-bold text-navy-900">User Profile</h2>
+                                <p className="text-navy-400 text-xs mt-0.5">UID: {selectedUser.id}</p>
+                            </div>
+                            <button onClick={() => setIsDetailOpen(false)} className="p-2 hover:bg-navy-100 rounded-full transition-colors text-navy-400 hover:text-navy-900"><X size={20} /></button>
                         </div>
-                        <div className="text-center">
-                            <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${getAvatarGradient(selectedUser.id)} flex items-center justify-center text-white text-2xl font-bold mx-auto`}>{selectedUser.avatar}</div>
-                            <h3 className="text-xl font-bold mt-3">{selectedUser.name}</h3>
-                            <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold ${getRoleBadge(selectedUser.role)}`}>{selectedUser.role}</span>
-                        </div>
-                        <div className="bg-navy-50 rounded-xl p-4 space-y-3 text-sm">
-                            <div className="flex items-center"><Mail size={16} className="text-navy-400 mr-3" />{selectedUser.email}</div>
-                            <div className="flex items-center"><Phone size={16} className="text-navy-400 mr-3" />{selectedUser.phone}</div>
-                            <div className="flex items-center"><Calendar size={16} className="text-navy-400 mr-3" />Joined {selectedUser.joinDate}</div>
-                        </div>
-                        <div>
-                            <p className="text-sm font-semibold mb-2">Account Status</p>
-                            <select value={selectedUser.status} onChange={(e) => handleStatusChange(selectedUser, e.target.value)} className="w-full px-4 py-2 border rounded-lg bg-white">
-                                {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                        </div>
-                        
-                        {/* Guest Booking History section */}
-                        {selectedUser.role === 'Guest' && (
-                            <div className="pt-4 border-t border-navy-100">
-                                <h3 className="font-bold text-navy-900 mb-3 text-sm">Booking History</h3>
+
+                        <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                            {/* Profile Hero */}
+                            <div className="flex items-center gap-6 pb-2">
+                                <div className={`w-24 h-24 rounded-3xl bg-gradient-to-br ${getAvatarGradient(selectedUser.id)} flex items-center justify-center text-white text-3xl font-black shadow-xl ring-4 ring-white`}>
+                                    {selectedUser._raw?.photoURL ? (
+                                        <img src={selectedUser._raw.photoURL} alt="" className="w-full h-full object-cover rounded-3xl" />
+                                    ) : selectedUser.avatar}
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-2xl font-black text-navy-900 leading-tight">{selectedUser.name}</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ring-1 ${getRoleBadge(selectedUser.role)}`}>{selectedUser.role}</span>
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ring-1 ${getStatusConfig(selectedUser.status).bg} ${getStatusConfig(selectedUser.status).text} ${getStatusConfig(selectedUser.status).ring}`}>{selectedUser.status}</span>
+                                    </div>
+                                    {selectedUser._raw?.googleId && (
+                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md w-fit uppercase tracking-tighter">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                            Google Authenticated
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Contact Info Cards */}
+                            <div className="grid grid-cols-1 gap-3">
+                                <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex items-center gap-4 hover:border-blue-200 transition-colors">
+                                    <div className="w-10 h-10 bg-white shadow-sm rounded-xl flex items-center justify-center text-blue-600 border border-slate-100"><Mail size={18} /></div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Email Address</p>
+                                        <p className="text-sm font-semibold text-navy-900">{selectedUser.email}</p>
+                                    </div>
+                                </div>
+                                <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex items-center gap-4 hover:border-teal-200 transition-colors">
+                                    <div className="w-10 h-10 bg-white shadow-sm rounded-xl flex items-center justify-center text-teal-600 border border-slate-100"><Phone size={18} /></div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Mobile Phone</p>
+                                        <p className="text-sm font-semibold text-navy-900">{selectedUser.phone || 'No phone provided'}</p>
+                                    </div>
+                                </div>
+                                <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex items-center gap-4 hover:border-purple-200 transition-colors">
+                                    <div className="w-10 h-10 bg-white shadow-sm rounded-xl flex items-center justify-center text-purple-600 border border-slate-100"><Calendar size={18} /></div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Registration Date</p>
+                                        <p className="text-sm font-semibold text-navy-900">{new Date(selectedUser._raw?.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Statistics Row */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-navy-900 p-5 rounded-3xl text-white shadow-lg">
+                                    <p className="text-[10px] font-bold opacity-60 uppercase tracking-[0.2em]">Bookings</p>
+                                    <p className="text-3xl font-black mt-1">{userBookings.length}</p>
+                                    <p className="text-[10px] opacity-40 mt-2">Lifetime reservations</p>
+                                </div>
+                                <div className="bg-teal-600 p-5 rounded-3xl text-white shadow-lg">
+                                    <p className="text-[10px] font-bold opacity-60 uppercase tracking-[0.2em]">Status</p>
+                                    <p className="text-xl font-black mt-2 leading-none">{selectedUser.status}</p>
+                                    <p className="text-[10px] opacity-40 mt-3 flex items-center gap-1 italic"><Clock size={10} /> Active Member</p>
+                                </div>
+                            </div>
+                            
+                            {/* Booking History section */}
+                            <div>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-sm font-black text-navy-900 uppercase tracking-widest">Reservation History</h3>
+                                    <span className="text-[10px] font-bold bg-navy-100 px-2 py-0.5 rounded text-navy-600">{userBookings.length} Total</span>
+                                </div>
+
                                 {loadingBookings ? (
-                                    <div className="flex justify-center py-4"><RefreshCw size={16} className="animate-spin text-navy-400" /></div>
+                                    <div className="flex flex-col items-center justify-center py-10 text-navy-300">
+                                        <RefreshCw size={24} className="animate-spin mb-3" />
+                                        <p className="text-xs font-medium uppercase tracking-widest">Syncing Data...</p>
+                                    </div>
                                 ) : userBookings.length > 0 ? (
-                                    <div className="space-y-3">
+                                    <div className="space-y-4">
                                         {userBookings.map((b) => (
-                                            <div key={b._id} className="bg-white border text-sm border-navy-100 rounded-lg p-3 shadow-sm">
-                                                <div className="flex justify-between items-start mb-1">
-                                                    <span className="font-bold text-navy-900">{b.room?.name || 'Unknown Room'}</span>
-                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase ${
+                                            <div key={b._id} className="group relative bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all hover:border-navy-100">
+                                                <div className="flex justify-between items-start">
+                                                    <div className="space-y-1">
+                                                        <span className="text-[10px] font-black text-teal-600 uppercase tracking-tighter">#{b.bookingId || b._id.slice(-6)}</span>
+                                                        <p className="font-bold text-navy-900">{b.room?.name || `Room ${b.room?.roomNumber}`}</p>
+                                                    </div>
+                                                    <span className={`text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-wider ${
                                                         b.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
                                                         b.status === 'cancelled' ? 'bg-red-100 text-red-700' :
                                                         b.status === 'confirmed' ? 'bg-blue-100 text-blue-700' :
                                                         'bg-amber-100 text-amber-700'
                                                     }`}>{b.status}</span>
                                                 </div>
-                                                <p className="text-xs text-navy-500">{new Date(b.checkIn).toLocaleDateString()} to {new Date(b.checkOut).toLocaleDateString()}</p>
-                                                <p className="text-xs font-medium text-teal-600 mt-1">Total: ${b.total}</p>
+                                                <div className="flex items-center gap-4 mt-3 text-[11px] text-navy-500 font-medium">
+                                                    <div className="flex items-center gap-1.5"><Calendar size={12} className="text-navy-300" /> {new Date(b.checkIn).toLocaleDateString()}</div>
+                                                    <div className="w-1 h-1 rounded-full bg-navy-200"></div>
+                                                    <div>{b.nights} Nights</div>
+                                                </div>
+                                                <div className="mt-3 pt-3 border-t border-slate-50 flex justify-between items-center">
+                                                    <p className="text-xs font-bold text-navy-900">Paid Amount</p>
+                                                    <p className="text-sm font-black text-navy-900">${b.total}</p>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-sm text-navy-400 italic">No bookings found for this user.</p>
+                                    <div className="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-8 text-center space-y-2">
+                                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto text-slate-300"><Clock size={20} /></div>
+                                        <p className="text-xs font-bold text-navy-400 uppercase tracking-widest">No Activity Found</p>
+                                        <p className="text-[10px] text-navy-300 italic">This user hasn't made any bookings yet.</p>
+                                    </div>
                                 )}
                             </div>
-                        )}
-                        
-                        <div className="flex gap-3 pt-6">
-                            <button onClick={() => openEditModal(selectedUser)} className="flex-1 bg-navy-900 text-white rounded-lg py-2.5 flex items-center justify-center gap-2"><Edit2 size={16} /> Edit</button>
-                            <button onClick={() => { handleDelete(selectedUser.id); setIsDetailOpen(false); }} className="flex-1 bg-red-50 text-red-600 rounded-lg py-2.5 flex items-center justify-center gap-2"><Trash2 size={16} /> Delete</button>
                         </div>
+
+
                     </div>
                 </div>
             )}

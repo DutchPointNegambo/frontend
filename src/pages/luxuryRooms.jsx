@@ -453,8 +453,8 @@ const LuxuryRooms = () => {
                                             </div>
                                         </div>
                                         {checkIn && (selectedPackage === 'day-use' || (checkOut && calcNights() > 0)) && (
-                                            <div className="grid grid-cols-2 gap-2 animate-fade-in">
-                                                <div className={`rounded-xl px-3 py-2 border ${selectedPackage === 'day-use' ? 'col-span-2 bg-amber-50 border-amber-100' : 'bg-amber-50 border-amber-100'}`}>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 animate-fade-in">
+                                                <div className={`rounded-xl px-3 py-2 border ${selectedPackage === 'day-use' ? 'col-span-1 sm:col-span-2 bg-amber-50 border-amber-100' : 'bg-amber-50 border-amber-100'}`}>
                                                     <span className="text-xs text-amber-600 font-bold block">{selectedPackage === 'day-use' ? 'Visit Date' : 'Check-In'}</span>
                                                     <span className="text-navy-800 font-semibold text-sm">{new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {selectedPackage === 'day-use' ? DaycheckInTime : checkInTime}</span>
                                                 </div>
@@ -464,7 +464,7 @@ const LuxuryRooms = () => {
                                                         <span className="text-navy-800 font-semibold text-sm">{new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {checkOutTime}</span>
                                                     </div>
                                                 )}
-                                                <div className="col-span-2 bg-gradient-to-r from-navy-50 to-amber-50/50 rounded-xl px-3 py-2 flex justify-between items-center">
+                                                <div className="col-span-1 sm:col-span-2 bg-gradient-to-r from-navy-50 to-amber-50/50 rounded-xl px-3 py-2 flex justify-between items-center">
                                                     <span className="text-navy-500 text-sm">
                                                         {selectedPackage === 'day-use' ? 'Day Use' : `${calcNights()} Night${calcNights() > 1 ? 's' : ''}`}
                                                     </span>
