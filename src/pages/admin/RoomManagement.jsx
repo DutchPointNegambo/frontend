@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     Plus, Search, Edit2, Trash2, X, BedDouble,
-    CheckCircle, WrenchIcon, XCircle, RefreshCw, Save, LogOut, UserCircle
+    CheckCircle, Wrench, XCircle, RefreshCw, Save, LogOut, UserCircle
 } from 'lucide-react';
 import { fetchRooms, createRoom, updateRoom, deleteRoom, updateRoomStatusByNumber, updateBookingStatus } from '../../utils/api';
 import Toast from '../../components/admin_components/Toast';
@@ -19,7 +19,7 @@ const EMPTY_FORM = {
 const statusConfig = {
     available: { label: 'Available', icon: CheckCircle, bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
     occupied: { label: 'Occupied', icon: XCircle, bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
-    maintenance: { label: 'Maintenance', icon: WrenchIcon, bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
+    maintenance: { label: 'Maintenance', icon: Wrench, bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
 };
 
 export default function RoomManagement() {
@@ -142,9 +142,9 @@ export default function RoomManagement() {
     });
 
     const counts = {
-        available: rooms.filter(r => r.status === 'available' && !r.activeBooking).length,
-        occupied: rooms.filter(r => r.status === 'occupied' || r.activeBooking).length,
-        maintenance: rooms.filter(r => r.status === 'maintenance').length,
+        available: (rooms || []).filter(r => r && r.status === 'available' && !r.activeBooking).length,
+        occupied: (rooms || []).filter(r => r && (r.status === 'occupied' || r.activeBooking)).length,
+        maintenance: (rooms || []).filter(r => r && r.status === 'maintenance').length,
     };
 
     return (
