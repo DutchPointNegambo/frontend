@@ -321,8 +321,7 @@ const UserManagement = () => {
                                     <input type="text" value={newUser.lastName} onChange={e => setNewUser({ ...newUser, lastName: e.target.value })} className="w-full px-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" placeholder="Doe" />
                                 </div>
                             </div>
-
-                            <div className="grid grid-cols-2 gap-5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Email Address</label>
                                     <div className="relative">
@@ -348,7 +347,7 @@ const UserManagement = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Access Role</label>
                                     <select value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })} className="w-full px-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all appearance-none cursor-pointer font-medium">

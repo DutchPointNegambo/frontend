@@ -37,7 +37,7 @@ const FoodItems = () => {
           numericPrice: 1350,
           rating: 5,
           prepTime: "25-30 min",
-          image: "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1776872599/Gourmet_Sri_Lankan_Fish_Curry_cxja9d.jpg"
         },
         {
           id: 2,
@@ -47,7 +47,7 @@ const FoodItems = () => {
           numericPrice: 2800,
           rating: 5,
           prepTime: "35-40 min",
-          image: "https://images.unsplash.com/photo-1551248429-40975aa4de74?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1776872600/Premium_Seafood_Platter_ldy2zp.jpg"
         },
         {
           id: 3,
@@ -57,7 +57,7 @@ const FoodItems = () => {
           numericPrice: 1100,
           rating: 4.8,
           prepTime: "15-20 min",
-          image: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1776872599/Luxury_Tropical_Breakfast_syatxr.jpg"
         }
       ]
     },
@@ -72,7 +72,7 @@ const FoodItems = () => {
           numericPrice: 1100,
           rating: 4.9,
           prepTime: "15-20 min",
-          image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981767/Chicken_Fried_Rice_fabdjb.jpg"
         },
         {
           id: 5,
@@ -82,7 +82,7 @@ const FoodItems = () => {
           numericPrice: 1300,
           rating: 5,
           prepTime: "20-25 min",
-          image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981769/Seafood_Fried_Rice_rd89ns.jpg"
         },
         {
           id: 6,
@@ -92,7 +92,7 @@ const FoodItems = () => {
           numericPrice: 850,
           rating: 4.7,
           prepTime: "10-15 min",
-          image: "https://images.unsplash.com/photo-1596560548464-f010549b84d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981767/Egg_Fried_Rice_hkacpq.jpg"
         },
         {
           id: 7,
@@ -102,7 +102,7 @@ const FoodItems = () => {
           numericPrice: 800,
           rating: 4.6,
           prepTime: "10-15 min",
-          image: "https://images.unsplash.com/photo-1645696301019-35adcc18fc12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981768/Vegetable_Fried_Rice_cvmee1.jpg"
         },
         {
           id: 8,
@@ -112,7 +112,7 @@ const FoodItems = () => {
           numericPrice: 1250,
           rating: 4.9,
           prepTime: "15-20 min",
-          image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981767/Prawn_Fried_Rice_tekrqe.jpg"
         },
         {
           id: 9,
@@ -122,7 +122,7 @@ const FoodItems = () => {
           numericPrice: 1300,
           rating: 5,
           prepTime: "20-25 min",
-          image: "https://images.unsplash.com/photo-1551326844-4df70f78d0e9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981766/Mixed_Fried_Rice_tdaqjh.jpg"
         }
       ]
     },
@@ -137,7 +137,7 @@ const FoodItems = () => {
           numericPrice: 950,
           rating: 5,
           prepTime: "15-20 min",
-          image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982172/Chicken_Kottu_ne2ufk.jpg"
         },
         {
           id: 11,
@@ -147,7 +147,7 @@ const FoodItems = () => {
           numericPrice: 1100,
           rating: 4.9,
           prepTime: "15-20 min",
-          image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982171/Cheese_Kottu_ragrnr.jpg"
         },
         {
           id: 12,
@@ -157,7 +157,7 @@ const FoodItems = () => {
           numericPrice: 1200,
           rating: 5,
           prepTime: "20-25 min",
-          image: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982171/Seafood_Kottu_iwkjop.jpg"
         },
         {
           id: 13,
@@ -167,7 +167,7 @@ const FoodItems = () => {
           numericPrice: 750,
           rating: 4.7,
           prepTime: "10-15 min",
-          image: "https://images.unsplash.com/photo-1574484284002-952d92456975?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982171/Egg_Kottu_mytssx.jpg"
         },
         {
           id: 14,
@@ -177,7 +177,7 @@ const FoodItems = () => {
           numericPrice: 700,
           rating: 4.6,
           prepTime: "10-15 min",
-          image: "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982172/Vegetable_Kottu_vyaj6h.jpg"
         },
         {
           id: 15,
@@ -187,7 +187,7 @@ const FoodItems = () => {
           numericPrice: 1150,
           rating: 5,
           prepTime: "20-25 min",
-          image: "https://images.unsplash.com/photo-1606491956689-2ea866880e5e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982172/Mixed_Kottu_xuqwbz.jpg"
         }
       ]
     }
