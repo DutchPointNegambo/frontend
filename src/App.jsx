@@ -45,6 +45,7 @@ const AttendanceScanner = lazy(() => import('./pages/admin/AttendanceScanner'))
 const FeedbackManagement = lazy(() => import('./pages/admin/FeedbackManagement'))
 const OrderManagement = lazy(() => import('./pages/admin/OrderManagement'))
 const AdminEventManagement = lazy(() => import('./pages/admin/EventManagement'))
+const PackageManagement = lazy(() => import('./pages/admin/PackageManagement'))
 
 function App() {
 
@@ -104,6 +105,7 @@ function App() {
             <Route path="attendance-scanner" element={<AttendanceScanner />} />
             <Route path="feedback" element={<FeedbackManagement />} />
             <Route path="events" element={<AdminEventManagement />} />
+            <Route path="package-management" element={<PackageManagement />} />
           </Route>
         </Routes>
       </Suspense>

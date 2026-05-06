@@ -37,112 +37,17 @@ const eventTypes = [
     },
 ]
 
-const decorationOptions = [
-    {
-        id: 'simple',
-        name: 'Simple',
-        price: 50000,
-        image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&q=80',
-        description: 'Clean, minimal decor with a fresh and cheerful feel.',
-        includes: [
-            'Balloon clusters (10 pcs)',
-            'Fresh flower centerpieces',
-            'Satin table runners',
-            'Welcome signage',
-            'Fairy lights (perimeter)',
-        ],
-    },
-    {
-        id: 'elegant',
-        name: 'Elegant',
-        price: 75000,
-        image: 'https://images.unsplash.com/photo-1478146059778-26e0a2309283?w=600&q=80',
-        description: 'Sophisticated styling with premium floral arrangements.',
-        includes: [
-            'Premium floral arches',
-            'Crystal candelabras',
-            'Draped ceiling fabric',
-            'Gold or silver themed accents',
-            'Ambient mood lighting',
-            'Personalized backdrop',
-        ],
-    },
-    {
-        id: 'royal',
-        name: 'Royal',
-        price: 100000,
-        image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600&q=80',
-        description: 'Opulent, show-stopping luxury befitting royalty.',
-        includes: [
-            'Grand floral installations',
-            'Hand-crafted chandeliers',
-            'Full venue fabric draping',
-            'Red carpet & stanchions',
-            'Custom neon sign',
-            'Photo booth setup',
-            'Live flower wall',
-        ],
-    },
-]
-
-const foodPackages = [
-    {
-        id: 'standard',
-        name: 'Standard',
-        pricePerHead: 2000,
-        image: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=600&q=80',
-        description: 'A satisfying spread of classic favourites for every guest.',
-        includes: [
-            '3-course set menu',
-            'Soup & bread rolls',
-            'Choice of 2 mains',
-            'Dessert platter',
-            'Soft drinks & juices',
-            'Tea & coffee',
-        ],
-    },
-    {
-        id: 'premium',
-        name: 'Premium',
-        pricePerHead: 5000,
-        image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80',
-        description: 'Elevated dining with richer ingredients and wider choices.',
-        includes: [
-            '4-course gourmet menu',
-            'Canapes on arrival',
-            'Seafood & meat selection',
-            'Chef carving station',
-            'Artisan dessert station',
-            'Mocktail & juice bar',
-            'Sparkling water & soft drinks',
-        ],
-    },
-    {
-        id: 'luxury',
-        name: 'Luxury',
-        pricePerHead: 9500,
-        image: 'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600&q=80',
-        description: 'A full fine-dining experience with live cooking stations.',
-        includes: [
-            '5-course signature menu',
-            'Premium canapes & amuse-bouche',
-            'Live pasta & sushi station',
-            'Whole roast carving station',
-            'Custom wedding / event cake',
-            'Champagne & sparkling wine',
-            'Open cocktail & mocktail bar',
-            'Dedicated personal waitstaff',
-        ],
-    },
-]
-
-const addonOptions = [
-    { id: 'welcome_drinks', name: 'Premium Welcome Drinks', price: 12500, description: 'Chilled fruit juices and mocktails for all guests upon arrival.', icon: '🍹' },
-    { id: 'projector', name: 'Projector & Screen', price: 8500, description: 'High-definition projector and 100-inch screen for presentations/videos.', icon: '📽️' },
-    { id: 'dj_sound', name: 'Professional DJ & Sound', price: 45000, description: 'Pro audio setup with a DJ to keep the party alive.', icon: '🎧' },
-    { id: 'photo_booth', name: 'Interactive Photo Booth', price: 25000, description: 'Fun props and instant prints for guests.', icon: '📸' },
-    { id: 'drone', name: 'Drone Coverage', price: 20000, description: 'Aerial photography and videography for your event.', icon: '🚁' },
-]
+// Fallback data for initial rendering or empty DB
+const DEFAULT_DECORATIONS = [
+    { _id: 'simple', name: 'Simple', price: 50000, description: 'Clean, minimal decor with a fresh and cheerful feel.', image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&q=80', includes: ['Balloon clusters', 'Fresh flower centerpieces'] },
+    { _id: 'elegant', name: 'Elegant', price: 75000, description: 'Sophisticated styling with premium floral arrangements.', image: 'https://images.unsplash.com/photo-1478146059778-26e0a2309283?w=600&q=80', includes: ['Premium floral arches', 'Crystal candelabras'] },
+    { _id: 'royal', name: 'Royal', price: 100000, description: 'Opulent luxury befitting royalty.', image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600&q=80', includes: ['Grand floral installations', 'Hand-crafted chandeliers'] }
+];
+const DEFAULT_FOOD = [
+    { _id: 'standard', name: 'Standard', pricePerHead: 2000, description: 'Satisfying spread of classic favourites.', image: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=600&q=80', includes: ['3-course set menu'] },
+    { _id: 'premium', name: 'Premium', pricePerHead: 5000, description: 'Elevated dining with richer ingredients.', image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80', includes: ['4-course gourmet menu'] }
+];
+const DEFAULT_ADDONS = [];
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 
@@ -156,6 +61,12 @@ const EventManagement = () => {
     const [decorationType, setDecorationType] = useState('simple')
     const [foodPackage, setFoodPackage] = useState('standard')
     const [totalAmount, setTotalAmount] = useState(0)
+
+    // Dynamic Options
+    const [decorationOptions, setDecorationOptions] = useState(DEFAULT_DECORATIONS)
+    const [foodPackages, setFoodPackages] = useState(DEFAULT_FOOD)
+    const [addonOptions, setAddonOptions] = useState(DEFAULT_ADDONS)
+    const [optionsLoading, setOptionsLoading] = useState(true)
 
     // Availability state
     const [dateAvailability, setDateAvailability] = useState(null)   // null | 'loading' | 'available' | 'booked'
@@ -186,8 +97,38 @@ const EventManagement = () => {
         }
     }, [user])
 
-    const selectedDeco = decorationOptions.find(d => d.id === decorationType)
-    const selectedFood = foodPackages.find(f => f.id === foodPackage)
+    // Fetch dynamic options
+    useEffect(() => {
+        const fetchOptions = async () => {
+            try {
+                const res = await fetch(`${API}/event-features`)
+                const data = await res.json()
+                if (Array.isArray(data) && data.length > 0) {
+                    const decos = data.filter(f => f.category === 'decoration')
+                    const foods = data.filter(f => f.category === 'food')
+                    const addons = data.filter(f => f.category === 'addon')
+                    
+                    if (decos.length > 0) {
+                        setDecorationOptions(decos)
+                        setDecorationType(decos[0]._id)
+                    }
+                    if (foods.length > 0) {
+                        setFoodPackages(foods)
+                        setFoodPackage(foods[0]._id)
+                    }
+                    if (addons.length > 0) setAddonOptions(addons)
+                }
+            } catch (err) {
+                console.error('Failed to fetch event packages:', err)
+            } finally {
+                setOptionsLoading(false)
+            }
+        }
+        fetchOptions()
+    }, [])
+
+    const selectedDeco = decorationOptions.find(d => (d._id || d.id) === decorationType)
+    const selectedFood = foodPackages.find(f => (f._id || f.id) === foodPackage)
 
     // Minimum selectable date = today
     const today = new Date().toISOString().split('T')[0]
@@ -648,10 +589,10 @@ const EventManagement = () => {
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                                             {decorationOptions.map((deco) => (
                                                 <button
-                                                    key={deco.id}
-                                                    onClick={() => setDecorationType(deco.id)}
+                                                    key={deco._id || deco.id}
+                                                    onClick={() => setDecorationType(deco._id || deco.id)}
                                                     className={`group rounded-2xl overflow-hidden text-left transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 focus:outline-none
-                                                    ${decorationType === deco.id
+                                                    ${decorationType === (deco._id || deco.id)
                                                             ? 'ring-4 ring-teal-400 ring-offset-2'
                                                             : 'ring-2 ring-transparent'
                                                         }`}
@@ -662,7 +603,7 @@ const EventManagement = () => {
                                                             alt={deco.name}
                                                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                         />
-                                                        {decorationType === deco.id && (
+                                                        {decorationType === (deco._id || deco.id) && (
                                                             <div className="absolute top-3 right-3 w-7 h-7 bg-teal-500 rounded-full flex items-center justify-center shadow-md">
                                                                 <span className="text-white text-xs font-bold">✓</span>
                                                             </div>
@@ -700,10 +641,10 @@ const EventManagement = () => {
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                                             {foodPackages.map((food) => (
                                                 <button
-                                                    key={food.id}
-                                                    onClick={() => setFoodPackage(food.id)}
+                                                    key={food._id || food.id}
+                                                    onClick={() => setFoodPackage(food._id || food.id)}
                                                     className={`group rounded-2xl overflow-hidden text-left transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 focus:outline-none
-                                                    ${foodPackage === food.id
+                                                    ${foodPackage === (food._id || food.id)
                                                             ? 'ring-4 ring-teal-400 ring-offset-2'
                                                             : 'ring-2 ring-transparent'
                                                         }`}
@@ -714,7 +655,7 @@ const EventManagement = () => {
                                                             alt={food.name}
                                                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                         />
-                                                        {foodPackage === food.id && (
+                                                        {foodPackage === (food._id || food.id) && (
                                                             <div className="absolute top-3 right-3 w-7 h-7 bg-teal-500 rounded-full flex items-center justify-center shadow-md">
                                                                 <span className="text-white text-xs font-bold">✓</span>
                                                             </div>
@@ -751,13 +692,13 @@ const EventManagement = () => {
                                         </h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {addonOptions.map(addon => {
-                                                const isSelected = selectedAddons.some(a => a.id === addon.id)
+                                                const isSelected = selectedAddons.some(a => (a._id || a.id) === (addon._id || addon.id))
                                                 return (
                                                     <button
-                                                        key={addon.id}
+                                                        key={addon._id || addon.id}
                                                         onClick={() => {
                                                             if (isSelected) {
-                                                                setSelectedAddons(prev => prev.filter(a => a.id !== addon.id))
+                                                                setSelectedAddons(prev => prev.filter(a => (a._id || a.id) !== (addon._id || addon.id)))
                                                             } else {
                                                                 setSelectedAddons(prev => [...prev, addon])
                                                             }
