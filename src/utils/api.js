@@ -8,7 +8,7 @@ const authHeaders = () => {
     if (userInfo) {
         try {
             token = JSON.parse(userInfo).token;
-        } catch (e) {}
+        } catch (e) { }
     }
     return {
         'Content-Type': 'application/json',
@@ -194,31 +194,31 @@ export async function deleteRoom(id) {
 }
 
 export async function fetchRoomsByCategory(category, packageType, checkIn, checkOut) {
-  let url = `${API_URL}/rooms/category/${category}?`;
-  if (packageType) url += `package=${packageType}&`;
-  if (checkIn) url += `checkIn=${checkIn}&`;
-  if (checkOut) url += `checkOut=${checkOut}&`;
-  const response = await fetch(url);
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.message || 'Failed to fetch rooms');
-  return data;
+    let url = `${API_URL}/rooms/category/${category}?`;
+    if (packageType) url += `package=${packageType}&`;
+    if (checkIn) url += `checkIn=${checkIn}&`;
+    if (checkOut) url += `checkOut=${checkOut}&`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch rooms');
+    return data;
 }
 
 export async function checkRoomAvailability(roomId, checkIn, checkOut) {
-  const response = await fetch(`${API_URL}/rooms/check-availability`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ roomId, checkIn, checkOut }),
-  });
+    const response = await fetch(`${API_URL}/rooms/check-availability`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomId, checkIn, checkOut }),
+    });
 
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.message || 'Failed to check availability');
-  return data;
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to check availability');
+    return data;
 }
 
 export async function fetchGalleryRooms() {
-  const res = await fetch(`${API_URL}/rooms`);
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/rooms`);
+    return handleResponse(res);
 }
 
 //Packages

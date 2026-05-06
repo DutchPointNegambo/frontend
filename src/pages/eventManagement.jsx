@@ -107,7 +107,7 @@ const EventManagement = () => {
                     const decos = data.filter(f => f.category === 'decoration')
                     const foods = data.filter(f => f.category === 'food')
                     const addons = data.filter(f => f.category === 'addon')
-                    
+
                     if (decos.length > 0) {
                         setDecorationOptions(decos)
                         setDecorationType(decos[0]._id)
