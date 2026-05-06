@@ -324,6 +324,14 @@ const EventManagement = () => {
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
+                                    <span className="text-gray-500">Decoration</span>
+                                    <span className="font-semibold text-gray-800 capitalize">{bookingSuccess.decoration?.name || bookingSuccess.decoration || '—'}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Food</span>
+                                    <span className="font-semibold text-gray-800 capitalize">{bookingSuccess.foodPackage?.name || bookingSuccess.foodPackage || '—'}</span>
+                                </div>
+                                <div className="flex justify-between">
                                     <span className="text-gray-500">Slot</span>
                                     <span className="font-semibold text-gray-800 capitalize">
                                         {bookingSuccess.timeSlot === 'day' ? '☀️ Day' : '🌙 Night'}

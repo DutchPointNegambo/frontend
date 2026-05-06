@@ -290,8 +290,8 @@ export default function EventManagement() {
                                     <div><p className="text-navy-400 text-xs mb-0.5">Date</p><p className="font-semibold text-navy-900">{formatDate(selectedBooking.eventDate)}</p></div>
                                     <div><p className="text-navy-400 text-xs mb-0.5">Slot</p><p className="font-semibold text-navy-900 capitalize">{selectedBooking.timeSlot === 'day' ? '☀️ Day' : '🌙 Night'}</p></div>
                                     <div><p className="text-navy-400 text-xs mb-0.5">Guests</p><p className="font-semibold text-navy-900">{selectedBooking.guests}</p></div>
-                                    <div><p className="text-navy-400 text-xs mb-0.5">Decoration</p><p className="font-semibold text-navy-900 capitalize">{selectedBooking.decoration}</p></div>
-                                    <div><p className="text-navy-400 text-xs mb-0.5">Food Package</p><p className="font-semibold text-navy-900 capitalize">{selectedBooking.foodPackage}</p></div>
+                                    <div><p className="text-navy-400 text-xs mb-0.5">Decoration</p><p className="font-semibold text-navy-900 capitalize">{selectedBooking.decoration?.name || selectedBooking.decoration || '—'}</p></div>
+                                    <div><p className="text-navy-400 text-xs mb-0.5">Food Package</p><p className="font-semibold text-navy-900 capitalize">{selectedBooking.foodPackage?.name || selectedBooking.foodPackage || '—'}</p></div>
                                 </div>
                             </div>
 
