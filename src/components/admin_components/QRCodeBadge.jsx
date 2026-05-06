@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { X, Download, Printer, User } from 'lucide-react';
+import { X, Download, Printer, User, Clock } from 'lucide-react';
 
 const QRCodeBadge = ({ employee, onClose }) => {
     const badgeRef = useRef(null);
@@ -70,8 +70,8 @@ const QRCodeBadge = ({ employee, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden" ref={badgeRef}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
+            <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-y-auto max-h-[90vh]" ref={badgeRef}>
                 {/* Header */}
                 <div className="bg-gradient-to-r from-navy-900 to-navy-800 px-6 py-4 flex items-center justify-between">
                     <div>
@@ -95,19 +95,26 @@ const QRCodeBadge = ({ employee, onClose }) => {
                         {employee.department}
                     </span>
 
-                    {/* QR Code — OTP Notice */}
-                    <div className="mt-6 mb-4 flex flex-col items-center gap-3 qr-wrapper">
-                        <div className="p-4 bg-amber-50 border-2 border-amber-200 rounded-2xl text-center w-full">
-                            <div className="w-12 h-12 mx-auto rounded-full bg-amber-100 flex items-center justify-center mb-2">
-                                <span className="text-2xl">🔐</span>
-                            </div>
-                            <p className="text-sm font-bold text-amber-800">Live QR Required</p>
-                            <p className="text-xs text-amber-600 mt-1 leading-relaxed">
-                                This badge is for identification only. For attendance scanning, the employee must show their <strong>live rotating QR</strong> from the Employee Portal.
-                            </p>
+                    {/* QR Code — Permanent Identification */}
+                    <div className="mt-6 mb-4 flex flex-col items-center qr-wrapper">
+                        <div className="p-4 bg-white border-2 border-navy-100 rounded-2xl shadow-sm mb-4">
+                            <QRCodeSVG
+                                value={`ID:${employee.employeeId}`}
+                                size={160}
+                                level="H"
+                                includeMargin={false}
+                                bgColor="#ffffff"
+                                fgColor="#0f172a"
+                            />
                         </div>
-                        <div className="text-xs text-navy-400 italic text-center px-2">
-                            Employee Dashboard → "My Attendance QR"
+                        
+                        <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl text-center w-full">
+                            <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wider flex items-center justify-center gap-1">
+                                <Clock size={10} /> Attendance Notice
+                            </p>
+                            <p className="text-[10px] text-amber-700 mt-1 leading-tight">
+                                This static QR is for ID only. Use <strong>Live QR</strong> from the Employee Portal for attendance.
+                            </p>
                         </div>
                     </div>
 
