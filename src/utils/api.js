@@ -521,3 +521,32 @@ export async function fetchMyLastPayroll() {
     const res = await fetch(`${API_URL}/staff/payroll/last`, { headers: authHeaders() });
     return handleResponse(res);
 }
+
+// Admin: Event Bookings
+export async function fetchAdminEventBookings(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/admin/events?${qs}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function updateEventBookingStatus(id, status) {
+    const res = await fetch(`${API_URL}/admin/events/${id}/status`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ status }),
+    });
+    return handleResponse(res);
+}
+
+export async function updateEventPaymentStatus(id, paymentStatus) {
+    const res = await fetch(`${API_URL}/admin/events/${id}/payment`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ paymentStatus }),
+    });
+    return handleResponse(res);
+}
+export async function fetchMyEventBookings() {
+    const res = await fetch(`${API_URL}/event-bookings/my-bookings`, { headers: authHeaders() });
+    return handleResponse(res);
+}

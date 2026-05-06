@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import Footer from '../components/Footer'
+import { useAuth } from '../context/AuthContext'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -135,9 +136,18 @@ const foodPackages = [
     },
 ]
 
+const addonOptions = [
+    { id: 'welcome_drinks', name: 'Premium Welcome Drinks', price: 12500, description: 'Chilled fruit juices and mocktails for all guests upon arrival.', icon: '🍹' },
+    { id: 'projector', name: 'Projector & Screen', price: 8500, description: 'High-definition projector and 100-inch screen for presentations/videos.', icon: '📽️' },
+    { id: 'dj_sound', name: 'Professional DJ & Sound', price: 45000, description: 'Pro audio setup with a DJ to keep the party alive.', icon: '🎧' },
+    { id: 'photo_booth', name: 'Interactive Photo Booth', price: 25000, description: 'Fun props and instant prints for guests.', icon: '📸' },
+    { id: 'drone', name: 'Drone Coverage', price: 20000, description: 'Aerial photography and videography for your event.', icon: '🚁' },
+]
+
 // ─── Component ─────────────────────────────────────────────────────────────────
 
 const EventManagement = () => {
+    const { user } = useAuth()
     const [step, setStep] = useState(1)
     const [selectedEventType, setSelectedEventType] = useState(null)
     const [eventDate, setEventDate] = useState('')
@@ -157,6 +167,25 @@ const EventManagement = () => {
     const [submitError, setSubmitError] = useState('')
     const [bookingSuccess, setBookingSuccess] = useState(null)  // confirmed booking object
 
+    // Payment state
+    const [paymentType, setPaymentType] = useState('full') // 'deposit' | 'full'
+    const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '', name: '' })
+    const [cardErrors, setCardErrors] = useState({})
+    const [specialRequests, setSpecialRequests] = useState('')
+    const [selectedAddons, setSelectedAddons] = useState([])
+
+    // Pre-fill user info
+    useEffect(() => {
+        if (user) {
+            setGuestInfo({
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
+                email: user.email || '',
+                phone: user.phone || ''
+            })
+        }
+    }, [user])
+
     const selectedDeco = decorationOptions.find(d => d.id === decorationType)
     const selectedFood = foodPackages.find(f => f.id === foodPackage)
 
@@ -166,9 +195,10 @@ const EventManagement = () => {
     // Recalculate total
     useEffect(() => {
         if (selectedDeco && selectedFood) {
-            setTotalAmount(selectedDeco.price + selectedFood.pricePerHead * guestCount)
+            const addonsTotal = selectedAddons.reduce((sum, addon) => sum + addon.price, 0)
+            setTotalAmount(selectedDeco.price + (selectedFood.pricePerHead * guestCount) + addonsTotal)
         }
-    }, [guestCount, decorationType, foodPackage])
+    }, [guestCount, decorationType, foodPackage, selectedAddons])
 
     // ── Live availability check via API ────────────────────────────────────────
     const checkAvailability = useCallback(async (date, slot) => {
@@ -194,13 +224,89 @@ const EventManagement = () => {
         setStep(2)
     }
 
+    // ── Card validation helpers ──────────────────────────────────────────────
+    const luhnCheck = (num) => {
+        const digits = num.replace(/\s/g, '')
+        let sum = 0, alt = false
+        for (let i = digits.length - 1; i >= 0; i--) {
+            let n = parseInt(digits[i], 10)
+            if (alt) { n *= 2; if (n > 9) n -= 9 }
+            sum += n
+            alt = !alt
+        }
+        return sum % 10 === 0
+    }
+
+    const detectBrand = (num) => {
+        const n = num.replace(/\s/g, '')
+        if (/^4/.test(n)) return 'visa'
+        if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n)) return 'mastercard'
+        if (/^3[47]/.test(n)) return 'amex'
+        if (/^6(?:011|5)/.test(n)) return 'discover'
+        return ''
+    }
+
+    const formatCardNumber = (val) => {
+        const digits = val.replace(/\D/g, '').slice(0, 16)
+        return digits.replace(/(.{4})/g, '$1 ').trim()
+    }
+
+    const formatExpiry = (val) => {
+        const digits = val.replace(/\D/g, '').slice(0, 4)
+        if (digits.length >= 3) return digits.slice(0, 2) + '/' + digits.slice(2)
+        return digits
+    }
+
+    const validateCard = () => {
+        const errs = {}
+        const num = cardDetails.number.replace(/\s/g, '')
+        if (!num || num.length < 13) errs.number = 'Card number is required'
+        else if (!luhnCheck(num)) errs.number = 'Invalid card number'
+
+        if (!cardDetails.expiry) errs.expiry = 'Expiry is required'
+        else {
+            const m = cardDetails.expiry.match(/^(0[1-9]|1[0-2])\/(\d{2})$/)
+            if (!m) errs.expiry = 'Use MM/YY format'
+            else {
+                const expY = 2000 + parseInt(m[2], 10), expM = parseInt(m[1], 10), now = new Date()
+                if (expY < now.getFullYear() || (expY === now.getFullYear() && expM < now.getMonth() + 1))
+                    errs.expiry = 'Card has expired'
+            }
+        }
+        if (!cardDetails.cvv || !/^\d{3,4}$/.test(cardDetails.cvv)) errs.cvv = '3 or 4 digits'
+        if (!cardDetails.name?.trim()) errs.name = 'Cardholder name is required'
+
+        setCardErrors(errs)
+        return Object.keys(errs).length === 0
+    }
+
+    const validateGuestInfo = () => {
+        if (!guestInfo.firstName?.trim() || !guestInfo.lastName?.trim() || !guestInfo.email?.trim()) {
+            setSubmitError('First name, last name, and email are required.')
+            return false
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestInfo.email)) {
+            setSubmitError('Please provide a valid email.')
+            return false
+        }
+        if (guestInfo.phone && !/^[0-9]{10}$/.test(guestInfo.phone)) {
+            setSubmitError('Phone must be 10 digits.')
+            return false
+        }
+        return true
+    }
+
     // ── Booking submit ─────────────────────────────────────────────────────────
     const handleBookingSubmit = async (e) => {
         e.preventDefault()
-        setSubmitting(true)
         setSubmitError('')
 
-        const token = localStorage.getItem('token')
+        if (!validateGuestInfo()) return
+        if (!validateCard()) return
+
+        setSubmitting(true)
+
+        const token = user?.token
         if (!token) {
             setSubmitError('You must be logged in to book. Please log in and try again.')
             setSubmitting(false)
@@ -223,6 +329,15 @@ const EventManagement = () => {
                     decoration: decorationType,
                     foodPackage,
                     totalAmount,
+                    paymentType,
+                    cardDetails: {
+                        number: cardDetails.number.replace(/\s/g, ''),
+                        expiry: cardDetails.expiry,
+                        cvv: cardDetails.cvv,
+                        name: cardDetails.name,
+                    },
+                    specialRequests,
+                    addons: selectedAddons.map(a => ({ name: a.name, price: a.price })),
                 }),
             })
 
@@ -231,8 +346,6 @@ const EventManagement = () => {
                 setSubmitError(data.message || 'Booking failed. Please try again.')
             } else {
                 setBookingSuccess(data)
-                setShowModal(false)
-                // Refresh availability so the slot shows as booked
                 checkAvailability(eventDate, timeSlot)
             }
         } catch {
@@ -283,10 +396,26 @@ const EventManagement = () => {
                                     <span className="text-gray-700 font-bold">Total</span>
                                     <span className="font-bold text-teal-600 text-lg">Rs. {bookingSuccess.totalAmount?.toLocaleString()}</span>
                                 </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Paid Now</span>
+                                    <span className="font-bold text-emerald-600">Rs. {bookingSuccess.paidAmount?.toLocaleString()}</span>
+                                </div>
+                                {bookingSuccess.paymentStatus === 'deposit_paid' && (
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">Balance Due</span>
+                                        <span className="font-semibold text-orange-600">Rs. {(bookingSuccess.totalAmount - bookingSuccess.paidAmount)?.toLocaleString()}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Payment</span>
+                                    <span className={`font-semibold text-xs px-2 py-0.5 rounded-full ${bookingSuccess.paymentStatus === 'fully_paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                        {bookingSuccess.paymentStatus === 'fully_paid' ? 'Fully Paid' : 'Deposit Paid (25%)'}
+                                    </span>
+                                </div>
                             </div>
                             <p className="text-gray-400 text-xs text-center">A confirmation will be sent to {bookingSuccess.guestInfo?.email}</p>
                             <button
-                                onClick={() => { setBookingSuccess(null); setStep(1); setSelectedEventType(null); setEventDate(''); setDateAvailability(null) }}
+                                onClick={() => { setBookingSuccess(null); setStep(1); setSelectedEventType(null); setEventDate(''); setDateAvailability(null); setCardDetails({ number: '', expiry: '', cvv: '', name: '' }); setCardErrors({}); setGuestInfo({ firstName: '', lastName: '', email: '', phone: '' }); setPaymentType('full'); setSpecialRequests('') }}
                                 className="w-full py-3 rounded-xl font-bold text-white transition-all hover:opacity-90"
                                 style={{ background: 'linear-gradient(135deg,#14b8a6,#0d9488)' }}
                             >
@@ -316,10 +445,14 @@ const EventManagement = () => {
 
                     {/* Step indicator */}
                     <div className="flex items-center justify-center gap-4 mt-8">
-                        {[1, 2].map((s) => (
+                        {[1, 2, 3].map((s) => (
                             <div key={s} className="flex items-center gap-2">
                                 <button
-                                    onClick={() => s === 1 ? setStep(1) : (selectedEventType && setStep(2))}
+                                    onClick={() => {
+                                        if (s === 1) setStep(1)
+                                        else if (s === 2 && selectedEventType) setStep(2)
+                                        else if (s === 3 && selectedEventType && eventDate && dateAvailability === 'available') setStep(3)
+                                    }}
                                     className={`w-9 h-9 rounded-full font-bold text-sm transition-all duration-300 flex items-center justify-center
                                         ${step === s
                                             ? 'bg-navy-900 text-white shadow-lg scale-110'
@@ -332,9 +465,9 @@ const EventManagement = () => {
                                     {s < step ? '✓' : s}
                                 </button>
                                 <span className={`text-sm font-medium ${step === s ? 'text-gray-900' : 'text-gray-400'}`}>
-                                    {s === 1 ? 'Event Type' : 'Customise'}
+                                    {s === 1 ? 'Event Type' : s === 2 ? 'Customise' : 'Payment'}
                                 </span>
-                                {s < 2 && <div className={`w-12 h-0.5 ${step > s ? 'bg-teal-500' : 'bg-gray-200'}`} />}
+                                {s < 3 && <div className={`w-12 h-0.5 ${step > s ? 'bg-teal-500' : 'bg-gray-200'}`} />}
                             </div>
                         ))}
                     </div>
@@ -609,6 +742,44 @@ const EventManagement = () => {
                                         ))}
                                     </div>
                                 </div>
+
+                                {/* Add-ons Section */}
+                                <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 mb-8">
+                                    <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                                        <span className="p-2 bg-teal-50 text-teal-600 rounded-xl">➕</span>
+                                        Optional Add-ons
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {addonOptions.map(addon => {
+                                            const isSelected = selectedAddons.some(a => a.id === addon.id)
+                                            return (
+                                                <button
+                                                    key={addon.id}
+                                                    onClick={() => {
+                                                        if (isSelected) {
+                                                            setSelectedAddons(prev => prev.filter(a => a.id !== addon.id))
+                                                        } else {
+                                                            setSelectedAddons(prev => [...prev, addon])
+                                                        }
+                                                    }}
+                                                    className={`flex items-start gap-4 p-4 rounded-2xl border-2 text-left transition-all duration-200 ${
+                                                        isSelected ? 'border-teal-500 bg-teal-50/50 shadow-md ring-4 ring-teal-500/10' : 'border-gray-100 bg-white hover:border-gray-200 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    <span className="text-3xl">{addon.icon}</span>
+                                                    <div className="flex-1">
+                                                        <div className="flex justify-between items-start mb-1">
+                                                            <h4 className="font-bold text-gray-900 leading-tight text-sm">{addon.name}</h4>
+                                                            {isSelected && <span className="text-teal-600 text-sm">✓</span>}
+                                                        </div>
+                                                        <p className="text-[10px] text-gray-500 line-clamp-2 mb-2">{addon.description}</p>
+                                                        <p className="text-xs font-bold text-teal-600">Rs. {addon.price.toLocaleString()}</p>
+                                                    </div>
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Right Column: Summary */}
@@ -666,6 +837,20 @@ const EventManagement = () => {
                                                 </div>
                                                 <span className="font-semibold">Rs. {((selectedFood?.pricePerHead || 0) * guestCount).toLocaleString()}</span>
                                             </div>
+                                            {/* Add-ons */}
+                                            {selectedAddons.length > 0 && (
+                                                <div className="py-3 border-b border-white/10">
+                                                    <p className="text-white/60 text-xs mb-2">Add-ons</p>
+                                                    <div className="space-y-1.5">
+                                                        {selectedAddons.map(a => (
+                                                            <div key={a.id} className="flex justify-between text-xs">
+                                                                <span className="text-white/80">• {a.name}</span>
+                                                                <span className="font-medium">Rs. {a.price.toLocaleString()}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                             {/* Total */}
                                             <div className="flex justify-between items-center pt-4">
                                                 <span className="text-lg font-bold">Total Estimate</span>
@@ -678,16 +863,169 @@ const EventManagement = () => {
                                                 if (!eventDate) return alert('Please select an event date first.')
                                                 if (dateAvailability === 'booked') return alert('This slot is already booked. Please choose a different date or slot.')
                                                 if (dateAvailability !== 'available') return alert('Please wait for availability to be confirmed.')
-                                                setShowModal(true)
+                                                setStep(3)
                                             }}
                                             className="w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5"
                                             style={{ background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }}
                                         >
-                                            Proceed to Booking →
+                                            Proceed to Payment →
                                         </button>
                                         <p className="text-xs text-white/40 text-center mt-4">
                                             *Final prices may vary based on specific requirements and seasonal availability.
                                         </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── STEP 3: Payment & Guest Details ────────────────────────────*/}
+                {step === 3 && selectedEventType && (
+                    <div className="animate-fade-in-up">
+                        <div className="flex items-center gap-3 mb-8">
+                            <button onClick={() => setStep(2)} className="text-sm text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1 transition-colors">← Back to Customise</button>
+                            <span className="text-gray-300">|</span>
+                            <span className="text-2xl">{selectedEventType.icon}</span>
+                            <span className="font-semibold text-gray-700">{selectedEventType.name}</span>
+                        </div>
+                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                            <div className="xl:col-span-2 space-y-8">
+                                {/* Guest Info */}
+                                <div className="bg-white rounded-2xl shadow-md p-6">
+                                    <h3 className="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2"><span className="text-2xl">👤</span> Guest Details</h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1">First Name *</label>
+                                            <input type="text" placeholder="Jane" value={guestInfo.firstName} onChange={e => setGuestInfo(g => ({ ...g, firstName: e.target.value }))} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1">Last Name *</label>
+                                            <input type="text" placeholder="Smith" value={guestInfo.lastName} onChange={e => setGuestInfo(g => ({ ...g, lastName: e.target.value }))} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1">Email *</label>
+                                            <input type="email" placeholder="jane@example.com" value={guestInfo.email} onChange={e => setGuestInfo(g => ({ ...g, email: e.target.value }))} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1">Phone</label>
+                                            <input type="tel" placeholder="0712345678" value={guestInfo.phone} onChange={e => { const val = e.target.value.replace(/\D/g, '').slice(0, 10); setGuestInfo(g => ({ ...g, phone: val })) }} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400" />
+                                        </div>
+                                    </div>
+                                    <div className="mt-4">
+                                        <label className="block text-xs font-semibold text-gray-600 mb-1">Special Requests</label>
+                                        <textarea rows={2} placeholder="Any dietary requirements, setup preferences..." value={specialRequests} onChange={e => setSpecialRequests(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 resize-none" />
+                                    </div>
+                                </div>
+                                {/* Payment Type */}
+                                <div className="bg-white rounded-2xl shadow-md p-6">
+                                    <h3 className="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2"><span className="text-2xl">💳</span> Payment Option</h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <button type="button" onClick={() => setPaymentType('deposit')} className={`p-5 rounded-2xl border-2 text-left transition-all duration-200 ${paymentType === 'deposit' ? 'border-teal-500 bg-teal-50 shadow-md' : 'border-gray-200 bg-white hover:border-gray-300'}`}>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="font-bold text-gray-900">Pay Deposit</span>
+                                                {paymentType === 'deposit' && <span className="w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center"><span className="text-white text-xs">✓</span></span>}
+                                            </div>
+                                            <p className="text-2xl font-bold text-teal-600 mb-1">Rs. {Math.round(totalAmount * 0.25).toLocaleString()}</p>
+                                            <p className="text-xs text-gray-500">25% of total · Balance due on event day</p>
+                                        </button>
+                                        <button type="button" onClick={() => setPaymentType('full')} className={`p-5 rounded-2xl border-2 text-left transition-all duration-200 ${paymentType === 'full' ? 'border-teal-500 bg-teal-50 shadow-md' : 'border-gray-200 bg-white hover:border-gray-300'}`}>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="font-bold text-gray-900">Pay in Full</span>
+                                                {paymentType === 'full' && <span className="w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center"><span className="text-white text-xs">✓</span></span>}
+                                            </div>
+                                            <p className="text-2xl font-bold text-teal-600 mb-1">Rs. {totalAmount.toLocaleString()}</p>
+                                            <p className="text-xs text-gray-500">Full amount · No balance remaining</p>
+                                        </button>
+                                    </div>
+                                </div>
+                                {/* Card Details */}
+                                <div className="bg-white rounded-2xl shadow-md p-6">
+                                    <h3 className="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2"><span className="text-2xl">🔒</span> Card Details</h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1">Card Number *</label>
+                                            <div className="relative">
+                                                <input type="text" placeholder="4242 4242 4242 4242" value={cardDetails.number} onChange={e => { setCardDetails(c => ({ ...c, number: formatCardNumber(e.target.value) })); setCardErrors(e2 => ({ ...e2, number: undefined })) }} maxLength={19} className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 ${cardErrors.number ? 'border-red-300 focus:ring-red-400' : 'border-gray-200 focus:ring-teal-400'}`} />
+                                                {detectBrand(cardDetails.number) && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 uppercase">{detectBrand(cardDetails.number)}</span>}
+                                            </div>
+                                            {cardErrors.number && <p className="text-red-500 text-xs mt-1">{cardErrors.number}</p>}
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-semibold text-gray-600 mb-1">Expiry *</label>
+                                                <input type="text" placeholder="MM/YY" value={cardDetails.expiry} onChange={e => { setCardDetails(c => ({ ...c, expiry: formatExpiry(e.target.value) })); setCardErrors(e2 => ({ ...e2, expiry: undefined })) }} maxLength={5} className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 ${cardErrors.expiry ? 'border-red-300 focus:ring-red-400' : 'border-gray-200 focus:ring-teal-400'}`} />
+                                                {cardErrors.expiry && <p className="text-red-500 text-xs mt-1">{cardErrors.expiry}</p>}
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-gray-600 mb-1">CVV *</label>
+                                                <input type="text" placeholder="123" value={cardDetails.cvv} onChange={e => { const v = e.target.value.replace(/\D/g, '').slice(0, 4); setCardDetails(c => ({ ...c, cvv: v })); setCardErrors(e2 => ({ ...e2, cvv: undefined })) }} maxLength={4} className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 ${cardErrors.cvv ? 'border-red-300 focus:ring-red-400' : 'border-gray-200 focus:ring-teal-400'}`} />
+                                                {cardErrors.cvv && <p className="text-red-500 text-xs mt-1">{cardErrors.cvv}</p>}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1">Cardholder Name *</label>
+                                            <input type="text" placeholder="JANE SMITH" value={cardDetails.name} onChange={e => { setCardDetails(c => ({ ...c, name: e.target.value })); setCardErrors(e2 => ({ ...e2, name: undefined })) }} className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 ${cardErrors.name ? 'border-red-300 focus:ring-red-400' : 'border-gray-200 focus:ring-teal-400'}`} />
+                                            {cardErrors.name && <p className="text-red-500 text-xs mt-1">{cardErrors.name}</p>}
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-3 flex items-center gap-1">🔒 Your card details are validated locally. This is a simulated payment.</p>
+                                </div>
+                            </div>
+                            {/* Right: Order Summary */}
+                            <div className="xl:col-span-1">
+                                <div className="sticky top-28 rounded-2xl shadow-xl overflow-hidden" style={{ background: '#0f2942' }}>
+                                    <div className="p-6 text-white">
+                                        <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
+                                        <div className="space-y-3 mb-6">
+                                            <div className="flex items-center gap-3 py-3 border-b border-white/10">
+                                                <span className="text-xl">{selectedEventType.icon}</span>
+                                                <div className="flex-1"><p className="text-white/60 text-xs">Event</p><p className="font-medium text-sm">{selectedEventType.name}</p></div>
+                                            </div>
+                                            <div className="flex justify-between items-center py-3 border-b border-white/10">
+                                                <div><p className="text-white/60 text-xs">Date &amp; Slot</p><p className="font-medium text-sm">{eventDate ? `${new Date(eventDate + 'T12:00:00').toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })} · ${timeSlot === 'day' ? '☀️ Day' : '🌙 Night'}` : 'N/A'}</p></div>
+                                            </div>
+                                            <div className="flex justify-between items-center py-3 border-b border-white/10">
+                                                <div><p className="text-white/60 text-xs">Guests</p><p className="font-medium text-sm">{guestCount} people</p></div>
+                                            </div>
+                                            <div className="flex justify-between items-center py-3 border-b border-white/10">
+                                                <div><p className="text-white/60 text-xs">Decoration</p><p className="font-medium text-sm capitalize">{selectedDeco?.name}</p></div>
+                                                <span className="font-semibold">Rs. {selectedDeco?.price.toLocaleString()}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center py-3 border-b border-white/10">
+                                                <div><p className="text-white/60 text-xs">Food ({guestCount} × Rs. {selectedFood?.pricePerHead.toLocaleString()})</p><p className="font-medium text-sm capitalize">{selectedFood?.name} Package</p></div>
+                                                <span className="font-semibold">Rs. {((selectedFood?.pricePerHead || 0) * guestCount).toLocaleString()}</span>
+                                            </div>
+                                            {/* Add-ons */}
+                                            {selectedAddons.length > 0 && (
+                                                <div className="py-3 border-b border-white/10">
+                                                    <p className="text-white/60 text-xs mb-2">Add-ons</p>
+                                                    <div className="space-y-1.5">
+                                                        {selectedAddons.map(a => (
+                                                            <div key={a.id} className="flex justify-between text-[11px]">
+                                                                <span className="text-white/80">• {a.name}</span>
+                                                                <span className="font-medium">Rs. {a.price.toLocaleString()}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            <div className="flex justify-between items-center pt-3 border-b border-white/10 pb-3">
+                                                <span className="text-lg font-bold">Total</span>
+                                                <span className="text-2xl font-bold text-teal-400">Rs. {totalAmount.toLocaleString()}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center pt-2">
+                                                <span className="text-sm font-semibold text-white/80">Paying Now</span>
+                                                <span className="text-xl font-bold text-emerald-400">Rs. {paymentType === 'deposit' ? Math.round(totalAmount * 0.25).toLocaleString() : totalAmount.toLocaleString()}</span>
+                                            </div>
+                                            {paymentType === 'deposit' && <p className="text-xs text-amber-300">Balance of Rs. {Math.round(totalAmount * 0.75).toLocaleString()} due on event day</p>}
+                                        </div>
+                                        {submitError && <div className="bg-red-500/20 border border-red-400/30 text-red-200 text-sm rounded-xl px-4 py-3 mb-4">{submitError}</div>}
+                                        <button onClick={handleBookingSubmit} disabled={submitting} className="w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2" style={{ background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }}>
+                                            {submitting ? (<><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" /></svg>Processing…</>) : `Confirm & Pay Rs. ${paymentType === 'deposit' ? Math.round(totalAmount * 0.25).toLocaleString() : totalAmount.toLocaleString()}`}
+                                        </button>
+                                        {!user && <p className="text-xs text-white/40 text-center mt-4">You must be logged in to complete your booking.</p>}
+                                        {user && <p className="text-xs text-emerald-400/60 text-center mt-4">✓ You are logged in as {user.firstName}</p>}
                                     </div>
                                 </div>
                             </div>
@@ -700,7 +1038,6 @@ const EventManagement = () => {
             {showModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
-                        {/* Modal Header */}
                         <div className="p-6 text-white" style={{ background: 'linear-gradient(135deg,#0f2942,#1a4a72)' }}>
                             <div className="flex justify-between items-start">
                                 <div>
@@ -709,94 +1046,10 @@ const EventManagement = () => {
                                 </div>
                                 <button onClick={() => { setShowModal(false); setSubmitError('') }} className="text-white/60 hover:text-white text-2xl leading-none">×</button>
                             </div>
-                            {/* Quick summary */}
-                            <div className="mt-4 bg-white/10 rounded-xl px-4 py-3 text-sm space-y-1">
-                                <div className="flex justify-between">
-                                    <span className="text-white/60">Date</span>
-                                    <span className="font-medium">
-                                        {new Date(eventDate + 'T12:00:00').toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                        {' · '}{timeSlot === 'day' ? '☀️ Day' : '🌙 Night'}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-white/60">Total</span>
-                                    <span className="font-bold text-teal-300">Rs. {totalAmount.toLocaleString()}</span>
-                                </div>
-                            </div>
                         </div>
-
-                        {/* Modal Body */}
-                        <form onSubmit={handleBookingSubmit} className="p-6 space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-600 mb-1">First Name *</label>
-                                    <input
-                                        required
-                                        type="text"
-                                        placeholder="Jane"
-                                        value={guestInfo.firstName}
-                                        onChange={e => setGuestInfo(g => ({ ...g, firstName: e.target.value }))}
-                                        className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-600 mb-1">Last Name *</label>
-                                    <input
-                                        required
-                                        type="text"
-                                        placeholder="Smith"
-                                        value={guestInfo.lastName}
-                                        onChange={e => setGuestInfo(g => ({ ...g, lastName: e.target.value }))}
-                                        className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">Email *</label>
-                                <input
-                                    required
-                                    type="email"
-                                    placeholder="jane@example.com"
-                                    value={guestInfo.email}
-                                    onChange={e => setGuestInfo(g => ({ ...g, email: e.target.value }))}
-                                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">Phone</label>
-                                <input
-                                    type="tel"
-                                    placeholder="+1 555 000 0000"
-                                    value={guestInfo.phone}
-                                    onChange={e => setGuestInfo(g => ({ ...g, phone: e.target.value }))}
-                                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
-                                />
-                            </div>
-
-                            {submitError && (
-                                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
-                                    {submitError}
-                                </div>
-                            )}
-
-                            <button
-                                type="submit"
-                                disabled={submitting}
-                                className="w-full py-3.5 rounded-xl font-bold text-white text-base transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                style={{ background: 'linear-gradient(135deg,#14b8a6,#0d9488)' }}
-                            >
-                                {submitting ? (
-                                    <>
-                                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                                        </svg>
-                                        Confirming…
-                                    </>
-                                ) : 'Confirm Booking'}
-                            </button>
-                            <p className="text-center text-xs text-gray-400">You must be logged in to complete your booking.</p>
-                        </form>
+                        <div className="p-6 text-center text-gray-500">
+                            <p>Please use the Step 3 payment form instead.</p>
+                        </div>
                     </div>
                 </div>
             )}
