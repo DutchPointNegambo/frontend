@@ -388,25 +388,13 @@ const OrderManagement = () => {
                             )}
                         </div>
 
-                        {/* Modal Footer - Actions */}
-                        <div className="px-8 py-6 border-t border-navy-50 bg-white flex flex-wrap gap-3">
+                        {/* Modal Footer - Actions (Status managed by Kitchen) */}
+                        <div className="px-8 py-6 border-t border-navy-50 bg-white flex justify-end">
                             <button 
-                                onClick={() => handleStatusUpdate(selectedOrder._id, 'preparing')}
-                                className="flex-1 bg-indigo-50 text-indigo-600 px-4 py-3 rounded-xl hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center font-bold text-sm"
+                                onClick={() => setIsDetailModalOpen(false)}
+                                className="px-8 py-3 bg-navy-900 text-white rounded-xl hover:bg-teal-700 transition-all font-bold text-sm"
                             >
-                                <RefreshCw size={18} className="mr-2" /> Start Preparing
-                            </button>
-                            <button 
-                                onClick={() => handleStatusUpdate(selectedOrder._id, 'delivered')}
-                                className="flex-1 bg-green-50 text-green-600 px-4 py-3 rounded-xl hover:bg-green-600 hover:text-white transition-all flex items-center justify-center font-bold text-sm"
-                            >
-                                <CheckCircle size={18} className="mr-2" /> Mark Delivered
-                            </button>
-                            <button 
-                                onClick={() => handleStatusUpdate(selectedOrder._id, 'cancelled')}
-                                className="px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all flex items-center justify-center font-bold text-sm"
-                            >
-                                <XCircle size={18} />
+                                Close Details
                             </button>
                         </div>
                     </div>
