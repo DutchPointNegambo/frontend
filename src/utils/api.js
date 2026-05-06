@@ -329,11 +329,11 @@ export async function getEmployeeQR(id) {
 
 //Admin: Attendance
 
-export async function scanAttendance(employeeId) {
+export async function scanAttendance(token) {
     const res = await fetch(`${API_URL}/admin/attendance/scan`, {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ employeeId }),
+        body: JSON.stringify({ token }),
     });
     return handleResponse(res);
 }
@@ -519,6 +519,11 @@ export async function fetchMyAttendance(params = {}) {
 
 export async function fetchMyLastPayroll() {
     const res = await fetch(`${API_URL}/staff/payroll/last`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function fetchMyQRToken() {
+    const res = await fetch(`${API_URL}/staff/my-qr-token`, { headers: authHeaders() });
     return handleResponse(res);
 }
 

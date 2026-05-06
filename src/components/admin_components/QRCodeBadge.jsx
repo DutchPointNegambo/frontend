@@ -95,17 +95,19 @@ const QRCodeBadge = ({ employee, onClose }) => {
                         {employee.department}
                     </span>
 
-                    {/* QR Code */}
-                    <div className="mt-6 mb-4 flex justify-center qr-wrapper">
-                        <div className="p-4 bg-white border-2 border-navy-100 rounded-2xl shadow-sm">
-                            <QRCodeSVG
-                                value={employee.employeeId}
-                                size={180}
-                                level="H"
-                                includeMargin={false}
-                                bgColor="#ffffff"
-                                fgColor="#0f172a"
-                            />
+                    {/* QR Code — OTP Notice */}
+                    <div className="mt-6 mb-4 flex flex-col items-center gap-3 qr-wrapper">
+                        <div className="p-4 bg-amber-50 border-2 border-amber-200 rounded-2xl text-center w-full">
+                            <div className="w-12 h-12 mx-auto rounded-full bg-amber-100 flex items-center justify-center mb-2">
+                                <span className="text-2xl">🔐</span>
+                            </div>
+                            <p className="text-sm font-bold text-amber-800">Live QR Required</p>
+                            <p className="text-xs text-amber-600 mt-1 leading-relaxed">
+                                This badge is for identification only. For attendance scanning, the employee must show their <strong>live rotating QR</strong> from the Employee Portal.
+                            </p>
+                        </div>
+                        <div className="text-xs text-navy-400 italic text-center px-2">
+                            Employee Dashboard → "My Attendance QR"
                         </div>
                     </div>
 
