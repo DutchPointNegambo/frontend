@@ -338,7 +338,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                             {detectBrand(cardDetails.number) && (
                                                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-blue-500 uppercase">
                                                     {detectBrand(cardDetails.number)}
-                                                }</span>
+                                                </span>
                                             )}
                                         </div>
                                         {cardErrors.number && <p className="text-red-500 text-[10px] font-bold mt-1 px-1">{cardErrors.number}</p>}

@@ -530,6 +530,35 @@ export async function fetchMyQRToken() {
 // Foods
 export async function fetchFoods() {
     const res = await fetch(`${API_URL}/foods`);
+    return handleResponse(res);
+}
+
+export async function createFood(payload) {
+    const res = await fetch(`${API_URL}/admin/foods`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function updateFood(id, payload) {
+    const res = await fetch(`${API_URL}/admin/foods/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function deleteFood(id) {
+    const res = await fetch(`${API_URL}/admin/foods/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+    });
+    return handleResponse(res);
+}
+
 // Admin: Event Bookings
 export async function fetchAdminEventBookings(params = {}) {
     const qs = new URLSearchParams(params).toString();
