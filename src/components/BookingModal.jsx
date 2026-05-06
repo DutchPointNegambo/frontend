@@ -113,7 +113,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
 
                     {step === 1 && (
                         <form onSubmit={(e) => { e.preventDefault(); setStep(2); }} className="space-y-4 animate-fade-in">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">First Name</label>
                                     <input 
@@ -140,7 +140,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Email Address</label>
                                     <input 
@@ -194,7 +194,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                     <Calendar className="text-blue-500" size={18} /> Booking Summary
                                 </h3>
                                 
-                                <div className="grid grid-cols-2 gap-6 pb-4 border-b border-navy-100">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-4 border-b border-navy-100">
                                     <div>
                                         <label className="text-[10px] text-navy-400 font-bold uppercase tracking-widest block mb-1">Check-In</label>
                                         <p className="text-navy-800 font-bold">{new Date(checkIn).toLocaleDateString()} at 10:00 AM</p>
@@ -229,7 +229,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
 
                             <div className="space-y-3">
                                 <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest block px-1">Payment Method</label>
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <button 
                                         onClick={() => setFormData(prev => ({ ...prev, paymentMethod: 'onsite' }))}
                                         className={`flex items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all ${formData.paymentMethod === 'onsite' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-navy-100 text-navy-400 hover:border-navy-200'}`}

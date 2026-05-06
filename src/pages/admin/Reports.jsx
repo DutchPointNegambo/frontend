@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, Calendar, Download, RefreshCw, ClipboardList } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Calendar, Download, RefreshCw, ClipboardList, Sparkles } from 'lucide-react';
+import AiExecutiveSummary from '../../components/admin_components/AiExecutiveSummary';
 import { fetchReportSummary, fetchMonthlyReport, fetchBookingReport, fetchOrderReport } from '../../utils/api';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -32,6 +33,7 @@ const Reports = () => {
     const [monthly, setMonthly] = useState([]);
     const [loading, setLoading] = useState(true);
     const [chartMode, setChartMode] = useState('revenue'); // 'revenue' or 'count'
+    const [showAiSummary, setShowAiSummary] = useState(false);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -108,12 +110,25 @@ const Reports = () => {
                     <button onClick={load} disabled={loading} className="p-2.5 bg-white border border-navy-200 text-navy-600 rounded-xl hover:bg-navy-50 shadow-sm disabled:opacity-50">
                         <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
                     </button>
+                    <button 
+                        onClick={() => setShowAiSummary(!showAiSummary)} 
+                        className={`px-4 py-2.5 rounded-xl flex items-center transition-all shadow-sm text-sm font-medium ${showAiSummary ? 'bg-teal-600 text-white' : 'bg-white border border-navy-200 text-navy-600 hover:bg-navy-50'}`}
+                    >
+                        <Sparkles size={15} className={`mr-2 ${showAiSummary ? 'animate-pulse' : ''}`} />
+                        {showAiSummary ? 'Hide AI Insights' : 'AI Smart Insights'}
+                    </button>
                     <button onClick={handleDownloadDetailed} className="bg-navy-900 text-white px-4 py-2.5 rounded-xl flex items-center hover:bg-teal-700 shadow-sm text-sm font-medium">
                         <Download size={15} className="mr-2" />
                         Export CSV
                     </button>
                 </div>
             </div>
+
+            {showAiSummary && (
+                <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+                    <AiExecutiveSummary />
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {topStats.map((stat, i) => (
