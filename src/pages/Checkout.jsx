@@ -13,15 +13,73 @@ const Checkout = () => {
     phone: '',
     notes: '',
   })
+  const [formErrors, setFormErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  const validateField = (name, value) => {
+    let error = ''
+    
+    if (name === 'name') {
+      if (!value.trim()) {
+        error = 'Full name is required'
+      } else if (value.trim().length < 3) {
+        error = 'Name must be at least 3 characters'
+      }
+    }
+
+    if (name === 'email') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!value.trim()) {
+        error = 'Email address is required'
+      } else if (!emailRegex.test(value)) {
+        error = 'Please enter a valid email address'
+      }
+    }
+
+    if (name === 'phone') {
+      const phoneClean = value.replace(/\s/g, '')
+      const phoneRegex = /^[0-9]{10}$/
+      if (!value.trim()) {
+        error = 'Phone number is required'
+      } else if (!phoneRegex.test(phoneClean)) {
+        error = 'Enter a valid number'
+      }
+    }
+
+    setFormErrors(prev => ({ ...prev, [name]: error }))
+    return !error
+  }
+
+  const validateForm = () => {
+    const nameValid = validateField('name', formData.name)
+    const emailValid = validateField('email', formData.email)
+    const phoneValid = validateField('phone', formData.phone)
+    return nameValid && emailValid && phoneValid
+  }
+
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+    const { name, value } = e.target
+    
+    // Prevent invalid characters in phone field
+    if (name === 'phone') {
+      const sanitizedValue = value.replace(/[^0-9]/g, '').slice(0, 10)
+      setFormData(prev => ({ ...prev, [name]: sanitizedValue }))
+      validateField(name, sanitizedValue)
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }))
+      validateField(name, value)
+    }
   }
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault()
+    
+    if (!validateForm()) {
+      setError('Please fix the errors in the form before proceeding.')
+      return
+    }
+
     setLoading(true)
     setError(null)
 
@@ -203,36 +261,39 @@ const Checkout = () => {
                   <input
                     type="text"
                     name="name"
-                    required
+                    maxLength={50}
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-navy-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all text-sm text-navy-950"
+                    className={`w-full px-4 py-3 rounded-xl border ${formErrors.name ? 'border-red-500' : 'border-navy-200'} focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all text-sm text-navy-950`}
                     placeholder="Your name"
                   />
+                  {formErrors.name && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-1">{formErrors.name}</p>}
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-navy-600 uppercase tracking-widest mb-1">Email *</label>
                   <input
                     type="email"
                     name="email"
-                    required
+                    maxLength={100}
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-navy-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all text-sm text-navy-950"
+                    className={`w-full px-4 py-3 rounded-xl border ${formErrors.email ? 'border-red-500' : 'border-navy-200'} focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all text-sm text-navy-950`}
                     placeholder="your@email.com"
                   />
+                  {formErrors.email && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-1">{formErrors.email}</p>}
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-navy-600 uppercase tracking-widest mb-1">Phone *</label>
                   <input
                     type="tel"
                     name="phone"
-                    required
+                    maxLength={10}
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-navy-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all text-sm text-navy-950"
+                    className={`w-full px-4 py-3 rounded-xl border ${formErrors.phone ? 'border-red-500' : 'border-navy-200'} focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all text-sm text-navy-950`}
                     placeholder="07XXXXXXXX"
                   />
+                  {formErrors.phone && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-1">{formErrors.phone}</p>}
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-navy-600 uppercase tracking-widest mb-1">Special Notes</label>

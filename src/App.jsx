@@ -26,6 +26,7 @@ import Checkout from './pages/Checkout'
 import PaymentSuccess from './pages/PaymentSuccess'
 import EmployeeDashboard from "./pages/EmployeeDashboard"
 import EmployeeLayout from "./pages/employee/EmployeeLayout"
+import EmployeeQR from "./pages/employee/EmployeeQR"
 
 import AddRoomForm from './components/admin_components/AddRoomForm'
 import useIdleTimeout from './hooks/useIdleTimeout'
@@ -90,6 +91,7 @@ function App() {
           <Route path="/payment-success/:orderId" element={<PaymentSuccess />} />
           <Route path="/employee" element={<EmployeeLayout />}>
             <Route path="dashboard" element={<EmployeeDashboard />} />
+            <Route path="my-qr" element={<EmployeeQR />} />
           </Route>
           
           {/* Admin Routes */}
