@@ -20,7 +20,7 @@ const EmployeeSidebar = () => {
 
     const menuItems = [
         { name: 'Dashboard', icon: LayoutDashboard, path: '/employee/dashboard' },
-        { name: 'Attendance QR', icon: QrCode, path: '/employee/dashboard?tab=qr' },
+        { name: 'My Attendance QR', icon: QrCode, path: '/employee/my-qr' },
         { name: 'Attendance', icon: CalendarCheck, path: '/employee/dashboard?tab=attendance' },
         { name: 'Payroll', icon: CreditCard, path: '/employee/dashboard?tab=payroll' },
         { name: 'My Profile', icon: UserCircle, path: '/employee/dashboard?tab=profile' },
@@ -31,7 +31,12 @@ const EmployeeSidebar = () => {
         navigate('/login');
     };
 
-    const isActive = (path) => location.pathname + location.search === path;
+    const isActive = (path) => {
+        if (path.includes('?')) {
+            return location.pathname + location.search === path;
+        }
+        return location.pathname === path;
+    };
 
     return (
         <div className="h-screen w-64 bg-navy-950 text-white fixed left-0 top-0 flex flex-col shadow-2xl z-40">
