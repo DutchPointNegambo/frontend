@@ -164,90 +164,94 @@ const FoodOrdering = () => {
 
             {/* Add/Edit Item Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-                        <h2 className="text-2xl font-bold text-navy-900 mb-4">{isEditing ? 'Edit Menu Item' : 'Add New Menu Item'}</h2>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-navy-700 mb-1">Item Name</label>
-                                <input
-                                    required
-                                    type="text"
-                                    value={newItem.name}
-                                    onChange={e => setNewItem({ ...newItem, name: e.target.value })}
-                                    className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="p-6 border-b border-navy-100 flex-shrink-0">
+                            <h2 className="text-2xl font-bold text-navy-900">{isEditing ? 'Edit Menu Item' : 'Add New Menu Item'}</h2>
+                        </div>
+                        <div className="overflow-y-auto flex-1">
+                            <form onSubmit={handleSubmit} className="p-6 space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-navy-700 mb-1">Price (Rs.)</label>
+                                    <label className="block text-sm font-medium text-navy-700 mb-1">Item Name</label>
                                     <input
                                         required
-                                        type="number"
-                                        step="0.01"
-                                        value={newItem.price}
-                                        onChange={e => setNewItem({ ...newItem, price: e.target.value })}
+                                        type="text"
+                                        value={newItem.name}
+                                        onChange={e => setNewItem({ ...newItem, name: e.target.value })}
+                                        className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-navy-700 mb-1">Price (Rs.)</label>
+                                        <input
+                                            required
+                                            type="number"
+                                            step="0.01"
+                                            value={newItem.price}
+                                            onChange={e => setNewItem({ ...newItem, price: e.target.value })}
+                                            className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-navy-700 mb-1">Category</label>
+                                        <select
+                                            value={newItem.category}
+                                            onChange={e => setNewItem({ ...newItem, category: e.target.value })}
+                                            className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                        >
+                                            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-navy-700 mb-1">Status</label>
+                                    <select
+                                        value={newItem.status}
+                                        onChange={e => setNewItem({ ...newItem, status: e.target.value })}
+                                        className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                    >
+                                        <option value="Available">Available</option>
+                                        <option value="Out of Stock">Out of Stock</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-navy-700 mb-1">Image URL or Emoji</label>
+                                    <input
+                                        type="text"
+                                        value={newItem.image}
+                                        onChange={e => setNewItem({ ...newItem, image: e.target.value })}
+                                        placeholder="e.g. https://... or 🍕"
                                         className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-navy-700 mb-1">Category</label>
-                                    <select
-                                        value={newItem.category}
-                                        onChange={e => setNewItem({ ...newItem, category: e.target.value })}
-                                        className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                                    >
-                                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                                    </select>
+                                    <label className="block text-sm font-medium text-navy-700 mb-1">Description</label>
+                                    <textarea
+                                        rows="3"
+                                        value={newItem.description}
+                                        onChange={e => setNewItem({ ...newItem, description: e.target.value })}
+                                        placeholder="Brief description of the dish..."
+                                        className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                                    />
                                 </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-navy-700 mb-1">Status</label>
-                                <select
-                                    value={newItem.status}
-                                    onChange={e => setNewItem({ ...newItem, status: e.target.value })}
-                                    className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                                >
-                                    <option value="Available">Available</option>
-                                    <option value="Out of Stock">Out of Stock</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-navy-700 mb-1">Image URL or Emoji</label>
-                                <input
-                                    type="text"
-                                    value={newItem.image}
-                                    onChange={e => setNewItem({ ...newItem, image: e.target.value })}
-                                    placeholder="e.g. https://... or 🍕"
-                                    className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-navy-700 mb-1">Description</label>
-                                <textarea
-                                    rows="3"
-                                    value={newItem.description}
-                                    onChange={e => setNewItem({ ...newItem, description: e.target.value })}
-                                    placeholder="Brief description of the dish..."
-                                    className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                                />
-                            </div>
-                            <div className="flex gap-3 pt-4">
-                                <button
-                                    type="button"
-                                    onClick={closeModal}
-                                    className="flex-1 px-4 py-2 border border-navy-200 rounded-lg text-navy-600 hover:bg-navy-50"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                                >
-                                    {isEditing ? 'Save Changes' : 'Add Item'}
-                                </button>
-                            </div>
-                        </form>
+                                <div className="flex gap-3 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={closeModal}
+                                        className="flex-1 px-4 py-2 border border-navy-200 rounded-lg text-navy-600 hover:bg-navy-50"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                    >
+                                        {isEditing ? 'Save Changes' : 'Add Item'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             )}
