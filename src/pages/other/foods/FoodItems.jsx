@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Reveal from '../../../components/Reveal';
 import { ChevronRight, Star, Clock, Utensils, ShoppingCart, Check } from 'lucide-react';
 import { useCart } from '../../../context/CartContext';
+import { fetchFoods } from '../../../utils/api';
 
 const FoodItems = () => {
   const { addToCart } = useCart();
@@ -25,173 +26,45 @@ const FoodItems = () => {
     }, 1500);
   };
 
-  const foodCategories = [
-    {
-      name: "Signature Dishes & Global Cuisine",
-      items: [
-        {
-          id: 1,
-          name: "Gourmet Sri Lankan Fish Curry",
-          description: "A traditional Negombo style fish curry prepared with fresh catch of the day, infused with authentic spices and served with fragrant basmati rice and accompaniments.",
-          price: "Rs. 1,350.00",
-          numericPrice: 1350,
-          rating: 5,
-          prepTime: "25-30 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1776872599/Gourmet_Sri_Lankan_Fish_Curry_cxja9d.jpg"
-        },
-        {
-          id: 2,
-          name: "Premium Seafood Platter",
-          description: "An indulgent selection of grilled lobster, jumbo prawns, calamari, and lagoon crabs, served with garlic herb butter and seasonal roasted vegetables.",
-          price: "Rs. 2,800.00",
-          numericPrice: 2800,
-          rating: 5,
-          prepTime: "35-40 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1776872600/Premium_Seafood_Platter_ldy2zp.jpg"
-        },
-        {
-          id: 3,
-          name: "Luxury Tropical Breakfast",
-          description: "A decadent start to your day featuring exotic seasonal fruits, artisanal pastries, avocado on sourdough with poached eggs, and fresh premium coffee.",
-          price: "Rs. 1,100.00",
-          numericPrice: 1100,
-          rating: 4.8,
-          prepTime: "15-20 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1776872599/Luxury_Tropical_Breakfast_syatxr.jpg"
-        }
-      ]
-    },
-    {
-      name: "Fried Rice — Sri Lankan Style",
-      items: [
-        {
-          id: 4,
-          name: "Chicken Fried Rice",
-          description: "A classic Sri Lankan favorite — wok-tossed basmati rice stir-fried with tender chicken pieces, fresh vegetables, scrambled egg, and a blend of aromatic soy and chili seasoning.",
-          price: "Rs. 1,100.00",
-          numericPrice: 1100,
-          rating: 4.9,
-          prepTime: "15-20 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981767/Chicken_Fried_Rice_fabdjb.jpg"
-        },
-        {
-          id: 5,
-          name: "Seafood Fried Rice",
-          description: "A coastal delight loaded with prawns, calamari, and crab meat, tossed with fragrant rice, crispy vegetables, and a hint of garlic butter and lime.",
-          price: "Rs. 1,300.00",
-          numericPrice: 1300,
-          rating: 5,
-          prepTime: "20-25 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981769/Seafood_Fried_Rice_rd89ns.jpg"
-        },
-        {
-          id: 6,
-          name: "Egg Fried Rice",
-          description: "Simple yet delicious — fluffy basmati rice wok-fried with scrambled eggs, spring onions, and a touch of sesame oil, served with a side of chili paste.",
-          price: "Rs. 850.00",
-          numericPrice: 850,
-          rating: 4.7,
-          prepTime: "10-15 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981767/Egg_Fried_Rice_hkacpq.jpg"
-        },
-        {
-          id: 7,
-          name: "Vegetable Fried Rice",
-          description: "A vibrant and healthy option featuring seasonal garden vegetables, tofu, and cashew nuts stir-fried with fragrant rice and traditional Sri Lankan spices.",
-          price: "Rs. 800.00",
-          numericPrice: 800,
-          rating: 4.6,
-          prepTime: "10-15 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981768/Vegetable_Fried_Rice_cvmee1.jpg"
-        },
-        {
-          id: 8,
-          name: "Prawn Fried Rice",
-          description: "Succulent jumbo prawns stir-fried with aromatic rice, bell peppers, leeks, and a special house blend sauce that gives it a signature smoky flavor.",
-          price: "Rs. 1,250.00",
-          numericPrice: 1250,
-          rating: 4.9,
-          prepTime: "15-20 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981767/Prawn_Fried_Rice_tekrqe.jpg"
-        },
-        {
-          id: 9,
-          name: "Mixed Fried Rice",
-          description: "The ultimate Sri Lankan fried rice experience — chicken, prawns, and egg combined with crispy vegetables, fried chillies, and our chef's secret seasoning.",
-          price: "Rs. 1,300.00",
-          numericPrice: 1300,
-          rating: 5,
-          prepTime: "20-25 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981766/Mixed_Fried_Rice_tdaqjh.jpg"
-        }
-      ]
-    },
-    {
-      name: "Kottu — Sri Lanka's Iconic Street Food",
-      items: [
-        {
-          id: 10,
-          name: "Chicken Kottu",
-          description: "Shredded godamba roti chopped on the hot griddle with spiced chicken, leeks, eggs, and a rich curry sauce — the rhythmic sound and smoky aroma make this a true Sri Lankan experience.",
-          price: "Rs. 950.00",
-          numericPrice: 950,
-          rating: 5,
-          prepTime: "15-20 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982172/Chicken_Kottu_ne2ufk.jpg"
-        },
-        {
-          id: 11,
-          name: "Cheese Kottu",
-          description: "A modern twist on the classic — crispy roti strips stir-chopped with chicken, vegetables, and generously topped with melted mozzarella cheese and a creamy curry gravy.",
-          price: "Rs. 1,100.00",
-          numericPrice: 1100,
-          rating: 4.9,
-          prepTime: "15-20 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982171/Cheese_Kottu_ragrnr.jpg"
-        },
-        {
-          id: 12,
-          name: "Seafood Kottu",
-          description: "Fresh prawns, calamari, and fish pieces chopped with godamba roti, seasoned vegetables, and a spicy coastal curry sauce — a Negombo specialty.",
-          price: "Rs. 1,200.00",
-          numericPrice: 1200,
-          rating: 5,
-          prepTime: "20-25 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982171/Seafood_Kottu_iwkjop.jpg"
-        },
-        {
-          id: 13,
-          name: "Egg Kottu",
-          description: "A budget-friendly favorite — shredded roti chopped with scrambled eggs, onions, green chillies, and curry leaves, served with a side of spicy pol sambol.",
-          price: "Rs. 750.00",
-          numericPrice: 750,
-          rating: 4.7,
-          prepTime: "10-15 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982171/Egg_Kottu_mytssx.jpg"
-        },
-        {
-          id: 14,
-          name: "Vegetable Kottu",
-          description: "A wholesome vegetarian delight — godamba roti chopped with fresh cabbage, carrots, leeks, green beans, and a mild yet flavorful vegetable curry sauce.",
-          price: "Rs. 700.00",
-          numericPrice: 700,
-          rating: 4.6,
-          prepTime: "10-15 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982172/Vegetable_Kottu_vyaj6h.jpg"
-        },
-        {
-          id: 15,
-          name: "Mixed Kottu",
-          description: "The chef's special — a generous combination of chicken, prawns, and egg with shredded roti, stir-chopped with aromatic spices and topped with crispy onions.",
-          price: "Rs. 1,150.00",
-          numericPrice: 1150,
-          rating: 5,
-          prepTime: "20-25 min",
-          image: "https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982172/Mixed_Kottu_xuqwbz.jpg"
-        }
-      ]
-    }
-  ];
+  const [foodCategories, setFoodCategories] = useState([]);
+
+  useEffect(() => {
+    const loadFoods = async () => {
+      try {
+        const foods = await fetchFoods();
+        
+        // Group foods by category
+        const grouped = foods.reduce((acc, food) => {
+          if (!acc[food.category]) {
+            acc[food.category] = [];
+          }
+          acc[food.category].push({
+            id: food._id,
+            name: food.name,
+            description: food.description,
+            price: `Rs. ${food.price.toFixed(2)}`,
+            numericPrice: food.price,
+            rating: food.rating || 5,
+            prepTime: food.prepTime || '15-20 min',
+            image: food.image
+          });
+          return acc;
+        }, {});
+
+        // Convert to array format
+        const formattedCategories = Object.keys(grouped).map(catName => ({
+          name: catName,
+          items: grouped[catName]
+        }));
+
+        setFoodCategories(formattedCategories);
+      } catch (err) {
+        console.error("Failed to load foods", err);
+      }
+    };
+
+    loadFoods();
+  }, []);
 
   return (
     <div className="w-full bg-white pt-32 pb-24">

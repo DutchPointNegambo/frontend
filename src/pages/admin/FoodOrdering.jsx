@@ -1,47 +1,88 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, Filter } from 'lucide-react';
+import { fetchFoods, createFood, deleteFood, updateFood } from '../../utils/api';
 
 const FoodOrdering = () => {
-    const [menuItems, setMenuItems] = useState([
-        { id: 1, name: 'Gourmet Sri Lankan Fish Curry', category: 'Signature Dishes', price: 1350.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1776872599/Gourmet_Sri_Lankan_Fish_Curry_cxja9d.jpg' },
-        { id: 2, name: 'Premium Seafood Platter', category: 'Signature Dishes', price: 2800.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1776872600/Premium_Seafood_Platter_ldy2zp.jpg' },
-        { id: 3, name: 'Luxury Tropical Breakfast', category: 'Signature Dishes', price: 1100.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1776872599/Luxury_Tropical_Breakfast_syatxr.jpg' },
-        { id: 4, name: 'Chicken Fried Rice', category: 'Fried Rice', price: 1100.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981767/Chicken_Fried_Rice_fabdjb.jpg' },
-        { id: 5, name: 'Seafood Fried Rice', category: 'Fried Rice', price: 1300.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981769/Seafood_Fried_Rice_rd89ns.jpg' },
-        { id: 6, name: 'Egg Fried Rice', category: 'Fried Rice', price: 850.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981767/Egg_Fried_Rice_hkacpq.jpg' },
-        { id: 7, name: 'Vegetable Fried Rice', category: 'Fried Rice', price: 800.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981768/Vegetable_Fried_Rice_cvmee1.jpg' },
-        { id: 8, name: 'Prawn Fried Rice', category: 'Fried Rice', price: 1250.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981767/Prawn_Fried_Rice_tekrqe.jpg' },
-        { id: 9, name: 'Mixed Fried Rice', category: 'Fried Rice', price: 1300.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1777981766/Mixed_Fried_Rice_tdaqjh.jpg' },
-        { id: 10, name: 'Chicken Kottu', category: 'Kottu', price: 950.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982172/Chicken_Kottu_ne2ufk.jpg' },
-        { id: 11, name: 'Cheese Kottu', category: 'Kottu', price: 1100.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982171/Cheese_Kottu_ragrnr.jpg' },
-        { id: 12, name: 'Seafood Kottu', category: 'Kottu', price: 1200.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982171/Seafood_Kottu_iwkjop.jpg' },
-        { id: 13, name: 'Egg Kottu', category: 'Kottu', price: 750.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982171/Egg_Kottu_mytssx.jpg' },
-        { id: 14, name: 'Vegetable Kottu', category: 'Kottu', price: 700.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982172/Vegetable_Kottu_vyaj6h.jpg' },
-        { id: 15, name: 'Mixed Kottu', category: 'Kottu', price: 1150.00, status: 'Available', image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1777982172/Mixed_Kottu_xuqwbz.jpg' },
-    ]);
-
+    const [menuItems, setMenuItems] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [newItem, setNewItem] = useState({ name: '', category: 'Signature Dishes', price: '', status: 'Available', image: '' });
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentId, setCurrentId] = useState(null);
+    const [newItem, setNewItem] = useState({ name: '', category: 'Signature Dishes & Global Cuisine', price: '', status: 'Available', image: '', description: '' });
 
-    const categories = ['Signature Dishes', 'Fried Rice', 'Kottu', 'Beverages', 'Desserts'];
+    const categories = [
+        'Signature Dishes & Global Cuisine', 
+        'Fried Rice — Sri Lankan Style', 
+        'Kottu — Sri Lanka\'s Iconic Street Food', 
+        'Beverages', 
+        'Desserts'
+    ];
 
-    const handleDelete = (id) => {
-        if (window.confirm('Are you sure you want to delete this item?')) {
-            setMenuItems(menuItems.filter(item => item.id !== id));
+    useEffect(() => {
+        loadFoods();
+    }, []);
+
+    const loadFoods = async () => {
+        try {
+            const data = await fetchFoods();
+            setMenuItems(data);
+        } catch (error) {
+            console.error("Failed to load foods", error);
         }
     };
 
-    const handleAdd = (e) => {
+    const handleDelete = async (id) => {
+        if (window.confirm('Are you sure you want to delete this item?')) {
+            try {
+                await deleteFood(id);
+                setMenuItems(menuItems.filter(item => item._id !== id));
+            } catch (error) {
+                console.error("Failed to delete food", error);
+            }
+        }
+    };
+
+    const handleEdit = (item) => {
+        setNewItem({
+            name: item.name,
+            category: item.category,
+            price: item.price,
+            status: item.status,
+            image: item.image,
+            description: item.description || ''
+        });
+        setCurrentId(item._id);
+        setIsEditing(true);
+        setIsModalOpen(true);
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const item = {
-            id: menuItems.length + 1,
+        const itemData = {
             ...newItem,
             price: parseFloat(newItem.price),
             image: newItem.image || '🍽️'
         };
-        setMenuItems([...menuItems, item]);
+
+        try {
+            if (isEditing) {
+                const updatedItem = await updateFood(currentId, itemData);
+                setMenuItems(menuItems.map(item => item._id === currentId ? updatedItem : item));
+            } else {
+                const addedItem = await createFood(itemData);
+                setMenuItems([...menuItems, addedItem]);
+            }
+            closeModal();
+        } catch (error) {
+            console.error("Failed to save food", error);
+            alert('Failed to save food item');
+        }
+    };
+
+    const closeModal = () => {
         setIsModalOpen(false);
-        setNewItem({ name: '', category: 'Signature Dishes', price: '', status: 'Available', image: '' });
+        setIsEditing(false);
+        setCurrentId(null);
+        setNewItem({ name: '', category: 'Signature Dishes & Global Cuisine', price: '', status: 'Available', image: '', description: '' });
     };
 
     return (
@@ -82,7 +123,7 @@ const FoodOrdering = () => {
             {/* Menu Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {menuItems.map((item) => (
-                    <div key={item.id} className="bg-white rounded-2xl shadow-sm border border-navy-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
+                    <div key={item._id} className="bg-white rounded-2xl shadow-sm border border-navy-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
                         <div className={`h-40 flex items-center justify-center overflow-hidden text-6xl bg-gradient-to-br ${item.status === 'Available' ? 'from-blue-50 to-blue-100' : 'from-gray-100 to-gray-200'}`}>
                             {item.image && item.image.startsWith('http') ? (
                                 <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
@@ -103,11 +144,14 @@ const FoodOrdering = () => {
                             <p className="text-2xl font-bold text-blue-600 mt-2">Rs. {item.price.toFixed(2)}</p>
 
                             <div className="flex gap-2 mt-4 pt-4 border-t border-navy-50 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button className="flex-1 py-2 bg-navy-50 text-navy-600 rounded-lg hover:bg-navy-100 flex items-center justify-center font-medium text-sm">
+                                <button 
+                                    onClick={() => handleEdit(item)}
+                                    className="flex-1 py-2 bg-navy-50 text-navy-600 rounded-lg hover:bg-navy-100 flex items-center justify-center font-medium text-sm"
+                                >
                                     <Edit2 size={16} className="mr-2" /> Edit
                                 </button>
                                 <button
-                                    onClick={() => handleDelete(item.id)}
+                                    onClick={() => handleDelete(item._id)}
                                     className="flex-none p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 hover:text-red-600"
                                 >
                                     <Trash2 size={18} />
@@ -118,12 +162,12 @@ const FoodOrdering = () => {
                 ))}
             </div>
 
-            {/* Add Item Modal */}
+            {/* Add/Edit Item Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-                        <h2 className="text-2xl font-bold text-navy-900 mb-4">Add New Menu Item</h2>
-                        <form onSubmit={handleAdd} className="space-y-4">
+                        <h2 className="text-2xl font-bold text-navy-900 mb-4">{isEditing ? 'Edit Menu Item' : 'Add New Menu Item'}</h2>
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-navy-700 mb-1">Item Name</label>
                                 <input
@@ -178,10 +222,20 @@ const FoodOrdering = () => {
                                     className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
+                            <div>
+                                <label className="block text-sm font-medium text-navy-700 mb-1">Description</label>
+                                <textarea
+                                    rows="3"
+                                    value={newItem.description}
+                                    onChange={e => setNewItem({ ...newItem, description: e.target.value })}
+                                    placeholder="Brief description of the dish..."
+                                    className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                                />
+                            </div>
                             <div className="flex gap-3 pt-4">
                                 <button
                                     type="button"
-                                    onClick={() => setIsModalOpen(false)}
+                                    onClick={closeModal}
                                     className="flex-1 px-4 py-2 border border-navy-200 rounded-lg text-navy-600 hover:bg-navy-50"
                                 >
                                     Cancel
@@ -190,7 +244,7 @@ const FoodOrdering = () => {
                                     type="submit"
                                     className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                                 >
-                                    Add Item
+                                    {isEditing ? 'Save Changes' : 'Add Item'}
                                 </button>
                             </div>
                         </form>
