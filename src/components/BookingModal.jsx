@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { X, Calendar, Users, CreditCard, ChevronRight, Loader2, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Calendar, Users, CreditCard, ChevronRight, Loader2, CheckCircle2, Lock } from 'lucide-react';
 import { createBooking } from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 
 const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, selectedPackage, onSuccess }) => {
+    const { user } = useAuth();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -12,8 +14,85 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
         email: '',
         phone: '',
         specialRequests: '',
-        paymentMethod: 'onsite'
+        paymentMethod: 'card'
     });
+
+    const [cardDetails, setCardDetails] = useState({
+        number: '',
+        expiry: '',
+        cvv: '',
+        name: ''
+    });
+    const [cardErrors, setCardErrors] = useState({});
+
+    // Pre-fill user info
+    useEffect(() => {
+        if (user) {
+            setFormData(prev => ({
+                ...prev,
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
+                email: user.email || '',
+                phone: user.phone || ''
+            }));
+        }
+    }, [user, isOpen]);
+
+    // ── Card validation helpers ──────────────────────────────────────────────
+    const luhnCheck = (num) => {
+        const digits = num.replace(/\s/g, '');
+        let sum = 0, alt = false;
+        for (let i = digits.length - 1; i >= 0; i--) {
+            let n = parseInt(digits[i], 10);
+            if (alt) { n *= 2; if (n > 9) n -= 9; }
+            sum += n;
+            alt = !alt;
+        }
+        return sum % 10 === 0;
+    };
+
+    const detectBrand = (num) => {
+        const n = num.replace(/\s/g, '');
+        if (/^4/.test(n)) return 'visa';
+        if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n)) return 'mastercard';
+        if (/^3[47]/.test(n)) return 'amex';
+        if (/^6(?:011|5)/.test(n)) return 'discover';
+        return '';
+    };
+
+    const formatCardNumber = (val) => {
+        const digits = val.replace(/\D/g, '').slice(0, 16);
+        return digits.replace(/(.{4})/g, '$1 ').trim();
+    };
+
+    const formatExpiry = (val) => {
+        const digits = val.replace(/\D/g, '').slice(0, 4);
+        if (digits.length >= 3) return digits.slice(0, 2) + '/' + digits.slice(2);
+        return digits;
+    };
+
+    const validateCard = () => {
+        const errs = {};
+        const num = cardDetails.number.replace(/\s/g, '');
+        if (!num || num.length < 13) errs.number = 'Card number is required';
+        else if (!luhnCheck(num)) errs.number = 'Invalid card number';
+
+        if (!cardDetails.expiry) errs.expiry = 'Expiry is required';
+        else {
+            const m = cardDetails.expiry.match(/^(0[1-9]|1[0-2])\/(\d{2})$/);
+            if (!m) errs.expiry = 'Use MM/YY format';
+            else {
+                const expY = 2000 + parseInt(m[2], 10), expM = parseInt(m[1], 10), now = new Date();
+                if (expY < now.getFullYear() || (expY === now.getFullYear() && expM < now.getMonth() + 1))
+                    errs.expiry = 'Card has expired';
+            }
+        }
+        if (!cardDetails.cvv || !/^\d{3,4}$/.test(cardDetails.cvv)) errs.cvv = '3 or 4 digits';
+        if (!cardDetails.name?.trim()) errs.name = 'Cardholder name is required';
+
+        setCardErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
 
     if (!isOpen || !room) return null;
 
@@ -33,6 +112,9 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!validateCard()) return;
+
         setLoading(true);
         setError(null);
 
@@ -53,7 +135,12 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                     phone: formData.phone,
                     specialRequests: formData.specialRequests
                 },
-                paymentMethod: formData.paymentMethod
+                cardDetails: {
+                    number: cardDetails.number.replace(/\s/g, ''),
+                    expiry: cardDetails.expiry,
+                    cvv: cardDetails.cvv,
+                    name: cardDetails.name,
+                }
             };
 
             await createBooking(payload);
@@ -222,28 +309,93 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                 </div>
 
                                 <div className="flex items-center justify-between pt-2">
-                                    <span className="text-navy-900 font-bold text-lg italic">Total Amount</span>
-                                    <span className="text-navy-900 font-extrabold text-2xl italic">{formatPrice(total)}/-</span>
+                                    <span className="text-navy-900 font-bold text-lg italic">Total Amount to Pay</span>
+                                    <span className="text-blue-600 font-extrabold text-2xl italic">{formatPrice(total)}/-</span>
                                 </div>
                             </div>
 
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest block px-1">Payment Method</label>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <button 
-                                        onClick={() => setFormData(prev => ({ ...prev, paymentMethod: 'onsite' }))}
-                                        className={`flex items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all ${formData.paymentMethod === 'onsite' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-navy-100 text-navy-400 hover:border-navy-200'}`}
-                                    >
-                                        <CreditCard size={18} /> Pay Onsite
-                                    </button>
-                                    <button 
-                                        disabled
-                                        className="flex flex-col items-center justify-center p-4 rounded-2xl border-2 border-dashed border-navy-100 text-navy-300 cursor-not-allowed"
-                                    >
-                                        <span className="text-sm font-bold">Online Payment</span>
-                                        <span className="text-[8px] uppercase tracking-widest">Coming Soon</span>
-                                    </button>
+                            {/* Card Details Section */}
+                            <div className="bg-white rounded-3xl p-6 border-2 border-blue-100 space-y-5">
+                                <h3 className="text-navy-900 font-bold flex items-center gap-2">
+                                    <Lock className="text-blue-500" size={18} /> Secure Payment
+                                </h3>
+
+                                <div className="space-y-4">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Card Number</label>
+                                        <div className="relative">
+                                            <input 
+                                                type="text"
+                                                placeholder="4242 4242 4242 4242"
+                                                value={cardDetails.number}
+                                                onChange={e => {
+                                                    setCardDetails(c => ({ ...c, number: formatCardNumber(e.target.value) }));
+                                                    setCardErrors(e2 => ({ ...e2, number: undefined }));
+                                                }}
+                                                maxLength={19}
+                                                className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all ${cardErrors.number ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-blue-400/50'}`}
+                                            />
+                                            {detectBrand(cardDetails.number) && (
+                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-blue-500 uppercase">
+                                                    {detectBrand(cardDetails.number)}
+                                                }</span>
+                                            )}
+                                        </div>
+                                        {cardErrors.number && <p className="text-red-500 text-[10px] font-bold mt-1 px-1">{cardErrors.number}</p>}
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Expiry Date</label>
+                                            <input 
+                                                type="text"
+                                                placeholder="MM/YY"
+                                                value={cardDetails.expiry}
+                                                onChange={e => {
+                                                    setCardDetails(c => ({ ...c, expiry: formatExpiry(e.target.value) }));
+                                                    setCardErrors(e2 => ({ ...e2, expiry: undefined }));
+                                                }}
+                                                maxLength={5}
+                                                className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all ${cardErrors.expiry ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-blue-400/50'}`}
+                                            />
+                                            {cardErrors.expiry && <p className="text-red-500 text-[10px] font-bold mt-1 px-1">{cardErrors.expiry}</p>}
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">CVV</label>
+                                            <input 
+                                                type="text"
+                                                placeholder="123"
+                                                value={cardDetails.cvv}
+                                                onChange={e => {
+                                                    const v = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                                    setCardDetails(c => ({ ...c, cvv: v }));
+                                                    setCardErrors(e2 => ({ ...e2, cvv: undefined }));
+                                                }}
+                                                maxLength={4}
+                                                className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all ${cardErrors.cvv ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-blue-400/50'}`}
+                                            />
+                                            {cardErrors.cvv && <p className="text-red-500 text-[10px] font-bold mt-1 px-1">{cardErrors.cvv}</p>}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Cardholder Name</label>
+                                        <input 
+                                            type="text"
+                                            placeholder="JANE SMITH"
+                                            value={cardDetails.name}
+                                            onChange={e => {
+                                                setCardDetails(c => ({ ...c, name: e.target.value }));
+                                                setCardErrors(e2 => ({ ...e2, name: undefined }));
+                                            }}
+                                            className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all ${cardErrors.name ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-blue-400/50'}`}
+                                        />
+                                        {cardErrors.name && <p className="text-red-500 text-[10px] font-bold mt-1 px-1">{cardErrors.name}</p>}
+                                    </div>
                                 </div>
+                                <p className="text-[10px] text-navy-400 flex items-center gap-1.5 px-1">
+                                    <Lock size={10} /> Card details are validated securely for simulation.
+                                </p>
                             </div>
 
                             {error && (
@@ -262,9 +414,9 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                 <button 
                                     onClick={handleSubmit}
                                     disabled={loading}
-                                    className="flex-[2] bg-blue-500 text-white py-4 rounded-2xl font-bold hover:bg-blue-600 transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98]"
+                                    className="flex-[2] bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98]"
                                 >
-                                    {loading ? <Loader2 className="animate-spin" size={20} /> : 'Confirm Booking'}
+                                    {loading ? <Loader2 className="animate-spin" size={20} /> : `Pay ${formatPrice(total)} & Confirm`}
                                 </button>
                             </div>
                         </div>

@@ -530,31 +530,70 @@ export async function fetchMyQRToken() {
 // Foods
 export async function fetchFoods() {
     const res = await fetch(`${API_URL}/foods`);
+// Admin: Event Bookings
+export async function fetchAdminEventBookings(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/admin/events?${qs}`, { headers: authHeaders() });
     return handleResponse(res);
 }
 
-export async function createFood(payload) {
-    const res = await fetch(`${API_URL}/foods`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify(payload)
-    });
-    return handleResponse(res);
-}
-
-export async function updateFood(id, payload) {
-    const res = await fetch(`${API_URL}/foods/${id}`, {
+export async function updateEventBookingStatus(id, status) {
+    const res = await fetch(`${API_URL}/admin/events/${id}/status`, {
         method: 'PUT',
         headers: authHeaders(),
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ status }),
     });
     return handleResponse(res);
 }
 
-export async function deleteFood(id) {
-    const res = await fetch(`${API_URL}/foods/${id}`, {
+export async function updateEventPaymentStatus(id, paymentStatus) {
+    const res = await fetch(`${API_URL}/admin/events/${id}/payment`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ paymentStatus }),
+    });
+    return handleResponse(res);
+}
+export async function fetchMyEventBookings() {
+    const res = await fetch(`${API_URL}/event-bookings/my-bookings`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+// Event Features (Decoration, Food, Addons)
+export async function fetchEventFeatures(category) {
+    const qs = category && category !== 'all' ? '?category=' + category : '';
+    const res = await fetch(API_URL + '/event-features' + qs);
+    return handleResponse(res);
+}
+
+export async function fetchAdminEventFeatures(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(API_URL + '/admin/event-features?' + qs, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function createEventFeature(payload) {
+    const res = await fetch(API_URL + '/admin/event-features', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function updateEventFeature(id, payload) {
+    const res = await fetch(API_URL + '/admin/event-features/' + id, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function deleteEventFeature(id) {
+    const res = await fetch(API_URL + '/admin/event-features/' + id, {
         method: 'DELETE',
-        headers: authHeaders()
+        headers: authHeaders(),
     });
     return handleResponse(res);
 }

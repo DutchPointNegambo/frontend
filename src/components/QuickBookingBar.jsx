@@ -34,7 +34,7 @@ const QuickBookingBar = () => {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-navy-200/50 p-6 md:p-8">
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-6">
-                    {/* Check-in Date */}
+                     
                     <div className="md:col-span-1">
                         <label className="block text-sm font-semibold text-navy-900 mb-2">
                             Check In
@@ -48,7 +48,7 @@ const QuickBookingBar = () => {
                         />
                     </div>
 
-                    {/* Check-out Date */}
+        
                     <div className="md:col-span-1">
                         <label className="block text-sm font-semibold text-navy-900 mb-2">
                             Check Out
@@ -62,7 +62,7 @@ const QuickBookingBar = () => {
                         />
                     </div>
 
-                    {/* Guests */}
+                     
                     <div className="md:col-span-1">
                         <label className="block text-sm font-semibold text-navy-900 mb-2">
                             Guests
@@ -80,7 +80,7 @@ const QuickBookingBar = () => {
                         </select>
                     </div>
 
-                    {/* Room Type */}
+                     
                     <div className="md:col-span-1">
                         <label className="block text-sm font-semibold text-navy-900 mb-2">
                             Room Type
@@ -97,7 +97,7 @@ const QuickBookingBar = () => {
                         </select>
                     </div>
 
-                    {/* Check Availability Button */}
+                     
                     <div className="md:col-span-1 flex items-end">
                         <button
                             onClick={handleCheckAvailability}

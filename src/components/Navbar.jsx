@@ -25,7 +25,8 @@ const Navbar = () => {
     { name: 'Home', path: '/' },
     { name: 'Dining', path: '/foods' },
     { name: 'Gallery', path: '/gallery' },
-    { name: 'Events', path: '/event' },
+    { name: 'Events', path: '/event-management' },
+    ...(user ? [{ name: 'My Events', path: '/my-events' }] : [])
   ]
 
   const roomCategories = [
@@ -374,6 +375,14 @@ const Navbar = () => {
                           <User size={14} />
                           My Profile
                         </Link>
+                        <Link
+                          to="/my-events"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${shouldShowSolidNavbar ? 'text-navy-700 hover:bg-navy-50 hover:text-navy-950' : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
+                        >
+                          <TrendingUp size={14} />
+                          My Events
+                        </Link>
                         <div className={`h-px my-1 ${shouldShowSolidNavbar ? 'bg-navy-100' : 'bg-white/10'}`} />
                         <button
                           onClick={() => { logout(); setIsUserDropdownOpen(false); }}
@@ -592,6 +601,13 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                 >
                   Profile
+                </Link>
+                <Link
+                  to="/my-events"
+                  className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center border-2 border-navy-950 text-navy-950 hover:bg-navy-50 transition-all duration-300"
+                  onClick={() => setIsOpen(false)}
+                >
+                  My Events
                 </Link>
                 <button
                   onClick={() => {
