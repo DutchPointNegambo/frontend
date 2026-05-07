@@ -4,6 +4,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import Reveal from "../components/Reveal"
 import { registerUser } from '../utils/api'
 import { useAuth } from '../context/AuthContext'
+import toast from 'react-hot-toast'
 
 const SignIn = () => {
   const navigate = useNavigate()
@@ -49,7 +50,7 @@ const SignIn = () => {
 
       // Success
       login(data)
-      alert('Account created successfully!')
+      toast.success('Account created successfully!')
       navigate('/')
     } catch (err) {
       setError(err.message)

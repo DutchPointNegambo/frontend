@@ -3,6 +3,7 @@ import Reveal from '../../../components/Reveal';
 import { ChevronRight, Star, Clock, Utensils, ShoppingCart, Check } from 'lucide-react';
 import { useCart } from '../../../context/CartContext';
 import { fetchFoods } from '../../../utils/api';
+import toast from 'react-hot-toast';
 
 const FoodItems = () => {
   const { addToCart } = useCart();
@@ -237,14 +238,14 @@ const FoodItems = () => {
                     }),
                   });
                   if (response.ok) {
-                    alert('Inquiry sent successfully! We will contact you soon.');
+                    toast.success('Inquiry sent successfully! We will contact you soon.');
                     setIsInquiryModalOpen(false);
                     setInquiryData({ name: '', email: '', phone: '', date: '', guests: '2', message: 'I am interested in booking a Private Beach Dinner.' });
                   } else {
                     throw new Error('Failed to send inquiry');
                   }
                 } catch (err) {
-                  alert('Error: ' + err.message);
+                  toast.error('Error: ' + err.message);
                 } finally {
                   setIsSubmitting(false);
                 }

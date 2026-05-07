@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
+import toast from 'react-hot-toast'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -808,9 +809,9 @@ const EventManagement = () => {
 
                                             <button
                                                 onClick={() => {
-                                                    if (!eventDate) return alert('Please select an event date first.')
-                                                    if (dateAvailability === 'booked') return alert('This slot is already booked. Please choose a different date or slot.')
-                                                    if (dateAvailability !== 'available') return alert('Please wait for availability to be confirmed.')
+                                                    if (!eventDate) return toast.error('Please select an event date first.')
+                                                    if (dateAvailability === 'booked') return toast.error('This slot is already booked. Please choose a different date or slot.')
+                                                    if (dateAvailability !== 'available') return toast.error('Please wait for availability to be confirmed.')
                                                     setStep(3)
                                                 }}
                                                 className="w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5"
