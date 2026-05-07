@@ -20,7 +20,60 @@ const Staff = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [editingStaff, setEditingStaff] = useState(null);
     const [form, setForm] = useState(EMPTY_FORM);
+    const [formErrors, setFormErrors] = useState({});
     const [saving, setSaving] = useState(false);
+
+    const validateField = (name, value) => {
+        let error = '';
+        if (name === 'name') {
+            if (!value.trim()) error = 'Name is required';
+            else if (value.trim().length < 3) error = 'Min 3 characters';
+        }
+        if (name === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!value.trim()) error = 'Email is required';
+            else if (!emailRegex.test(value)) error = 'Invalid email format';
+        }
+        if (name === 'phone') {
+            const phoneRegex = /^[0-9]{10}$/;
+            if (value && !phoneRegex.test(value)) {
+                error = 'Enter a valid number';
+            }
+        }
+        if (name === 'jobTitle') {
+            if (!value.trim()) error = 'Job title is required';
+        }
+        if (name === 'salary') {
+            if (!value) error = 'Salary is required';
+            else if (Number(value) <= 0) error = 'Must be a positive number';
+        }
+        if (name === 'password' && !editingStaff) {
+            if (!value) error = 'Password is required';
+            else if (value.length < 6) error = 'Min 6 characters';
+        }
+
+        setFormErrors(prev => ({ ...prev, [name]: error }));
+        return !error;
+    };
+
+    const validateForm = () => {
+        const fields = ['name', 'email', 'phone', 'jobTitle', 'salary', 'password'];
+        let isValid = true;
+        fields.forEach(f => {
+            if (!validateField(f, form[f])) isValid = false;
+        });
+        return isValid;
+    };
+
+    const handleFormChange = (e) => {
+        const { name, value } = e.target;
+        let finalValue = value;
+        if (name === 'phone') {
+            finalValue = value.replace(/[^0-9]/g, '').slice(0, 10);
+        }
+        setForm(prev => ({ ...prev, [name]: finalValue }));
+        validateField(name, finalValue);
+    };
 
     // QR state
     const [qrEmployee, setQrEmployee] = useState(null);
@@ -52,9 +105,15 @@ const Staff = () => {
 
     useEffect(() => { loadEmployees(); }, [loadEmployees]);
 
-    const openAdd = () => { setEditingStaff(null); setForm(EMPTY_FORM); setModalOpen(true); };
+    const openAdd = () => { 
+        setEditingStaff(null); 
+        setForm(EMPTY_FORM); 
+        setFormErrors({});
+        setModalOpen(true); 
+    };
     const openEdit = (staff) => {
         setEditingStaff(staff);
+        setFormErrors({});
         setForm({
             name: staff.name, email: staff.email, phone: staff.phone || '',
             jobTitle: staff.jobTitle, department: staff.department,
@@ -66,6 +125,12 @@ const Staff = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateForm()) {
+            showToast('Please fix the errors in the form', 'error');
+            return;
+        }
+
         setSaving(true);
         try {
             const payload = { ...form, salary: Number(form.salary) };
@@ -563,72 +628,132 @@ const Staff = () => {
 
             {/* Add / Edit Staff Modal */}
             {modalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl">
-                        <div className="flex items-center justify-between p-5 border-b border-navy-100">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="flex items-center justify-between p-5 border-b border-navy-100 flex-shrink-0">
                             <h2 className="text-xl font-bold text-navy-900">{editingStaff ? 'Edit Employee' : 'Add New Employee'}</h2>
                             <button onClick={() => setModalOpen(false)} className="p-2 hover:bg-navy-50 rounded-xl text-navy-400"><X size={18} /></button>
                         </div>
-                        <form onSubmit={handleSubmit} className="p-5 space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="col-span-1 sm:col-span-2">
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Full Name *</label>
-                                    <input required value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="e.g. Sarah Wilson" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                        <div className="overflow-y-auto flex-1">
+                            <form onSubmit={handleSubmit} className="p-5 space-y-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="col-span-1 sm:col-span-2">
+                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Full Name *</label>
+                                        <input 
+                                            name="name"
+                                            value={form.name} 
+                                            onChange={handleFormChange} 
+                                            placeholder="e.g. Sarah Wilson" 
+                                            className={`w-full px-4 py-2.5 border ${formErrors.name ? 'border-red-500' : 'border-navy-200'} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500`} 
+                                        />
+                                        {formErrors.name && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-tight">{formErrors.name}</p>}
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Email *</label>
+                                        <input 
+                                            name="email"
+                                            type="email" 
+                                            value={form.email} 
+                                            onChange={handleFormChange} 
+                                            placeholder="staff@hotel.com" 
+                                            className={`w-full px-4 py-2.5 border ${formErrors.email ? 'border-red-500' : 'border-navy-200'} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500`} 
+                                        />
+                                        {formErrors.email && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-tight">{formErrors.email}</p>}
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Phone</label>
+                                        <input 
+                                            name="phone"
+                                            value={form.phone} 
+                                            onChange={handleFormChange} 
+                                            maxLength={10}
+                                            placeholder="07XXXXXXXX" 
+                                            className={`w-full px-4 py-2.5 border ${formErrors.phone ? 'border-red-500' : 'border-navy-200'} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500`} 
+                                        />
+                                        {formErrors.phone && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-tight">{formErrors.phone}</p>}
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Job Title *</label>
+                                        <input 
+                                            name="jobTitle"
+                                            value={form.jobTitle} 
+                                            onChange={handleFormChange} 
+                                            placeholder="e.g. Senior Chef" 
+                                            className={`w-full px-4 py-2.5 border ${formErrors.jobTitle ? 'border-red-500' : 'border-navy-200'} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500`} 
+                                        />
+                                        {formErrors.jobTitle && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-tight">{formErrors.jobTitle}</p>}
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Department *</label>
+                                        <select 
+                                            name="department"
+                                            value={form.department} 
+                                            onChange={handleFormChange} 
+                                            className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                        >
+                                            {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Status</label>
+                                        <select 
+                                            name="status"
+                                            value={form.status} 
+                                            onChange={handleFormChange} 
+                                            className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                        >
+                                            <option value="Active">Active</option>
+                                            <option value="On Leave">On Leave</option>
+                                            <option value="Terminated">Terminated</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Monthly Salary (Rs.) *</label>
+                                        <input 
+                                            name="salary"
+                                            type="number" 
+                                            min="0" 
+                                            value={form.salary} 
+                                            onChange={handleFormChange} 
+                                            placeholder="e.g. 35000" 
+                                            className={`w-full px-4 py-2.5 border ${formErrors.salary ? 'border-red-500' : 'border-navy-200'} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500`} 
+                                        />
+                                        {formErrors.salary && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-tight">{formErrors.salary}</p>}
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Hire Date</label>
+                                        <input 
+                                            name="hireDate"
+                                            type="date" 
+                                            value={form.hireDate} 
+                                            onChange={handleFormChange} 
+                                            className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" 
+                                        />
+                                    </div>
+                                    <div className="col-span-1 sm:col-span-2">
+                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">
+                                            Password {editingStaff ? '(Leave blank to keep current)' : '*'}
+                                        </label>
+                                        <input 
+                                            name="password"
+                                            type="password" 
+                                            value={form.password} 
+                                            onChange={handleFormChange} 
+                                            placeholder="••••••••" 
+                                            className={`w-full px-4 py-2.5 border ${formErrors.password ? 'border-red-500' : 'border-navy-200'} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500`} 
+                                        />
+                                        {formErrors.password && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-tight">{formErrors.password}</p>}
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Email *</label>
-                                    <input required type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="staff@hotel.com" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                <div className="flex gap-3 pt-2">
+                                    <button type="button" onClick={() => setModalOpen(false)} className="flex-1 py-2.5 border border-navy-200 text-navy-600 rounded-xl text-sm font-medium hover:bg-navy-50 transition-colors">Cancel</button>
+                                    <button type="submit" disabled={saving} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-navy-900 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-60">
+                                        {saving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
+                                        {editingStaff ? 'Save Changes' : 'Add Employee'}
+                                    </button>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Phone</label>
-                                    <input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+1 234-567-8901" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Job Title *</label>
-                                    <input required value={form.jobTitle} onChange={e => setForm({...form, jobTitle: e.target.value})} placeholder="e.g. Senior Chef" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Department *</label>
-                                    <select required value={form.department} onChange={e => setForm({...form, department: e.target.value})} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                        {DEPARTMENTS.map(d => <option key={d}>{d}</option>)}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Status</label>
-                                    <select value={form.status} onChange={e => setForm({...form, status: e.target.value})} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                        <option>Active</option><option>On Leave</option><option>Terminated</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Monthly Salary (Rs.)</label>
-                                    <input type="number" min="0" value={form.salary} onChange={e => setForm({...form, salary: e.target.value})} placeholder="e.g. 3500" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Hire Date</label>
-                                    <input type="date" value={form.hireDate} onChange={e => setForm({...form, hireDate: e.target.value})} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
-                                </div>
-                                <div className="col-span-1 sm:col-span-2">
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">
-                                        Password {editingStaff ? '(Leave blank to keep current)' : '*'}
-                                    </label>
-                                    <input 
-                                        required={!editingStaff} 
-                                        type="password" 
-                                        value={form.password} 
-                                        onChange={e => setForm({...form, password: e.target.value})} 
-                                        placeholder="••••••••" 
-                                        className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" 
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex gap-3 pt-2">
-                                <button type="button" onClick={() => setModalOpen(false)} className="flex-1 py-2.5 border border-navy-200 text-navy-600 rounded-xl text-sm font-medium hover:bg-navy-50 transition-colors">Cancel</button>
-                                <button type="submit" disabled={saving} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-navy-900 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-60">
-                                    {saving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
-                                    {editingStaff ? 'Save Changes' : 'Add Employee'}
-                                </button>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
             )}

@@ -1,7 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-//Helpers
-
+// Helpers
 const authHeaders = () => {
     const userInfo = localStorage.getItem('userInfo');
     let token = null;
@@ -22,8 +21,7 @@ const handleResponse = async (res) => {
     return data;
 };
 
-//Auth
-
+// Auth
 export async function registerUser(payload) {
     const res = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
@@ -94,8 +92,7 @@ export async function resetPassword(payload) {
     return handleResponse(res);
 }
 
-//Admin: Dashboard
-
+// Admin: Dashboard
 export async function fetchDashboardStats() {
     const res = await fetch(`${API_URL}/admin/stats`, { headers: authHeaders() });
     return handleResponse(res);
@@ -111,8 +108,7 @@ export async function fetchAiSummary() {
     return handleResponse(res);
 }
 
-//Admin: Users
-
+// Admin: Users
 export async function fetchUsers(params = {}) {
     const qs = new URLSearchParams(params).toString();
     const res = await fetch(`${API_URL}/admin/users?${qs}`, { headers: authHeaders() });
@@ -150,8 +146,7 @@ export async function deleteUser(id) {
     return handleResponse(res);
 }
 
-//Admin: Rooms 
-
+// Admin: Rooms 
 export async function fetchRooms(params = {}) {
     const qs = new URLSearchParams(params).toString();
     const res = await fetch(`${API_URL}/admin/rooms?${qs}`, { headers: authHeaders() });
@@ -194,35 +189,34 @@ export async function deleteRoom(id) {
 }
 
 export async function fetchRoomsByCategory(category, packageType, checkIn, checkOut) {
-  let url = `${API_URL}/rooms/category/${category}?`;
-  if (packageType) url += `package=${packageType}&`;
-  if (checkIn) url += `checkIn=${checkIn}&`;
-  if (checkOut) url += `checkOut=${checkOut}&`;
-  const response = await fetch(url);
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.message || 'Failed to fetch rooms');
-  return data;
+    let url = `${API_URL}/rooms/category/${category}?`;
+    if (packageType) url += `package=${packageType}&`;
+    if (checkIn) url += `checkIn=${checkIn}&`;
+    if (checkOut) url += `checkOut=${checkOut}&`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch rooms');
+    return data;
 }
 
 export async function checkRoomAvailability(roomId, checkIn, checkOut) {
-  const response = await fetch(`${API_URL}/rooms/check-availability`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ roomId, checkIn, checkOut }),
-  });
+    const response = await fetch(`${API_URL}/rooms/check-availability`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomId, checkIn, checkOut }),
+    });
 
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.message || 'Failed to check availability');
-  return data;
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to check availability');
+    return data;
 }
 
 export async function fetchGalleryRooms() {
-  const res = await fetch(`${API_URL}/rooms`);
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/rooms`);
+    return handleResponse(res);
 }
 
-//Packages
-
+// Packages
 export async function fetchPackagesByType(type) {
     const res = await fetch(`${API_URL}/packages?type=${type}`);
     return handleResponse(res);
@@ -260,8 +254,7 @@ export async function deletePackage(id) {
     return handleResponse(res);
 }
 
-//Admin: Bookings
-
+// Admin: Bookings
 export async function fetchBookings(params = {}) {
     const qs = new URLSearchParams(params).toString();
     const res = await fetch(`${API_URL}/admin/bookings?${qs}`, { headers: authHeaders() });
@@ -277,8 +270,7 @@ export async function updateBookingStatus(id, status) {
     return handleResponse(res);
 }
 
-//Public: Bookings 
-
+// Public: Bookings 
 export async function createBooking(payload) {
     const res = await fetch(`${API_URL}/bookings`, {
         method: 'POST',
@@ -288,8 +280,7 @@ export async function createBooking(payload) {
     return handleResponse(res);
 }
 
-//Admin: Staff
-
+// Admin: Staff
 export async function fetchStaff(params = {}) {
     const qs = new URLSearchParams(params).toString();
     const res = await fetch(`${API_URL}/admin/staff?${qs}`, { headers: authHeaders() });
@@ -327,13 +318,12 @@ export async function getEmployeeQR(id) {
     return handleResponse(res);
 }
 
-//Admin: Attendance
-
-export async function scanAttendance(employeeId) {
+// Admin: Attendance
+export async function scanAttendance(token) {
     const res = await fetch(`${API_URL}/admin/attendance/scan`, {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ employeeId }),
+        body: JSON.stringify({ token }),
     });
     return handleResponse(res);
 }
@@ -364,16 +354,14 @@ export async function updateAttendance(id, payload) {
     return handleResponse(res);
 }
 
-//Admin: Payroll
-
+// Admin: Payroll
 export async function fetchPayroll(params = {}) {
     const qs = new URLSearchParams(params).toString();
     const res = await fetch(`${API_URL}/admin/payroll?${qs}`, { headers: authHeaders() });
     return handleResponse(res);
 }
 
-//Admin: Reports
-
+// Admin: Reports
 export async function fetchReportSummary(params = {}) {
     const qs = new URLSearchParams(params).toString();
     const res = await fetch(`${API_URL}/admin/reports/summary?${qs}`, { headers: authHeaders() });
@@ -431,7 +419,6 @@ export async function deleteReadNotifications() {
     });
     return handleResponse(res);
 }
-
 
 // Admin: Feedbacks/Contacts
 export async function fetchFeedbacks() {
@@ -519,5 +506,111 @@ export async function fetchMyAttendance(params = {}) {
 
 export async function fetchMyLastPayroll() {
     const res = await fetch(`${API_URL}/staff/payroll/last`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function fetchMyQRToken() {
+    const res = await fetch(`${API_URL}/staff/my-qr-token`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+// Foods
+export async function fetchFoods() {
+    const res = await fetch(`${API_URL}/foods`);
+    return handleResponse(res);
+}
+
+export async function createFood(payload) {
+    const res = await fetch(`${API_URL}/admin/foods`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function updateFood(id, payload) {
+    const res = await fetch(`${API_URL}/admin/foods/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function deleteFood(id) {
+    const res = await fetch(`${API_URL}/admin/foods/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+    });
+    return handleResponse(res);
+}
+
+// Admin: Event Bookings
+export async function fetchAdminEventBookings(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/admin/events?${qs}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function updateEventBookingStatus(id, status) {
+    const res = await fetch(`${API_URL}/admin/events/${id}/status`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ status }),
+    });
+    return handleResponse(res);
+}
+
+export async function updateEventPaymentStatus(id, paymentStatus) {
+    const res = await fetch(`${API_URL}/admin/events/${id}/payment`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ paymentStatus }),
+    });
+    return handleResponse(res);
+}
+
+export async function fetchMyEventBookings() {
+    const res = await fetch(`${API_URL}/event-bookings/my-bookings`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+// Event Features (Decoration, Food, Addons)
+export async function fetchEventFeatures(category) {
+    const qs = category && category !== 'all' ? `?category=${category}` : '';
+    const res = await fetch(`${API_URL}/event-features${qs}`);
+    return handleResponse(res);
+}
+
+export async function fetchAdminEventFeatures(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/admin/event-features?${qs}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function createEventFeature(payload) {
+    const res = await fetch(`${API_URL}/admin/event-features`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function updateEventFeature(id, payload) {
+    const res = await fetch(`${API_URL}/admin/event-features/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function deleteEventFeature(id) {
+    const res = await fetch(`${API_URL}/admin/event-features/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+    });
     return handleResponse(res);
 }
