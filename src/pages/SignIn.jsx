@@ -49,7 +49,6 @@ const SignIn = () => {
 
       // Success
       login(data)
-      alert('Account created successfully!')
       navigate('/')
     } catch (err) {
       setError(err.message)

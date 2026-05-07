@@ -34,7 +34,6 @@ const Login = () => {
 
       // Success
       login(data)
-      alert('Logged in successfully!')
       
       if (data.role === 'admin') {
         navigate('/admin')
