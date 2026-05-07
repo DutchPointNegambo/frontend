@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, Filter } from 'lucide-react';
 import { fetchFoods, createFood, deleteFood, updateFood } from '../../utils/api';
+import toast from 'react-hot-toast';
 
 const FoodOrdering = () => {
     const [menuItems, setMenuItems] = useState([]);
@@ -74,7 +75,7 @@ const FoodOrdering = () => {
             closeModal();
         } catch (error) {
             console.error("Failed to save food", error);
-            alert('Failed to save food item');
+            toast.error('Failed to save food item');
         }
     };
 
