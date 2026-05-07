@@ -26,7 +26,7 @@ const EmployeeQR = () => {
     // Reload token every 60 seconds automatically
     useEffect(() => {
         loadToken();
-        const refreshInterval = setInterval(loadToken, 60000);
+        const refreshInterval = setInterval(loadToken, 90000);
         return () => clearInterval(refreshInterval);
     }, [loadToken]);
 
@@ -37,7 +37,7 @@ const EmployeeQR = () => {
             setCountdown(prev => {
                 if (prev <= 1) {
                     loadToken(); // Auto-reload when expired
-                    return 60;
+                    return 90;
                 }
                 return prev - 1;
             });
@@ -65,7 +65,7 @@ const EmployeeQR = () => {
             <div className="flex items-center gap-3 px-4 py-3 bg-teal-50 border border-teal-100 rounded-xl">
                 <ShieldCheck size={18} className="text-teal-600 flex-shrink-0" />
                 <p className="text-sm text-teal-700 font-medium">
-                    This QR refreshes every 60 seconds — screenshots cannot be misused
+                    This QR refreshes every 90 seconds — screenshots cannot be misused
                 </p>
             </div>
 
@@ -135,7 +135,7 @@ const EmployeeQR = () => {
                         <div className="mx-6 mb-6 h-1.5 bg-navy-100 rounded-full overflow-hidden">
                             <div
                                 className={`h-full ${colors.bar} transition-all duration-1000`}
-                                style={{ width: `${(countdown / 60) * 100}%` }}
+                                style={{ width: `${(countdown / 90) * 100}%` }}
                             />
                         </div>
 
