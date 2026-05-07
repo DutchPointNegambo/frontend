@@ -521,7 +521,7 @@ export async function fetchFoods() {
 }
 
 export async function createFood(payload) {
-    const res = await fetch(`${API_URL}/admin/foods`, {
+    const res = await fetch(`${API_URL}/foods`, {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify(payload),
@@ -530,7 +530,7 @@ export async function createFood(payload) {
 }
 
 export async function updateFood(id, payload) {
-    const res = await fetch(`${API_URL}/admin/foods/${id}`, {
+    const res = await fetch(`${API_URL}/foods/${id}`, {
         method: 'PUT',
         headers: authHeaders(),
         body: JSON.stringify(payload),
@@ -539,7 +539,7 @@ export async function updateFood(id, payload) {
 }
 
 export async function deleteFood(id) {
-    const res = await fetch(`${API_URL}/admin/foods/${id}`, {
+    const res = await fetch(`${API_URL}/foods/${id}`, {
         method: 'DELETE',
         headers: authHeaders(),
     });

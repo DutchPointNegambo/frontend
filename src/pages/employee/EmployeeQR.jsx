@@ -5,17 +5,22 @@ import { fetchMyQRToken } from '../../utils/api';
 
 const EmployeeQR = () => {
     const [qrData, setQrData] = useState(null);
-    const [countdown, setCountdown] = useState(60);
+    const [countdown, setCountdown] = useState(90);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [lastRefreshed, setLastRefreshed] = useState(null);
 
-    const loadToken = useCallback(async () => {
+    const loadToken = useCallback(async (isManual = false) => {
         setLoading(true);
         setError(null);
         try {
             const data = await fetchMyQRToken();
             setQrData(data);
             setCountdown(data.expiresInSeconds);
+            if (isManual) {
+                setLastRefreshed(new Date().toLocaleTimeString());
+                setTimeout(() => setLastRefreshed(null), 3000);
+            }
         } catch (err) {
             setError(err.message || 'Failed to load QR. Are you logged in?');
         } finally {
@@ -23,27 +28,36 @@ const EmployeeQR = () => {
         }
     }, []);
 
-    // Reload token every 60 seconds automatically
+    // Initial load and periodic refresh
     useEffect(() => {
         loadToken();
-        const refreshInterval = setInterval(loadToken, 90000);
+        const refreshInterval = setInterval(() => loadToken(), 90000);
         return () => clearInterval(refreshInterval);
     }, [loadToken]);
 
-    // Countdown timer — ticks every second
+    // Countdown timer
     useEffect(() => {
-        if (loading || error) return;
+        if (loading || error || !qrData) return;
+        
         const tick = setInterval(() => {
             setCountdown(prev => {
                 if (prev <= 1) {
-                    loadToken(); // Auto-reload when expired
-                    return 90;
+                    // When countdown hits zero, trigger a reload outside the setter
+                    return 0;
                 }
                 return prev - 1;
             });
         }, 1000);
+
         return () => clearInterval(tick);
-    }, [loading, error, loadToken]);
+    }, [loading, error, qrData]);
+
+    // Trigger reload when countdown hits 0
+    useEffect(() => {
+        if (countdown === 0 && !loading) {
+            loadToken();
+        }
+    }, [countdown, loading, loadToken]);
 
     const urgency = countdown <= 10 ? 'red' : countdown <= 20 ? 'amber' : 'teal';
     const urgencyColors = {
@@ -71,7 +85,7 @@ const EmployeeQR = () => {
 
             {/* QR Code Card */}
             <div className="bg-white rounded-2xl shadow-sm border border-navy-100 overflow-hidden">
-                {loading ? (
+                {loading && !qrData ? (
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                         <div className="w-10 h-10 border-4 border-teal-500/20 border-t-teal-500 rounded-full animate-spin" />
                         <p className="text-navy-400 text-sm font-medium">Generating secure QR...</p>
@@ -81,7 +95,7 @@ const EmployeeQR = () => {
                         <AlertCircle size={40} className="text-red-400" />
                         <p className="text-red-600 font-medium">{error}</p>
                         <button
-                            onClick={loadToken}
+                            onClick={() => loadToken(true)}
                             className="px-4 py-2 bg-navy-900 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors"
                         >
                             Try Again
@@ -103,8 +117,8 @@ const EmployeeQR = () => {
                         </div>
 
                         {/* QR Code */}
-                        <div className="flex justify-center px-6 py-6">
-                            <div className={`p-4 bg-white rounded-2xl border-4 ${colors.ring} ring-2 transition-all duration-300`}>
+                        <div className="flex justify-center px-6 py-6 relative">
+                            <div className={`p-4 bg-white rounded-2xl border-4 ${colors.ring} ring-2 transition-all duration-300 ${loading ? 'opacity-50' : ''}`}>
                                 {qrData?.token && (
                                     <QRCodeSVG
                                         value={qrData.token}
@@ -116,6 +130,11 @@ const EmployeeQR = () => {
                                     />
                                 )}
                             </div>
+                            {loading && (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <RefreshCw size={40} className="text-teal-600 animate-spin" />
+                                </div>
+                            )}
                         </div>
 
                         {/* Countdown */}
@@ -142,16 +161,22 @@ const EmployeeQR = () => {
                         {/* Manual refresh */}
                         <div className="px-6 pb-6">
                             <button
-                                onClick={loadToken}
+                                onClick={() => loadToken(true)}
                                 disabled={loading}
                                 className="w-full flex items-center justify-center gap-2 py-2.5 border border-navy-200 text-navy-600 rounded-xl text-sm font-medium hover:bg-navy-50 transition-colors disabled:opacity-50"
                             >
                                 <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
-                                Refresh Now
+                                {loading ? 'Refreshing...' : 'Refresh Now'}
                             </button>
+                            {lastRefreshed && (
+                                <p className="text-center text-[10px] text-teal-600 font-bold uppercase mt-2 animate-bounce">
+                                    Last Refreshed at {lastRefreshed}
+                                </p>
+                            )}
                         </div>
                     </>
-                )}
+                )
+}
             </div>
 
             {/* Instructions */}
