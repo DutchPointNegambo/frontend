@@ -83,7 +83,15 @@ export default function BookingManagement() {
 
     const handleCreateBooking = async (e) => {
         e.preventDefault();
-        setCreating(true);
+        const checkInDate = new Date(newBooking.checkIn);
+        const checkOutDate = new Date(newBooking.checkOut);
+        
+        if (checkOutDate <= checkInDate) {
+            showToast('Check-out date must be after check-in date', 'error');
+            setCreating(false);
+            return;
+        }
+
         try {
             await apiCreateBooking({
                 ...newBooking,
@@ -489,18 +497,33 @@ export default function BookingManagement() {
                                             <div 
                                                 key={r._id} 
                                                 onClick={() => setNewBooking({ ...newBooking, roomId: r._id })}
-                                                className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                                                className={`rounded-xl border-2 cursor-pointer transition-all overflow-hidden ${
                                                     newBooking.roomId === r._id 
                                                     ? 'border-teal-500 bg-teal-50 shadow-sm' 
                                                     : 'border-white bg-white hover:border-navy-200 shadow-sm'
                                                 }`}
                                             >
-                                                <div className="flex justify-between items-start mb-1">
-                                                    <p className="font-bold text-navy-900 text-sm">Room {r.roomNumber}</p>
-                                                    {newBooking.roomId === r._id && <CheckCircle size={14} className="text-teal-500" />}
+                                                <div className="h-20 bg-navy-100 relative">
+                                                    {(r.image || (r.images && r.images[0])) ? (
+                                                        <img src={r.image || r.images[0]} alt={r.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-navy-300">
+                                                            <BedDouble size={20} />
+                                                        </div>
+                                                    )}
+                                                    {newBooking.roomId === r._id && (
+                                                        <div className="absolute inset-0 bg-teal-500/20 flex items-center justify-center">
+                                                            <CheckCircle size={20} className="text-white drop-shadow-md" />
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <p className="text-xs text-navy-500 truncate" title={r.name}>{r.name}</p>
-                                                <p className="text-teal-600 font-semibold text-xs mt-1.5">{formatCurrency(r.price)}<span className="text-navy-400 font-normal text-[10px]">/n</span></p>
+                                                <div className="p-2.5">
+                                                    <div className="flex justify-between items-start mb-0.5">
+                                                        <p className="font-bold text-navy-900 text-xs">Room {r.roomNumber}</p>
+                                                    </div>
+                                                    <p className="text-[10px] text-navy-500 truncate" title={r.name}>{r.name}</p>
+                                                    <p className="text-teal-600 font-bold text-xs mt-1">{formatCurrency(r.price)}<span className="text-navy-400 font-normal text-[9px]">/n</span></p>
+                                                </div>
                                             </div>
                                         ))
                                     )}
@@ -514,7 +537,14 @@ export default function BookingManagement() {
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Check-out</label>
-                                    <input required type="date" value={newBooking.checkOut} onChange={e => setNewBooking({ ...newBooking, checkOut: e.target.value })} className="w-full px-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" />
+                                    <input 
+                                        required 
+                                        type="date" 
+                                        min={newBooking.checkIn ? new Date(new Date(newBooking.checkIn).getTime() + 86400000).toISOString().split('T')[0] : ''}
+                                        value={newBooking.checkOut} 
+                                        onChange={e => setNewBooking({ ...newBooking, checkOut: e.target.value })} 
+                                        className="w-full px-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" 
+                                    />
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Guests</label>
