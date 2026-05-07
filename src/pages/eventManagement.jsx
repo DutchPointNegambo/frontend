@@ -107,7 +107,7 @@ const EventManagement = () => {
                     const decos = data.filter(f => f.category === 'decoration')
                     const foods = data.filter(f => f.category === 'food')
                     const addons = data.filter(f => f.category === 'addon')
-                    
+
                     if (decos.length > 0) {
                         setDecorationOptions(decos)
                         setDecorationType(decos[0]._id)
@@ -322,6 +322,14 @@ const EventManagement = () => {
                                     <span className="font-semibold text-gray-800">
                                         {new Date(bookingSuccess.eventDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                                     </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Decoration</span>
+                                    <span className="font-semibold text-gray-800 capitalize">{bookingSuccess.decoration?.name || bookingSuccess.decoration || '—'}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Food</span>
+                                    <span className="font-semibold text-gray-800 capitalize">{bookingSuccess.foodPackage?.name || bookingSuccess.foodPackage || '—'}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-500">Slot</span>

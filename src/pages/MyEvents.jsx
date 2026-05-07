@@ -77,8 +77,8 @@ export default function MyEvents() {
         // Table
         const tableData = [
             ['Description', 'Details', 'Amount'],
-            ['Event Decoration', booking.decoration.toUpperCase(), `Rs. ${booking.totalAmount.toLocaleString()}`], // This is a simplification, in real apps we'd store base price
-            ['Food Package', booking.foodPackage.toUpperCase(), 'Included'],
+            ['Event Decoration', (booking.decoration?.name || booking.decoration || 'Standard').toUpperCase(), `Rs. ${booking.totalAmount.toLocaleString()}`], // This is a simplification, in real apps we'd store base price
+            ['Food Package', (booking.foodPackage?.name || booking.foodPackage || 'Standard').toUpperCase(), 'Included'],
             ...booking.addons.map(a => [a.name, 'Add-on', `Rs. ${a.price.toLocaleString()}`])
         ]
 
@@ -205,7 +205,7 @@ export default function MyEvents() {
                                                     <div className="p-2 bg-sand-50 text-sand-600 rounded-xl"><MapPin size={18} /></div>
                                                     <div>
                                                         <p className="text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-0.5">Decoration</p>
-                                                        <p className="text-sm font-bold text-navy-700 capitalize">{booking.decoration}</p>
+                                                        <p className="text-sm font-bold text-navy-700 capitalize">{booking.decoration?.name || booking.decoration || '—'}</p>
                                                     </div>
                                                 </div>
                                             </div>
