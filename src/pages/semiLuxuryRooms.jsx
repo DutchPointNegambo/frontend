@@ -66,9 +66,8 @@ const SemiLuxuryRooms = () => {
     const [checkOut, setCheckOut] = useState(state?.checkOut || '')
     const [guests, setGuests] = useState(state?.guests || '1')
     const [availability, setAvailability] = useState(null)
-    const [bookingSuccess, setBookingSuccess] = useState(false)
     const [lightboxIndex, setLightboxIndex] = useState(null)
-    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+    const [showBookingModal, setShowBookingModal] = useState(false)
     const navigate = useNavigate()
 
     const openLightbox = (idx) => setLightboxIndex(idx)
@@ -109,7 +108,6 @@ const SemiLuxuryRooms = () => {
         setError(null)
         setSelectedRoom(null)
         setAvailability(null)
-        setBookingSuccess(false)
         fetchRoomsByCategory('semiluxury', selectedPackage, checkIn, checkOut)
             .then(data => {
                 const normalized = data.map(normalizeRoom);
@@ -118,11 +116,10 @@ const SemiLuxuryRooms = () => {
             })
             .catch(() => setError('Unable to load rooms. Please try again.'))
             .finally(() => setLoading(false))
-    }, [selectedPackage, guests, checkIn, checkOut, bookingSuccess])
+    }, [selectedPackage, guests, checkIn, checkOut])
 
     const handleSelectRoom = (room) => {
         setSelectedRoom(room)
-        setBookingSuccess(false)
         setAvailability(null)
     }
 
@@ -154,20 +151,10 @@ const SemiLuxuryRooms = () => {
 
     const handleConfirmBooking = () => {
         if (!selectedRoom || !checkIn || (selectedPackage !== 'day-use' && !checkOut)) return
-        setIsBookingModalOpen(true)
+        setShowBookingModal(true)
     }
 
-    const handleBookingSuccess = () => {
-        setBookingSuccess(true)
-        setAvailability(null)
-        // Refresh rooms to show updated status
-        fetchRoomsByCategory('semiluxury', selectedPackage, checkIn, checkOut)
-            .then(data => {
-                const normalized = data.map(normalizeRoom);
-                const filtered = normalized.filter(room => room.guests >= parseInt(guests));
-                setRooms(filtered);
-            })
-    }
+
 
     const calcNights = () => {
         if (!checkIn || !checkOut) return 0
@@ -376,10 +363,10 @@ const SemiLuxuryRooms = () => {
                                     <div className="absolute top-4 right-4 z-20 bg-teal-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow animate-badge-pulse">✓ Selected</div>
                                 )}
 
-                                {(room.isAvailable === false || room.status === 'occupied') && (
+                                {(room.isAvailable === false || room.status === 'maintenance') && (
                                     <div className="absolute inset-0 z-10 bg-navy-900/40 backdrop-blur-[2px] flex items-center justify-center pointer-events-none">
-                                        <div className="bg-red-500 text-white px-6 py-2 rounded-full font-bold text-lg shadow-2xl rotate-[-10deg] animate-pulse">
-                                            Occupied
+                                        <div className={`${room.status === 'maintenance' ? 'bg-amber-600' : 'bg-red-500'} text-white px-6 py-2 rounded-full font-bold text-lg shadow-2xl rotate-[-10deg] animate-pulse`}>
+                                            {room.status === 'maintenance' ? 'Maintenance' : 'Occupied'}
                                         </div>
                                     </div>
                                 )}
@@ -409,13 +396,13 @@ const SemiLuxuryRooms = () => {
                                                 <span className="text-xl sm:text-2xl font-extrabold text-navy-900 italic">{formatPrice(room.price)}/-</span>
                                             </div>
                                             <button onClick={(e) => { e.stopPropagation(); handleSelectRoom(room) }}
-                                                disabled={room.isAvailable === false || room.status === 'occupied'}
-                                                className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 ${(room.isAvailable === false || room.status === 'occupied')
+                                                disabled={room.isAvailable === false || room.status === 'maintenance'}
+                                                className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 ${(room.isAvailable === false || room.status === 'maintenance')
                                                     ? 'bg-navy-200 text-navy-400 cursor-not-allowed'
                                                     : selectedRoom?._id === room._id
                                                         ? 'bg-teal-500 text-white shadow-lg shadow-teal-200'
                                                         : 'bg-navy-900 text-white hover:bg-navy-700 shadow-md hover:shadow-lg'}`}>
-                                                {(room.isAvailable === false || room.status === 'occupied') ? 'Not Available' : selectedRoom?._id === room._id ? 'Selected' : 'Select Room'}
+                                                {room.status === 'maintenance' ? 'Maintenance' : room.isAvailable === false ? 'Not Available' : selectedRoom?._id === room._id ? 'Selected' : 'Select Room'}
                                             </button>
                                         </div>
                                     </div>
@@ -464,8 +451,8 @@ const SemiLuxuryRooms = () => {
                                             </div>
                                         </div>
                                         {checkIn && (selectedPackage === 'day-use' || (checkOut && calcNights() > 0)) && (
-                                            <div className="grid grid-cols-2 gap-2 animate-fade-in">
-                                                <div className={`rounded-xl px-3 py-2 border ${selectedPackage === 'day-use' ? 'col-span-2 bg-teal-50 border-teal-100' : 'bg-teal-50 border-teal-100'}`}>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 animate-fade-in">
+                                                <div className={`rounded-xl px-3 py-2 border ${selectedPackage === 'day-use' ? 'col-span-1 sm:col-span-2 bg-teal-50 border-teal-100' : 'bg-teal-50 border-teal-100'}`}>
                                                     <span className="text-xs text-teal-600 font-bold block">{selectedPackage === 'day-use' ? 'Visit Date' : 'Check-In'}</span>
                                                     <span className="text-navy-800 font-semibold text-sm">{new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {selectedPackage === 'day-use' ? DaycheckInTime : checkInTime}</span>
                                                 </div>
@@ -475,7 +462,7 @@ const SemiLuxuryRooms = () => {
                                                         <span className="text-navy-800 font-semibold text-sm">{new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {checkOutTime}</span>
                                                     </div>
                                                 )}
-                                                <div className="col-span-2 bg-gradient-to-r from-navy-50 to-teal-50/50 rounded-xl px-3 py-2 flex justify-between items-center">
+                                                <div className="col-span-1 sm:col-span-2 bg-gradient-to-r from-navy-50 to-teal-50/50 rounded-xl px-3 py-2 flex justify-between items-center">
                                                     <span className="text-navy-500 text-sm">
                                                         {selectedPackage === 'day-use' ? 'Day Use' : `${calcNights()} Night${calcNights() > 1 ? 's' : ''}`}
                                                     </span>
@@ -525,18 +512,12 @@ const SemiLuxuryRooms = () => {
                                                 ))}
                                             </ul>
                                         </div>
-                                        {bookingSuccess ? (
-                                            <div className="bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-2xl p-4 text-center animate-scale-in">
-                                                <p className="text-teal-700 font-bold">Booking Confirmed!</p>
-                                                <p className="text-teal-500 text-xs mt-1">Redirecting…</p>
-                                            </div>
-                                        ) : (
-                                            <button onClick={handleConfirmBooking}
-                                                disabled={!checkIn || (selectedPackage !== 'day-use' && (!checkOut || calcNights() <= 0)) || availability === false || availability === 'checking' || selectedRoom?.isAvailable === false || selectedRoom?.status === 'occupied'}
-                                                className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-teal-600 hover:to-teal-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow">
-                                                {(selectedRoom?.isAvailable === false || selectedRoom?.status === 'occupied') ? 'Room Occupied' : !checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
-                                            </button>
-                                        )}
+                                        <button onClick={handleConfirmBooking}
+                                            disabled={!checkIn || (selectedPackage !== 'day-use' && (!checkOut || calcNights() <= 0)) || availability === false || availability === 'checking' || selectedRoom?.isAvailable === false || selectedRoom?.status === 'maintenance'}
+                                            className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-teal-600 hover:to-teal-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow">
+                                            {selectedRoom?.status === 'maintenance' ? 'Maintenance Mode' : selectedRoom?.isAvailable === false ? 'Room Occupied' : !checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
+                                        </button>
+
                                         <p className="text-center text-navy-400 text-xs">Check dates & times before booking</p>
                                     </div>
                                 </div>
@@ -551,18 +532,17 @@ const SemiLuxuryRooms = () => {
                     </div>
                 </div>
             </section>
-            <Footer />
-
             <BookingModal
-                isOpen={isBookingModalOpen}
-                onClose={() => setIsBookingModalOpen(false)}
+                isOpen={showBookingModal}
+                onClose={() => { setShowBookingModal(false) }}
                 room={selectedRoom}
                 checkIn={checkIn}
-                checkOut={checkOut}
+                checkOut={selectedPackage === 'day-use' ? checkIn : checkOut}
                 guests={guests}
                 selectedPackage={selectedPackage}
-                onSuccess={handleBookingSuccess}
+                onSuccess={() => { setAvailability(null) }}
             />
+            <Footer />
         </div>
     )
 }

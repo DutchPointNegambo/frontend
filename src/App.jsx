@@ -9,6 +9,8 @@ import Login from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
 import Profile from './pages/Profile'
 import EventManagement from './pages/eventManagement'
+import VenueGallery from './pages/VenueGallery'
+import MyEvents from './pages/MyEvents'
 import DayOutingRooms from './pages/DayOutingRooms'
 import DeluxeRooms from './pages/deluxeRooms' 
 import SemiLuxuryRooms from './pages/semiLuxuryRooms'
@@ -23,6 +25,7 @@ import Checkout from './pages/Checkout'
 import PaymentSuccess from './pages/PaymentSuccess'
 import EmployeeDashboard from "./pages/EmployeeDashboard"
 import EmployeeLayout from "./pages/employee/EmployeeLayout"
+import EmployeeQR from "./pages/employee/EmployeeQR"
 
 import AddRoomForm from './components/admin_components/AddRoomForm'
 import useIdleTimeout from './hooks/useIdleTimeout'
@@ -41,6 +44,8 @@ const Staff = lazy(() => import('./pages/admin/Staff'))
 const AttendanceScanner = lazy(() => import('./pages/admin/AttendanceScanner'))
 const FeedbackManagement = lazy(() => import('./pages/admin/FeedbackManagement'))
 const OrderManagement = lazy(() => import('./pages/admin/OrderManagement'))
+const AdminEventManagement = lazy(() => import('./pages/admin/EventManagement'))
+const PackageManagement = lazy(() => import('./pages/admin/PackageManagement'))
 
 function App() {
 
@@ -66,7 +71,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/event" element={<EventManagement />} />
+          <Route path="/event-management" element={<EventManagement />} />
+          <Route path="/venues" element={<VenueGallery />} />
+          <Route path="/my-events" element={<MyEvents />} />
           <Route path="/foods" element={<FoodItems />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/DayOutingRooms" element={<DayOutingRooms />} />
@@ -82,6 +89,7 @@ function App() {
           <Route path="/payment-success/:orderId" element={<PaymentSuccess />} />
           <Route path="/employee" element={<EmployeeLayout />}>
             <Route path="dashboard" element={<EmployeeDashboard />} />
+            <Route path="my-qr" element={<EmployeeQR />} />
           </Route>
           
           {/* Admin Routes */}
@@ -96,6 +104,8 @@ function App() {
             <Route path="staff" element={<Staff />} />
             <Route path="attendance-scanner" element={<AttendanceScanner />} />
             <Route path="feedback" element={<FeedbackManagement />} />
+            <Route path="events" element={<AdminEventManagement />} />
+            <Route path="package-management" element={<PackageManagement />} />
           </Route>
         </Routes>
       </Suspense>

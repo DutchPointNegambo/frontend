@@ -66,9 +66,8 @@ const DayOutingRooms = () => {
     const [outingDate, setOutingDate] = useState(state?.checkIn || '')
     const [guests, setGuests] = useState(state?.guests || '1')
     const [availability, setAvailability] = useState(null)
-    const [bookingSuccess, setBookingSuccess] = useState(false)
     const [lightboxIndex, setLightboxIndex] = useState(null)
-    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+    const [showBookingModal, setShowBookingModal] = useState(false)
     const [packages, setPackages] = useState([])
     const [packagesLoading, setPackagesLoading] = useState(false)
     const [packagesError, setPackagesError] = useState(null)
@@ -129,7 +128,6 @@ const DayOutingRooms = () => {
         setError(null)
         setSelectedRoom(null)
         setAvailability(null)
-        setBookingSuccess(false)
         fetchRoomsByCategory('couple', null, outingDate, outingDate)
             .then(data => {
                 const normalized = data.map(normalizeRoom);
@@ -138,7 +136,7 @@ const DayOutingRooms = () => {
             })
             .catch(() => setError('Unable to load rooms. Please try again.'))
             .finally(() => setLoading(false))
-    }, [guests, outingDate, bookingSuccess])
+    }, [guests, outingDate])
 
     const handleSelectCategory = (cat) => {
         setSelectedCategory(cat)
@@ -157,7 +155,6 @@ const DayOutingRooms = () => {
 
     const handleSelectRoom = (room) => {
         setSelectedRoom(room)
-        setBookingSuccess(false)
         setAvailability(null)
     }
 
@@ -178,20 +175,10 @@ const DayOutingRooms = () => {
 
     const handleConfirmBooking = () => {
         if (!selectedRoom || !outingDate) return
-        setIsBookingModalOpen(true)
+        setShowBookingModal(true)
     }
 
-    const handleBookingSuccess = () => {
-        setBookingSuccess(true)
-        setAvailability(null)
-        // Refresh rooms to show updated status
-        fetchRoomsByCategory('couple', null, outingDate, outingDate)
-            .then(data => {
-                const normalized = data.map(normalizeRoom);
-                const filtered = normalized.filter(room => room.guests >= parseInt(guests));
-                setRooms(filtered);
-            })
-    }
+
 
 
 
@@ -461,10 +448,10 @@ const DayOutingRooms = () => {
                                         className={`card-shine group relative bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer border-2 transform hover:-translate-y-1 ${selectedRoom?._id === room._id ? 'border-teal-500 scale-[1.01] animate-selected-ring' : 'border-transparent hover:border-teal-200'}`}
                                         style={{ animationDelay: `${idx * 120}ms` }}
                                     >
-                                        {(room.isAvailable === false || room.status === 'occupied') && (
+                                        {(room.isAvailable === false || room.status === 'maintenance') && (
                                             <div className="absolute inset-0 z-10 bg-navy-900/40 backdrop-blur-[2px] flex items-center justify-center pointer-events-none">
-                                                <div className="bg-red-500 text-white px-6 py-2 rounded-full font-bold text-lg shadow-2xl rotate-[-10deg] animate-pulse">
-                                                    Occupied
+                                                <div className={`${room.status === 'maintenance' ? 'bg-amber-600' : 'bg-red-500'} text-white px-6 py-2 rounded-full font-bold text-lg shadow-2xl rotate-[-10deg] animate-pulse`}>
+                                                    {room.status === 'maintenance' ? 'Maintenance' : 'Occupied'}
                                                 </div>
                                             </div>
                                         )}
@@ -486,14 +473,14 @@ const DayOutingRooms = () => {
                                                 <div className="flex flex-wrap items-center justify-between gap-2 mt-4">
                                                     <div><span className="text-xs text-navy-400 block">Package Price</span><span className="text-xl sm:text-2xl font-extrabold text-navy-900 italic">{formatPrice(room.price)}/-</span></div>
                                                     <button
-                                                        disabled={room.isAvailable === false || room.status === 'occupied'}
-                                                        className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 ${(room.isAvailable === false || room.status === 'occupied')
+                                                        disabled={room.isAvailable === false || room.status === 'maintenance'}
+                                                        className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 ${(room.isAvailable === false || room.status === 'maintenance')
                                                             ? 'bg-navy-200 text-navy-400 cursor-not-allowed'
                                                             : selectedRoom?._id === room._id
                                                                 ? 'bg-teal-50 text-teal-600 shadow-lg border border-teal-200'
                                                                 : 'bg-navy-900 text-white hover:bg-navy-700 shadow-md hover:shadow-lg'
                                                             }`}>
-                                                        {(room.isAvailable === false || room.status === 'occupied') ? 'Not Available' : selectedRoom?._id === room._id ? 'Selected' : 'Select Room'}
+                                                        {room.status === 'maintenance' ? 'Maintenance' : room.isAvailable === false ? 'Not Available' : selectedRoom?._id === room._id ? 'Selected' : 'Select Room'}
                                                     </button>
                                                 </div>
                                             </div>
@@ -583,16 +570,9 @@ const DayOutingRooms = () => {
                                                     </ul>
                                                 </div>
 
-                                                {bookingSuccess ? (
-                                                    <div className="bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-2xl p-4 text-center animate-scale-in">
-                                                        <p className="text-teal-700 font-bold">Booking Confirmed!</p>
-                                                        <p className="text-teal-500 text-xs mt-1">Redirecting to booking page…</p>
-                                                    </div>
-                                                ) : (
-                                                    <button onClick={handleConfirmBooking} disabled={!outingDate || availability === false || availability === 'checking' || selectedRoom?.isAvailable === false || selectedRoom?.status === 'occupied'} className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow transition-all duration-300 hover:from-teal-600 hover:to-teal-700 transform hover:-translate-y-0.5 active:translate-y-0">
-                                                        {(selectedRoom?.isAvailable === false || selectedRoom?.status === 'occupied') ? 'Room Occupied' : !outingDate ? 'Select Date First' : 'Confirm Booking'}
-                                                    </button>
-                                                )}
+                                                <button onClick={handleConfirmBooking} disabled={!outingDate || availability === false || availability === 'checking' || selectedRoom?.isAvailable === false || selectedRoom?.status === 'maintenance'} className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow transition-all duration-300 hover:from-teal-600 hover:to-teal-700 transform hover:-translate-y-0.5 active:translate-y-0">
+                                                    {selectedRoom?.status === 'maintenance' ? 'Maintenance Mode' : (selectedRoom?.isAvailable === false) ? 'Room Occupied' : !outingDate ? 'Select Date First' : 'Confirm Booking'}
+                                                </button>
                                             </div>
                                         </div>
                                     ) : (
@@ -699,7 +679,7 @@ const DayOutingRooms = () => {
                                     </div>
 
                                     <h4 className="text-xs font-bold text-navy-800 uppercase tracking-widest mb-4">Package Facilities</h4>
-                                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-8">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 mb-8">
                                         {pkg.facilities && pkg.facilities.map((item, i) => (
                                             <div key={i} className="flex items-center gap-2 text-[13px] text-navy-600 animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
                                                 <span className={`${selectedCategory === 'family' ? 'text-teal-500' : 'text-amber-500'} font-bold`}>•</span>
@@ -738,18 +718,18 @@ const DayOutingRooms = () => {
                     </div>
                 </section>
             )}
-            <Footer />
-
             <BookingModal
-                isOpen={isBookingModalOpen}
-                onClose={() => setIsBookingModalOpen(false)}
+                isOpen={showBookingModal}
+                onClose={() => { setShowBookingModal(false) }}
                 room={selectedRoom}
                 checkIn={outingDate}
                 checkOut={outingDate}
                 guests={guests}
                 selectedPackage="day-use"
-                onSuccess={handleBookingSuccess}
+                onSuccess={() => { setAvailability(null) }}
             />
+            <Footer />
+
         </div>
     )
 }

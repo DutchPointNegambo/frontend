@@ -4,7 +4,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import Reveal from "../components/Reveal"
 import { googleSignIn, loginUser } from '../utils/api'
 import { useAuth } from '../context/AuthContext'
-// Firebase authentication imports
+import toast from 'react-hot-toast'
 import { auth, googleProvider, signInWithPopup } from '../firebase'
 import { GoogleAuthProvider } from 'firebase/auth'
 
@@ -40,10 +40,8 @@ const Login = () => {
 
       // Save user in auth context
       login(data)
-      alert('Logged in successfully!')
-
-
-      // Role-based navigation
+      toast.success('Logged in successfully!')
+      
       if (data.role === 'admin') {
         navigate('/admin')
       } else if (data.role === 'staff') {

@@ -3,7 +3,7 @@ import {
     Search, 
     Filter, 
     Eye, 
-    CheckCircle2, 
+    CheckCircle, 
     Clock, 
     Truck, 
     XCircle, 
@@ -11,7 +11,8 @@ import {
     RefreshCw,
     MoreVertical,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Plus
 } from 'lucide-react';
 import { fetchAdminOrders, updateAdminOrderStatus } from '../../utils/api';
 import { useToast } from '../../components/admin_components/useToast';
@@ -24,13 +25,21 @@ const OrderManagement = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const { toast: toastState, showToast, clearToast } = useToast();
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [creating, setCreating] = useState(false);
+    const [newOrder, setNewOrder] = useState({
+        guestInfo: { name: '', email: '', phone: '', notes: '' },
+        items: [{ name: '', quantity: 1, price: 0 }],
+        subtotal: 0,
+        serviceCharge: 0,
+        total: 0
+    });
 
     const loadOrders = useCallback(async () => {
         setLoading(true);
         try {
             const data = await fetchAdminOrders({ status: statusFilter, search: searchTerm });
-            setOrders(data);
+            setOrders(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Failed to fetch orders:', error);
             showToast('Failed to load orders', 'error');
@@ -105,11 +114,60 @@ const OrderManagement = () => {
     const getStatusIcon = (status) => {
         switch (status) {
             case 'pending': return <Clock size={14} />;
-            case 'preparing': return <RefreshCw size={14} className="animate-spin-slow" />;
-            case 'delivered': return <CheckCircle2 size={14} />;
+            case 'preparing': return <RefreshCw size={14} className="animate-spin" />;
+            case 'delivered': return <CheckCircle size={14} />;
             case 'cancelled': return <XCircle size={14} />;
             default: return <Clock size={14} />;
         }
+    };
+
+    const handleCreateOrder = async (e) => {
+        e.preventDefault();
+        setCreating(true);
+        try {
+            const subtotal = newOrder.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const serviceCharge = subtotal * 0.1; // 10% service charge
+            const total = subtotal + serviceCharge;
+            
+            const payload = {
+                ...newOrder,
+                subtotal,
+                serviceCharge,
+                total,
+                items: newOrder.items.map(item => ({ ...item, id: `manual-${Date.now()}` }))
+            };
+
+            const { createOrder: apiCreateOrder } = await import('../../utils/api');
+            await apiCreateOrder(payload);
+            toast.success('Order created successfully');
+            setIsAddModalOpen(false);
+            loadOrders();
+            setNewOrder({
+                guestInfo: { name: '', email: '', phone: '', notes: '' },
+                items: [{ name: '', quantity: 1, price: 0 }],
+                subtotal: 0,
+                serviceCharge: 0,
+                total: 0
+            });
+        } catch (error) {
+            toast.error(error.message || 'Failed to create order');
+        } finally {
+            setCreating(false);
+        }
+    };
+
+    const addOrderItem = () => {
+        setNewOrder({
+            ...newOrder,
+            items: [...newOrder.items, { name: '', quantity: 1, price: 0 }]
+        });
+    };
+
+    const removeOrderItem = (index) => {
+        setNewOrder({
+            ...newOrder,
+            items: newOrder.items.filter((_, i) => i !== index)
+        });
     };
 
     return (
@@ -130,10 +188,17 @@ const OrderManagement = () => {
                     </button>
                     <button 
                         onClick={handleExport}
-                        className="bg-navy-900 text-white px-5 py-2.5 rounded-xl flex items-center hover:bg-teal-700 transition-all shadow-lg shadow-navy-900/10 font-medium text-sm"
+                        className="bg-white border border-navy-100 text-navy-600 px-4 py-2.5 rounded-xl flex items-center hover:bg-navy-50 transition-all shadow-sm font-medium text-sm"
                     >
                         <Download size={18} className="mr-2" />
-                        Export Data
+                        Export
+                    </button>
+                    <button 
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="bg-navy-900 text-white px-5 py-2.5 rounded-xl flex items-center hover:bg-teal-700 transition-all shadow-lg shadow-navy-900/10 font-medium text-sm"
+                    >
+                        <Plus size={18} className="mr-2" />
+                        Add Order
                     </button>
                 </div>
             </div>
@@ -175,33 +240,31 @@ const OrderManagement = () => {
                                 <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Order ID</th>
                                 <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Guest</th>
                                 <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Items</th>
-                                <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Total</th>
-                                <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider text-right">Actions</th>
+                                <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider text-right">Total</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-navy-50">
                             {loading ? (
                                 Array(5).fill(0).map((_, i) => (
                                     <tr key={i} className="animate-pulse">
-                                        <td colSpan="6" className="px-6 py-4 h-16 bg-navy-50/10"></td>
+                                        <td colSpan="4" className="px-6 py-4 h-16 bg-navy-50/10"></td>
                                     </tr>
                                 ))
                             ) : orders.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-12 text-center text-navy-400 font-medium">
+                                    <td colSpan="4" className="px-6 py-12 text-center text-navy-400 font-medium">
                                         No orders found matching your criteria
                                     </td>
                                 </tr>
                             ) : (
                                 orders.map((order) => (
-                                    <tr key={order._id} className="hover:bg-navy-50/30 transition-colors group">
+                                    <tr key={order._id} onClick={() => { setSelectedOrder(order); setIsDetailModalOpen(true); }} className="hover:bg-navy-50/30 transition-colors group cursor-pointer">
                                         <td className="px-6 py-4 font-mono text-xs text-navy-500">
                                             #{order._id.slice(-6).toUpperCase()}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="font-semibold text-navy-900">{order.guestInfo.name}</div>
-                                            <div className="text-xs text-navy-400">{order.guestInfo.phone}</div>
+                                            <div className="font-semibold text-navy-900">{order.guestInfo?.name || 'Guest'}</div>
+                                            <div className="text-xs text-navy-400">{order.guestInfo?.phone || 'No phone'}</div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="text-sm text-navy-700">
@@ -211,25 +274,8 @@ const OrderManagement = () => {
                                                 {order.items.map(i => i.name).join(', ')}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="font-bold text-navy-900">Rs. {order.total.toLocaleString()}</div>
-                                            <div className={`text-[10px] font-bold uppercase ${order.paymentStatus === 'paid' ? 'text-teal-600' : 'text-amber-600'}`}>
-                                                {order.paymentStatus}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(order.status)}`}>
-                                                {getStatusIcon(order.status)}
-                                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                                            </span>
-                                        </td>
                                         <td className="px-6 py-4 text-right">
-                                            <button 
-                                                onClick={() => { setSelectedOrder(order); setIsDetailModalOpen(true); }}
-                                                className="p-2 text-navy-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-all"
-                                            >
-                                                <Eye size={18} />
-                                            </button>
+                                            <div className="font-bold text-navy-900">Rs. {order.total.toLocaleString()}</div>
                                         </td>
                                     </tr>
                                 ))
@@ -260,7 +306,7 @@ const OrderManagement = () => {
                         {/* Modal Body */}
                         <div className="flex-1 overflow-y-auto p-8 space-y-8">
                             {/* Guest Info */}
-                            <div className="grid grid-cols-2 gap-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                 <div>
                                     <h3 className="text-xs font-bold text-navy-400 uppercase tracking-widest mb-3">Guest Information</h3>
                                     <div className="space-y-2">
@@ -307,7 +353,7 @@ const OrderManagement = () => {
                                         <tfoot>
                                             <tr className="bg-white/50 border-t border-navy-100">
                                                 <td colSpan="3" className="px-4 py-4 text-right font-bold text-navy-600">Total Amount</td>
-                                                <td className="px-4 py-4 text-right font-black text-teal-600 text-lg">Rs. {selectedOrder.total.toLocaleString()}</td>
+                                                <td className="px-4 py-4 text-right font-black text-teal-600 text-lg">Rs. {(selectedOrder?.total || 0).toLocaleString()}</td>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -315,7 +361,7 @@ const OrderManagement = () => {
                             </div>
 
                             {/* Notes */}
-                            {selectedOrder.guestInfo.notes && (
+                            {selectedOrder?.guestInfo?.notes && (
                                 <div>
                                     <h3 className="text-xs font-bold text-navy-400 uppercase tracking-widest mb-2">Special Instructions</h3>
                                     <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl text-sm text-amber-800 italic">
@@ -325,27 +371,109 @@ const OrderManagement = () => {
                             )}
                         </div>
 
-                        {/* Modal Footer - Actions */}
-                        <div className="px-8 py-6 border-t border-navy-50 bg-white flex flex-wrap gap-3">
+                        {/* Modal Footer - Actions (Status managed by Kitchen) */}
+                        <div className="px-8 py-6 border-t border-navy-50 bg-white flex justify-end">
                             <button 
-                                onClick={() => handleStatusUpdate(selectedOrder._id, 'preparing')}
-                                className="flex-1 bg-indigo-50 text-indigo-600 px-4 py-3 rounded-xl hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center font-bold text-sm"
+                                onClick={() => setIsDetailModalOpen(false)}
+                                className="px-8 py-3 bg-navy-900 text-white rounded-xl hover:bg-teal-700 transition-all font-bold text-sm"
                             >
-                                <RefreshCw size={18} className="mr-2" /> Start Preparing
-                            </button>
-                            <button 
-                                onClick={() => handleStatusUpdate(selectedOrder._id, 'delivered')}
-                                className="flex-1 bg-green-50 text-green-600 px-4 py-3 rounded-xl hover:bg-green-600 hover:text-white transition-all flex items-center justify-center font-bold text-sm"
-                            >
-                                <CheckCircle2 size={18} className="mr-2" /> Mark Delivered
-                            </button>
-                            <button 
-                                onClick={() => handleStatusUpdate(selectedOrder._id, 'cancelled')}
-                                className="px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all flex items-center justify-center font-bold text-sm"
-                            >
-                                <XCircle size={18} />
+                                Close Details
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Add Order Modal */}
+            {isAddModalOpen && (
+                <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md flex items-center justify-center z-[1000] p-4">
+                    <div className="bg-white rounded-3xl overflow-hidden w-full max-w-2xl shadow-2xl border border-white/20 flex flex-col max-h-[90vh]">
+                        <div className="bg-navy-900 px-8 py-6 flex justify-between items-center text-white">
+                            <div>
+                                <h2 className="text-xl font-bold">Create New Order</h2>
+                                <p className="text-navy-300 text-xs mt-1">Place a food order manually for a guest</p>
+                            </div>
+                            <button onClick={() => setIsAddModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><XCircle size={24} /></button>
+                        </div>
+                        
+                        <form onSubmit={handleCreateOrder} className="p-8 space-y-6 overflow-y-auto">
+                            {/* Guest Info Section */}
+                            <div className="space-y-4">
+                                <h3 className="text-xs font-bold text-navy-400 uppercase tracking-widest border-b border-navy-50 pb-2">Guest Information</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-navy-900 uppercase">Guest Name</label>
+                                        <input required type="text" value={newOrder.guestInfo.name} onChange={e => setNewOrder({ ...newOrder, guestInfo: { ...newOrder.guestInfo, name: e.target.value } })} className="w-full px-4 py-2 bg-navy-50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="John Doe" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-navy-900 uppercase">Phone Number</label>
+                                        <input required type="tel" value={newOrder.guestInfo.phone} onChange={e => setNewOrder({ ...newOrder, guestInfo: { ...newOrder.guestInfo, phone: e.target.value } })} className="w-full px-4 py-2 bg-navy-50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="0712345678" />
+                                    </div>
+                                    <div className="col-span-2 space-y-1.5">
+                                        <label className="text-xs font-bold text-navy-900 uppercase">Email Address</label>
+                                        <input required type="email" value={newOrder.guestInfo.email} onChange={e => setNewOrder({ ...newOrder, guestInfo: { ...newOrder.guestInfo, email: e.target.value } })} className="w-full px-4 py-2 bg-navy-50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="guest@example.com" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Items Section */}
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center border-b border-navy-50 pb-2">
+                                    <h3 className="text-xs font-bold text-navy-400 uppercase tracking-widest">Order Items</h3>
+                                    <button type="button" onClick={addOrderItem} className="text-teal-600 hover:text-teal-700 text-xs font-bold flex items-center gap-1">
+                                        <Plus size={14} /> Add Item
+                                    </button>
+                                </div>
+                                <div className="space-y-3">
+                                    {newOrder.items.map((item, index) => (
+                                        <div key={index} className="grid grid-cols-12 gap-3 items-end bg-navy-50/50 p-3 rounded-xl border border-navy-50">
+                                            <div className="col-span-6 space-y-1">
+                                                <label className="text-[10px] font-bold text-navy-500 uppercase">Item Name</label>
+                                                <input required type="text" value={item.name} onChange={e => {
+                                                    const items = [...newOrder.items];
+                                                    items[index].name = e.target.value;
+                                                    setNewOrder({ ...newOrder, items });
+                                                }} className="w-full px-3 py-1.5 bg-white border border-navy-100 rounded-lg text-sm" placeholder="e.g. Chicken Kottu" />
+                                            </div>
+                                            <div className="col-span-2 space-y-1">
+                                                <label className="text-[10px] font-bold text-navy-500 uppercase">Qty</label>
+                                                <input required type="number" min="1" value={item.quantity} onChange={e => {
+                                                    const items = [...newOrder.items];
+                                                    items[index].quantity = parseInt(e.target.value);
+                                                    setNewOrder({ ...newOrder, items });
+                                                }} className="w-full px-3 py-1.5 bg-white border border-navy-100 rounded-lg text-sm" />
+                                            </div>
+                                            <div className="col-span-3 space-y-1">
+                                                <label className="text-[10px] font-bold text-navy-500 uppercase">Price</label>
+                                                <input required type="number" min="0" value={item.price} onChange={e => {
+                                                    const items = [...newOrder.items];
+                                                    items[index].price = parseFloat(e.target.value);
+                                                    setNewOrder({ ...newOrder, items });
+                                                }} className="w-full px-3 py-1.5 bg-white border border-navy-100 rounded-lg text-sm" />
+                                            </div>
+                                            <div className="col-span-1 pb-1">
+                                                <button type="button" onClick={() => removeOrderItem(index)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
+                                                    <XCircle size={18} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-navy-900 uppercase">Notes / Special Instructions</label>
+                                <textarea rows={2} value={newOrder.guestInfo.notes} onChange={e => setNewOrder({ ...newOrder, guestInfo: { ...newOrder.guestInfo, notes: e.target.value } })} className="w-full px-4 py-2 bg-navy-50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm" placeholder="Any allergy warnings or special requests..." />
+                            </div>
+
+                            <div className="flex gap-4 pt-4">
+                                <button type="button" onClick={() => setIsAddModalOpen(false)} className="flex-1 px-4 py-3 border border-navy-200 rounded-xl text-navy-600 font-semibold hover:bg-navy-50 transition-colors">Cancel</button>
+                                <button type="submit" disabled={creating} className="flex-[2] bg-navy-900 text-white rounded-xl py-3 font-semibold flex items-center justify-center gap-2 hover:bg-teal-700 active:scale-[0.98] transition-all disabled:opacity-50">
+                                    {creating ? <RefreshCw size={18} className="animate-spin" /> : <CheckCircle size={18} />}
+                                    Create Order
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

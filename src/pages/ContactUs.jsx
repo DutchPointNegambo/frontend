@@ -3,6 +3,7 @@ import Reveal from "../components/Reveal"
 import Footer from "../components/Footer"
 import { FaFacebook, FaInstagram, FaXTwitter } from 'react-icons/fa6'
 import { SiTripadvisor } from 'react-icons/si'
+import toast from 'react-hot-toast'
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -48,7 +49,7 @@ const ContactUs = () => {
     } catch (error) {
       console.error('Error submitting form:', error);
       setIsSubmitting(false);
-      alert('Failed to send message: ' + error.message);
+      toast.error('Failed to send message: ' + error.message);
     }
   }
 
@@ -90,7 +91,7 @@ const ContactUs = () => {
               {
                 icon: '📞',
                 title: 'Phone',
-                lines: ['0764219211'],
+                lines: ['0312263340'],
                 gradient: 'from-blue-500 to-blue-600',
               },
               {

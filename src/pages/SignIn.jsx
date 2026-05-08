@@ -4,6 +4,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import Reveal from "../components/Reveal"
 import { registerUser } from '../utils/api'
 import { useAuth } from '../context/AuthContext'
+import toast from 'react-hot-toast'
 
 const SignIn = () => {
   const navigate = useNavigate()
@@ -49,7 +50,7 @@ const SignIn = () => {
 
       // Success
       login(data)
-      alert('Account created successfully!')
+      toast.success('Account created successfully!')
       navigate('/')
     } catch (err) {
       setError(err.message)
@@ -129,7 +130,7 @@ const SignIn = () => {
 
           <div className="bg-white rounded-3xl p-5 shadow-xl shadow-navy-950/5 border border-navy-50 relative group">
             <form onSubmit={handleSubmit} className="space-y-3 text-left">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="signup-firstName" className="block text-xs font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">
                     First Name
@@ -160,7 +161,7 @@ const SignIn = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="signup-email" className="block text-xs font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">
                     Email Address
@@ -191,7 +192,7 @@ const SignIn = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="signup-password" className="block text-xs font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">
                     Password
