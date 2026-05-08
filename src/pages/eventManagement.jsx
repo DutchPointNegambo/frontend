@@ -917,7 +917,7 @@ const EventManagement = () => {
                                                 {cardErrors.name && <p className="text-red-500 text-xs mt-1">{cardErrors.name}</p>}
                                             </div>
                                         </div>
-                                        <p className="text-xs text-gray-400 mt-3 flex items-center gap-1">🔒 Your card details are validated locally. This is a simulated payment.</p>
+                                         
                                     </div>
                                 </div>
                                 {/* Right: Order Summary */}
