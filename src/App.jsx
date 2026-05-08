@@ -2,7 +2,6 @@
 import React, { Suspense, lazy } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
-import { Toaster } from 'react-hot-toast'
 
 import Home from './pages/Home'
 import SignIn from './pages/SignIn'
@@ -58,7 +57,6 @@ function App() {
   return (
     <CartProvider>
       <ScrollToTop />
-      <Toaster position="top-center" reverseOrder={false} />
       {shouldShowNavbar && <Navbar />}
       <main className={mainPadding}>
       <Suspense fallback={<div className="h-screen flex items-center justify-center text-navy-500 font-bold">Loading...</div>}>
