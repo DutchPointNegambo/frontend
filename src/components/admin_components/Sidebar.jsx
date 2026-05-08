@@ -82,8 +82,12 @@ const Sidebar = () => {
             <div className="px-6 py-5 border-b border-white/10">
                 <Link to="/admin" className="block group">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center shadow-lg shadow-teal-500/30 flex-shrink-0">
-                            <span className="text-white font-bold text-sm">DP</span>
+                        <div className="w-10 h-10 rounded-xl bg-white/10 p-1 flex items-center justify-center shadow-lg flex-shrink-0">
+                            <img 
+                                src="https://res.cloudinary.com/dtdgufs9u/image/upload/v1772345832/ChatGPT_Image_Feb_13_2026_02_11_36_PM_jgcxnu.png" 
+                                alt="Logo" 
+                                className="w-full h-full object-contain" 
+                            />
                         </div>
                         <div>
                             <h1 className="text-base font-bold text-white leading-none tracking-wide">Dutch-Point</h1>

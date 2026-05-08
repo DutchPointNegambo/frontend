@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 const QuickBookingBar = () => {
     const navigate = useNavigate()
@@ -13,7 +14,7 @@ const QuickBookingBar = () => {
 
     const handleCheckAvailability = () => {
         if (!checkIn) {
-            alert('Please select check-in date')
+            toast.error('Please select check-in date')
             return
         }
 

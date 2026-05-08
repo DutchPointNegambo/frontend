@@ -242,8 +242,8 @@ export default function RoomManagement() {
                         return (
                             <div key={room._id} className="bg-white rounded-2xl border border-navy-100 overflow-hidden hover:shadow-md transition-shadow group">
                                 <div className="relative h-44 bg-navy-100 overflow-hidden">
-                                    {room.image ? (
-                                        <img src={room.image} alt={room.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    {room.image || (room.images && room.images[0]) ? (
+                                        <img src={room.image || room.images[0]} alt={room.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
                                             <BedDouble size={40} className="text-navy-300" />
