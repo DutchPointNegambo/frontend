@@ -15,7 +15,8 @@ import {
     Plus
 } from 'lucide-react';
 import { fetchAdminOrders, updateAdminOrderStatus } from '../../utils/api';
-import toast from 'react-hot-toast';
+import { useToast } from '../../components/admin_components/useToast';
+import Toast from '../../components/admin_components/Toast';
 
 const OrderManagement = () => {
     const [orders, setOrders] = useState([]);
@@ -41,7 +42,7 @@ const OrderManagement = () => {
             setOrders(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Failed to fetch orders:', error);
-            toast.error('Failed to load orders');
+            showToast('Failed to load orders', 'error');
         } finally {
             setLoading(false);
         }
@@ -54,19 +55,19 @@ const OrderManagement = () => {
     const handleStatusUpdate = async (id, newStatus) => {
         try {
             await updateAdminOrderStatus(id, { status: newStatus });
-            toast.success(`Order status updated to ${newStatus}`);
+            showToast(`Order status updated to ${newStatus}`, 'success');
             loadOrders();
             if (selectedOrder && selectedOrder._id === id) {
                 setIsDetailModalOpen(false);
             }
         } catch (error) {
-            toast.error('Failed to update status');
+            showToast('Failed to update status', 'error');
         }
     };
 
     const handleExport = () => {
         if (orders.length === 0) {
-            toast.error('No data to export');
+            showToast('No data to export', 'error');
             return;
         }
 
@@ -96,7 +97,7 @@ const OrderManagement = () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        toast.success('Exporting data...');
+        showToast('Exporting data...', 'success');
     };
 
     const getStatusColor = (status) => {
@@ -171,6 +172,7 @@ const OrderManagement = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
+            {toastState && <Toast message={toastState.message} type={toastState.type} onClose={clearToast} />}
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>

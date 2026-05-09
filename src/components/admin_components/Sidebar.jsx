@@ -53,6 +53,7 @@ const Sidebar = () => {
             items: [
                 { name: 'Food & Menu', icon: UtensilsCrossed, path: '/admin/food' },
                 { name: 'Food Orders', icon: Truck, path: '/admin/orders' },
+                { name: 'Inventory', icon: PackageIcon, path: '/admin/inventory' },
                 { name: 'Guest Feedback', icon: MessageSquare, path: '/admin/feedback' },
                 { name: 'Reports', icon: FileBarChart, path: '/admin/reports' },
             ],
