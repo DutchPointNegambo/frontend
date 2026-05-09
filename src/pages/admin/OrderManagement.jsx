@@ -19,6 +19,7 @@ import { useToast } from '../../components/admin_components/useToast';
 import Toast from '../../components/admin_components/Toast';
 
 const OrderManagement = () => {
+    const { toast: toastState, showToast, clearToast } = useToast();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('all');
@@ -46,7 +47,7 @@ const OrderManagement = () => {
         } finally {
             setLoading(false);
         }
-    }, [statusFilter, searchTerm]);
+    }, [statusFilter, searchTerm, showToast]);
 
     useEffect(() => {
         loadOrders();
@@ -139,7 +140,7 @@ const OrderManagement = () => {
 
             const { createOrder: apiCreateOrder } = await import('../../utils/api');
             await apiCreateOrder(payload);
-            toast.success('Order created successfully');
+            showToast('Order created successfully', 'success');
             setIsAddModalOpen(false);
             loadOrders();
             setNewOrder({
@@ -150,7 +151,7 @@ const OrderManagement = () => {
                 total: 0
             });
         } catch (error) {
-            toast.error(error.message || 'Failed to create order');
+            showToast(error.message || 'Failed to create order', 'error');
         } finally {
             setCreating(false);
         }
@@ -260,7 +261,7 @@ const OrderManagement = () => {
                                 orders.map((order) => (
                                     <tr key={order._id} onClick={() => { setSelectedOrder(order); setIsDetailModalOpen(true); }} className="hover:bg-navy-50/30 transition-colors group cursor-pointer">
                                         <td className="px-6 py-4 font-mono text-xs text-navy-500">
-                                            #{order._id.slice(-6).toUpperCase()}
+                                            #{order._id?.slice(-6).toUpperCase() || 'N/A'}
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="font-semibold text-navy-900">{order.guestInfo?.name || 'Guest'}</div>
@@ -268,14 +269,14 @@ const OrderManagement = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="text-sm text-navy-700">
-                                                {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
+                                                {order.items?.length || 0} {(order.items?.length || 0) === 1 ? 'item' : 'items'}
                                             </div>
                                             <div className="text-[10px] text-navy-400 truncate max-w-[150px]">
-                                                {order.items.map(i => i.name).join(', ')}
+                                                {order.items?.map(i => i.name).join(', ') || 'No items'}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <div className="font-bold text-navy-900">Rs. {order.total.toLocaleString()}</div>
+                                            <div className="font-bold text-navy-900">Rs. {order.total?.toLocaleString() || '0'}</div>
                                         </td>
                                     </tr>
                                 ))
@@ -320,9 +321,9 @@ const OrderManagement = () => {
                                     <div className="flex flex-col gap-3">
                                         <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold w-fit ${getStatusColor(selectedOrder.status)}`}>
                                             {getStatusIcon(selectedOrder.status)}
-                                            {selectedOrder.status.toUpperCase()}
+                                            {(selectedOrder.status || 'pending').toUpperCase()}
                                         </span>
-                                        <p className="text-xs text-navy-400">Placed on {new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                                        <p className="text-xs text-navy-400">Placed on {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleString() : 'Unknown date'}</p>
                                     </div>
                                 </div>
                             </div>
