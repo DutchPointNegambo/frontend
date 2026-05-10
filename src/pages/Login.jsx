@@ -11,6 +11,8 @@ import { GoogleAuthProvider } from 'firebase/auth'
 const Login = () => {
   const navigate = useNavigate()
   const { login } = useAuth()
+
+  // Store form data (email + password)
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -20,20 +22,23 @@ const Login = () => {
 
   const [error, setError] = useState('')
 
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  // Handle email/password login
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
     setError('')
 
     try {
+      // Call backend API for login
       const data = await loginUser(formData)
 
-      // Success
+      // Save user in auth context
       login(data)
       toast.success('Logged in successfully!')
       
@@ -51,13 +56,17 @@ const Login = () => {
     }
   }
 
+
+  // Google Login using Firebase SDK
   const handleGoogleSignIn = async () => {
     setIsSubmitting(true)
     setError('')
 
     try {
+      // Open Google popup (OAuth)
       const result = await signInWithPopup(auth, googleProvider)
       const user = result.user
+      // Get Google ID token from Firebase
       const credential = GoogleAuthProvider.credentialFromResult(result)
       const googleIdToken = credential?.idToken
 
@@ -65,6 +74,7 @@ const Login = () => {
         throw new Error('Google sign-in did not return a valid token')
       }
 
+      // Send Google user data to backend
       const data = await googleSignIn({
         idToken: googleIdToken,
         googleId: user.uid,
@@ -73,8 +83,10 @@ const Login = () => {
         photoURL: user.photoURL,
       })
 
+      // Save login session
       login(data)
 
+      // Role-based redirect
       if (data.role === 'admin') {
         navigate('/admin')
       } else if (data.role === 'staff') {

@@ -521,7 +521,7 @@ export async function fetchFoods() {
 }
 
 export async function createFood(payload) {
-    const res = await fetch(`${API_URL}/admin/foods`, {
+    const res = await fetch(`${API_URL}/foods`, {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify(payload),
@@ -530,7 +530,7 @@ export async function createFood(payload) {
 }
 
 export async function updateFood(id, payload) {
-    const res = await fetch(`${API_URL}/admin/foods/${id}`, {
+    const res = await fetch(`${API_URL}/foods/${id}`, {
         method: 'PUT',
         headers: authHeaders(),
         body: JSON.stringify(payload),
@@ -539,7 +539,7 @@ export async function updateFood(id, payload) {
 }
 
 export async function deleteFood(id) {
-    const res = await fetch(`${API_URL}/admin/foods/${id}`, {
+    const res = await fetch(`${API_URL}/foods/${id}`, {
         method: 'DELETE',
         headers: authHeaders(),
     });
@@ -610,6 +610,91 @@ export async function updateEventFeature(id, payload) {
 export async function deleteEventFeature(id) {
     const res = await fetch(`${API_URL}/admin/event-features/${id}`, {
         method: 'DELETE',
+        headers: authHeaders(),
+    });
+    return handleResponse(res);
+}
+
+// Inventory
+export async function fetchInventory() {
+    const res = await fetch(`${API_URL}/inventory`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function createInventoryItem(payload) {
+    const res = await fetch(`${API_URL}/inventory`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function updateInventoryItem(id, payload) {
+    const res = await fetch(`${API_URL}/inventory/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function deleteInventoryItem(id) {
+    const res = await fetch(`${API_URL}/inventory/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+    });
+    return handleResponse(res);
+}
+
+export async function adjustStock(id, payload) {
+    const res = await fetch(`${API_URL}/inventory/${id}/adjust`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function fetchStockLogs(id) {
+    const res = await fetch(`${API_URL}/inventory/${id}/logs`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+// Suppliers
+export async function fetchSuppliers() {
+    const res = await fetch(`${API_URL}/inventory/suppliers`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function createSupplier(payload) {
+    const res = await fetch(`${API_URL}/inventory/suppliers`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function updateSupplier(id, payload) {
+    const res = await fetch(`${API_URL}/inventory/suppliers/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function deleteSupplier(id) {
+    const res = await fetch(`${API_URL}/inventory/suppliers/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+    });
+    return handleResponse(res);
+}
+
+export async function fetchAllStockLogs() {
+    const res = await fetch(`${API_URL}/inventory/logs/all`, {
         headers: authHeaders(),
     });
     return handleResponse(res);

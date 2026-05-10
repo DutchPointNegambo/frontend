@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, CreditCard, CheckCircle } from 'lucide-react'
+import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, ArrowRight, CreditCard, CheckCircle, Lock } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { createOrder } from '../utils/api'
 
@@ -16,6 +16,71 @@ const Checkout = () => {
   const [formErrors, setFormErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [step, setStep] = useState(1) // 1: Guest Info, 2: Payment Info
+  
+  const [cardDetails, setCardDetails] = useState({
+    number: '',
+    expiry: '',
+    cvv: '',
+    name: ''
+  })
+  const [cardErrors, setCardErrors] = useState({})
+
+  // ── Card validation helpers (From Booking Modal) ─────────────────────────
+  const luhnCheck = (num) => {
+    const digits = num.replace(/\s/g, '')
+    let sum = 0, alt = false
+    for (let i = digits.length - 1; i >= 0; i--) {
+      let n = parseInt(digits[i], 10)
+      if (alt) { n *= 2; if (n > 9) n -= 9; }
+      sum += n;
+      alt = !alt;
+    }
+    return sum % 10 === 0
+  }
+
+  const detectBrand = (num) => {
+    const n = num.replace(/\s/g, '')
+    if (/^4/.test(n)) return 'visa'
+    if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n)) return 'mastercard'
+    if (/^3[47]/.test(n)) return 'amex'
+    if (/^6(?:011|5)/.test(n)) return 'discover'
+    return ''
+  }
+
+  const formatCardNumber = (val) => {
+    const digits = val.replace(/\D/g, '').slice(0, 16)
+    return digits.replace(/(.{4})/g, '$1 ').trim()
+  }
+
+  const formatExpiry = (val) => {
+    const digits = val.replace(/\D/g, '').slice(0, 4)
+    if (digits.length >= 3) return digits.slice(0, 2) + '/' + digits.slice(2)
+    return digits
+  }
+
+  const validateCard = () => {
+    const errs = {}
+    const num = cardDetails.number.replace(/\s/g, '')
+    if (!num || num.length < 13) errs.number = 'Card number is required'
+    else if (!luhnCheck(num)) errs.number = 'Invalid card number'
+
+    if (!cardDetails.expiry) errs.expiry = 'Expiry is required'
+    else {
+      const m = cardDetails.expiry.match(/^(0[1-9]|1[0-2])\/(\d{2})$/)
+      if (!m) errs.expiry = 'Use MM/YY format'
+      else {
+        const expY = 2000 + parseInt(m[2], 10), expM = parseInt(m[1], 10), now = new Date()
+        if (expY < now.getFullYear() || (expY === now.getFullYear() && expM < now.getMonth() + 1))
+          errs.expiry = 'Card has expired'
+      }
+    }
+    if (!cardDetails.cvv || !/^\d{3,4}$/.test(cardDetails.cvv)) errs.cvv = '3 or 4 digits'
+    if (!cardDetails.name?.trim()) errs.name = 'Cardholder name is required'
+
+    setCardErrors(errs)
+    return Object.keys(errs).length === 0
+  }
 
   const validateField = (name, value) => {
     let error = ''
@@ -72,11 +137,22 @@ const Checkout = () => {
     }
   }
 
+  const handleNextStep = (e) => {
+    e.preventDefault()
+    if (validateForm()) {
+      setStep(2)
+      setError(null)
+      window.scrollTo(0, 0)
+    } else {
+      setError('Please fix the errors in the form before proceeding.')
+    }
+  }
+
   const handlePlaceOrder = async (e) => {
     e.preventDefault()
     
-    if (!validateForm()) {
-      setError('Please fix the errors in the form before proceeding.')
+    if (!validateCard()) {
+      setError('Please check your card details.')
       return
     }
 
@@ -95,18 +171,22 @@ const Checkout = () => {
         })),
         subtotal: cartTotal,
         serviceCharge: cartTotal * 0.1,
-        total: cartTotal * 1.1
+        total: cartTotal * 1.1,
+        cardDetails: {
+          ...cardDetails,
+          number: cardDetails.number.replace(/\s/g, '')
+        }
       }
 
       const response = await createOrder(payload)
       
       if (response.success) {
-        // Redirect to Stripe Checkout link provided by user
-        window.location.href = "https://buy.stripe.com/test_3cIcN71o9gRw01Vb0H4Ja00"
+        clearCart()
+        navigate(`/payment-success/${response.orderId}`)
       }
     } catch (err) {
       console.error('Error placing order:', err)
-      setError('Failed to place order. Please try again.')
+      setError(err.response?.data?.message || 'Failed to place order. Please try again.')
       setLoading(false)
     }
   }
@@ -228,7 +308,34 @@ const Checkout = () => {
           </div>
 
           {/* Order Summary + Form — Right */}
+
+
+          {/* Progress Indicator (Mobile) */}
+          <div className="lg:hidden mb-6 flex items-center justify-center gap-4">
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${step === 1 ? 'bg-teal-500 text-white shadow-lg shadow-teal-200' : 'bg-navy-50 text-navy-400'}`}>
+              Guest Info
+            </div>
+            <div className="w-8 h-px bg-navy-100" />
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${step === 2 ? 'bg-teal-500 text-white shadow-lg shadow-teal-200' : 'bg-navy-50 text-navy-400'}`}>
+              Payment
+            </div>
+          </div>
+
+          {/* Order Summary + Form — Right */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Progress Indicator (Desktop) */}
+            <div className="hidden lg:flex items-center justify-center gap-4 mb-2">
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${step === 1 ? 'bg-teal-500 text-white shadow-lg shadow-teal-200' : 'bg-navy-100 text-navy-400'}`}>
+                <span className={`w-4 h-4 rounded-full flex items-center justify-center border ${step === 1 ? 'border-white' : 'border-navy-200'}`}>1</span>
+                Guest Info
+              </div>
+              <div className="w-8 h-px bg-navy-200" />
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${step === 2 ? 'bg-teal-500 text-white shadow-lg shadow-teal-200' : 'bg-navy-100 text-navy-400'}`}>
+                <span className={`w-4 h-4 rounded-full flex items-center justify-center border ${step === 2 ? 'border-white' : 'border-navy-200'}`}>2</span>
+                Payment
+              </div>
+            </div>
+
             {/* Order Summary */}
             <div className="bg-white rounded-2xl shadow-sm border border-navy-100/50 overflow-hidden">
               <div className="px-6 py-4 bg-navy-950">
@@ -250,92 +357,206 @@ const Checkout = () => {
               </div>
             </div>
 
-            {/* Guest Details Form */}
-            <form onSubmit={handlePlaceOrder} className="bg-white rounded-2xl shadow-sm border border-navy-100/50 overflow-hidden">
+            {/* Multi-Step Form */}
+            <div className="bg-white rounded-2xl shadow-sm border border-navy-100/50 overflow-hidden">
               <div className="px-6 py-4 bg-navy-950">
-                <h2 className="text-white font-bold text-sm uppercase tracking-widest">Guest Details</h2>
+                <h2 className="text-white font-bold text-sm uppercase tracking-widest">
+                  {step === 1 ? 'Guest Details' : 'Secure Payment'}
+                </h2>
               </div>
               <div className="px-6 py-5 space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-navy-600 uppercase tracking-widest mb-1">Full Name *</label>
-                  <input
-                    type="text"
-                    name="name"
-                    maxLength={50}
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-xl border ${formErrors.name ? 'border-red-500' : 'border-navy-200'} focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all text-sm text-navy-950`}
-                    placeholder="Your name"
-                  />
-                  {formErrors.name && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-1">{formErrors.name}</p>}
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-navy-600 uppercase tracking-widest mb-1">Email *</label>
-                  <input
-                    type="email"
-                    name="email"
-                    maxLength={100}
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-xl border ${formErrors.email ? 'border-red-500' : 'border-navy-200'} focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all text-sm text-navy-950`}
-                    placeholder="your@email.com"
-                  />
-                  {formErrors.email && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-1">{formErrors.email}</p>}
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-navy-600 uppercase tracking-widest mb-1">Phone *</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    maxLength={10}
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-xl border ${formErrors.phone ? 'border-red-500' : 'border-navy-200'} focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all text-sm text-navy-950`}
-                    placeholder="07XXXXXXXX"
-                  />
-                  {formErrors.phone && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-1">{formErrors.phone}</p>}
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-navy-600 uppercase tracking-widest mb-1">Special Notes</label>
-                  <textarea
-                    name="notes"
-                    rows={3}
-                    value={formData.notes}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-navy-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all text-sm text-navy-950 resize-none"
-                    placeholder="Any dietary requirements or allergies?"
-                  />
-                </div>
+                
+                {step === 1 ? (
+                  /* Step 1: Guest Details */
+                  <form onSubmit={handleNextStep} className="space-y-4 animate-fade-in">
+                    <div>
+                      <label className="block text-xs font-bold text-navy-600 uppercase tracking-widest mb-1 pl-1">Full Name *</label>
+                      <input
+                        type="text"
+                        name="name"
+                        maxLength={50}
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        className={`w-full px-4 py-3 rounded-xl border ${formErrors.name ? 'border-red-500' : 'border-navy-200'} focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all text-sm text-navy-950`}
+                        placeholder="Your name"
+                      />
+                      {formErrors.name && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-1 pl-1">{formErrors.name}</p>}
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-navy-600 uppercase tracking-widest mb-1 pl-1">Email *</label>
+                      <input
+                        type="email"
+                        name="email"
+                        maxLength={100}
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className={`w-full px-4 py-3 rounded-xl border ${formErrors.email ? 'border-red-500' : 'border-navy-200'} focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all text-sm text-navy-950`}
+                        placeholder="your@email.com"
+                      />
+                      {formErrors.email && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-1 pl-1">{formErrors.email}</p>}
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-navy-600 uppercase tracking-widest mb-1 pl-1">Phone *</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        maxLength={10}
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className={`w-full px-4 py-3 rounded-xl border ${formErrors.phone ? 'border-red-500' : 'border-navy-200'} focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all text-sm text-navy-950`}
+                        placeholder="07XXXXXXXX"
+                      />
+                      {formErrors.phone && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-1 pl-1">{formErrors.phone}</p>}
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-navy-600 uppercase tracking-widest mb-1 pl-1">Special Notes</label>
+                      <textarea
+                        name="notes"
+                        rows={2}
+                        value={formData.notes}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 rounded-xl border border-navy-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all text-sm text-navy-900 resize-none"
+                        placeholder="Any dietary requirements?"
+                      />
+                    </div>
 
-                {error && (
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm font-medium">
-                    {error}
-                  </div>
+                    {error && (
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs font-bold uppercase tracking-widest">
+                        {error}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      className="w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest bg-navy-950 text-white hover:bg-navy-900 transition-all duration-300 shadow-lg flex items-center justify-center gap-2 group"
+                    >
+                      Continue to Payment
+                      <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </form>
+                ) : (
+                  /* Step 2: Payment Details */
+                  <form onSubmit={handlePlaceOrder} className="space-y-4 animate-fade-in">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">Card Number</label>
+                        <div className="relative">
+                          <input 
+                            type="text"
+                            placeholder="4242 4242 4242 4242"
+                            value={cardDetails.number}
+                            onChange={e => {
+                              setCardDetails(c => ({ ...c, number: formatCardNumber(e.target.value) }));
+                              setCardErrors(e2 => ({ ...e2, number: undefined }));
+                            }}
+                            maxLength={19}
+                            className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all text-sm ${cardErrors.number ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-teal-500/20'}`}
+                          />
+                          {detectBrand(cardDetails.number) && (
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-teal-600 uppercase">
+                              {detectBrand(cardDetails.number)}
+                            </span>
+                          )}
+                        </div>
+                        {cardErrors.number && <p className="text-red-500 text-[10px] font-bold mt-1 pl-1">{cardErrors.number}</p>}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">Expiry</label>
+                          <input 
+                            type="text"
+                            placeholder="MM/YY"
+                            value={cardDetails.expiry}
+                            onChange={e => {
+                              setCardDetails(c => ({ ...c, expiry: formatExpiry(e.target.value) }));
+                              setCardErrors(e2 => ({ ...e2, expiry: undefined }));
+                            }}
+                            maxLength={5}
+                            className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all text-sm ${cardErrors.expiry ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-teal-500/20'}`}
+                          />
+                          {cardErrors.expiry && <p className="text-red-500 text-[10px] font-bold mt-1 pl-1">{cardErrors.expiry}</p>}
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">CVV</label>
+                          <input 
+                            type="password"
+                            placeholder="•••"
+                            value={cardDetails.cvv}
+                            onChange={e => {
+                              const v = e.target.value.replace(/\D/g, '').slice(0, 4);
+                              setCardDetails(c => ({ ...c, cvv: v }));
+                              setCardErrors(e2 => ({ ...e2, cvv: undefined }));
+                            }}
+                            maxLength={4}
+                            className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all text-sm ${cardErrors.cvv ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-teal-500/20'}`}
+                          />
+                          {cardErrors.cvv && <p className="text-red-500 text-[10px] font-bold mt-1 pl-1">{cardErrors.cvv}</p>}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">Cardholder Name</label>
+                        <input 
+                          type="text"
+                          placeholder="JANE SMITH"
+                          value={cardDetails.name}
+                          onChange={e => {
+                            setCardDetails(c => ({ ...c, name: e.target.value.toUpperCase() }));
+                            setCardErrors(e2 => ({ ...e2, name: undefined }));
+                          }}
+                          className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all text-sm ${cardErrors.name ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-teal-500/20'}`}
+                        />
+                        {cardErrors.name && <p className="text-red-500 text-[10px] font-bold mt-1 pl-1">{cardErrors.name}</p>}
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <p className="text-[10px] text-navy-400 flex items-center gap-1.5 mb-4 pl-1">
+                        <Lock size={10} /> Secure validation for Dutch Point Resort.
+                      </p>
+
+                      {error && (
+                        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs font-bold uppercase tracking-widest mb-4">
+                          {error}
+                        </div>
+                      )}
+
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setStep(1)}
+                          className="flex-1 py-4 rounded-xl text-sm font-bold uppercase tracking-widest border border-navy-100 text-navy-600 hover:bg-navy-50 transition-all"
+                        >
+                          Back
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className="flex-[2] py-4 rounded-xl text-sm font-bold uppercase tracking-widest bg-teal-500 text-white hover:bg-teal-600 transition-all duration-300 shadow-lg shadow-teal-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                          {loading ? (
+                            <>
+                              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              Paying...
+                            </>
+                          ) : (
+                            <>
+                              <CreditCard size={16} />
+                              Pay Rs. {(cartTotal * 1.1).toFixed(2)}
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </form>
                 )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest bg-teal-500 text-white hover:bg-teal-600 transition-all duration-300 shadow-lg shadow-teal-500/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard size={16} />
-                      Place Order — Rs. {(cartTotal * 1.1).toFixed(2)}
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
   )
 }
 

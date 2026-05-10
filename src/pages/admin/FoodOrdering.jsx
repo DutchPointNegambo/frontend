@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, Filter } from 'lucide-react';
 import { fetchFoods, createFood, deleteFood, updateFood } from '../../utils/api';
+import ImageUpload from '../../components/admin_components/ImageUpload';
 import toast from 'react-hot-toast';
 
 const FoodOrdering = () => {
@@ -217,13 +218,10 @@ const FoodOrdering = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-navy-700 mb-1">Image URL or Emoji</label>
-                                    <input
-                                        type="text"
-                                        value={newItem.image}
-                                        onChange={e => setNewItem({ ...newItem, image: e.target.value })}
-                                        placeholder="e.g. https://... or 🍕"
-                                        className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    <ImageUpload 
+                                        label="Food Image *"
+                                        currentImage={newItem.image}
+                                        onUploadSuccess={(url) => setNewItem({ ...newItem, image: url })}
                                     />
                                 </div>
                                 <div>
