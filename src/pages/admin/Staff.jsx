@@ -7,7 +7,11 @@ import QRCodeBadge from '../../components/admin_components/QRCodeBadge';
 import QRScanner from '../../components/admin_components/QRScanner';
 
 const DEPARTMENTS = ['Operations', 'Kitchen', 'Front Desk', 'Housekeeping', 'Dining', 'Security', 'Maintenance', 'Finance', 'HR'];
-const EMPTY_FORM = { name: '', email: '', phone: '', jobTitle: '', password: '', department: 'Front Desk', status: 'Active', salary: '', hireDate: '' };
+const EMPTY_FORM = { 
+    name: '', email: '', phone: '', jobTitle: '', password: '', 
+    department: 'Front Desk', status: 'Active', salary: '', hireDate: '',
+    nic: '', address: '', dateOfBirth: '', emergencyContact: '', gender: 'Male'
+};
 
 const Staff = () => {
     const { toast, showToast, clearToast } = useToast();
@@ -51,13 +55,18 @@ const Staff = () => {
             if (!value) error = 'Password is required';
             else if (value.length < 6) error = 'Min 6 characters';
         }
+        if (name === 'nic') {
+            if (!value.trim()) error = 'NIC is required';
+            // Simple NIC validation (could be more complex depending on country)
+            else if (value.trim().length < 10) error = 'Invalid NIC format';
+        }
 
         setFormErrors(prev => ({ ...prev, [name]: error }));
         return !error;
     };
 
     const validateForm = () => {
-        const fields = ['name', 'email', 'phone', 'jobTitle', 'salary', 'password'];
+        const fields = ['name', 'email', 'phone', 'jobTitle', 'salary', 'password', 'nic'];
         let isValid = true;
         fields.forEach(f => {
             if (!validateField(f, form[f])) isValid = false;
@@ -119,6 +128,9 @@ const Staff = () => {
             jobTitle: staff.jobTitle, department: staff.department,
             password: '', // Keep empty when editing unless changing
             status: staff.status, salary: staff.salary, hireDate: staff.hireDate ? staff.hireDate.split('T')[0] : '',
+            nic: staff.nic || '', address: staff.address || '', 
+            dateOfBirth: staff.dateOfBirth ? staff.dateOfBirth.split('T')[0] : '',
+            emergencyContact: staff.emergencyContact || '', gender: staff.gender || 'Male'
         });
         setModalOpen(true);
     };
@@ -635,121 +647,63 @@ const Staff = () => {
                             <button onClick={() => setModalOpen(false)} className="p-2 hover:bg-navy-50 rounded-xl text-navy-400"><X size={18} /></button>
                         </div>
                         <div className="overflow-y-auto flex-1">
-                            <form onSubmit={handleSubmit} className="p-5 space-y-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="col-span-1 sm:col-span-2">
-                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Full Name *</label>
-                                        <input 
-                                            name="name"
-                                            value={form.name} 
-                                            onChange={handleFormChange} 
-                                            placeholder="e.g. Sarah Wilson" 
-                                            className={`w-full px-4 py-2.5 border ${formErrors.name ? 'border-red-500' : 'border-navy-200'} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500`} 
-                                        />
-                                        {formErrors.name && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-tight">{formErrors.name}</p>}
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Email *</label>
-                                        <input 
-                                            name="email"
-                                            type="email" 
-                                            value={form.email} 
-                                            onChange={handleFormChange} 
-                                            placeholder="staff@hotel.com" 
-                                            className={`w-full px-4 py-2.5 border ${formErrors.email ? 'border-red-500' : 'border-navy-200'} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500`} 
-                                        />
-                                        {formErrors.email && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-tight">{formErrors.email}</p>}
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Phone</label>
-                                        <input 
-                                            name="phone"
-                                            value={form.phone} 
-                                            onChange={handleFormChange} 
-                                            maxLength={10}
-                                            placeholder="07XXXXXXXX" 
-                                            className={`w-full px-4 py-2.5 border ${formErrors.phone ? 'border-red-500' : 'border-navy-200'} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500`} 
-                                        />
-                                        {formErrors.phone && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-tight">{formErrors.phone}</p>}
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Job Title *</label>
-                                        <input 
-                                            name="jobTitle"
-                                            value={form.jobTitle} 
-                                            onChange={handleFormChange} 
-                                            placeholder="e.g. Senior Chef" 
-                                            className={`w-full px-4 py-2.5 border ${formErrors.jobTitle ? 'border-red-500' : 'border-navy-200'} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500`} 
-                                        />
-                                        {formErrors.jobTitle && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-tight">{formErrors.jobTitle}</p>}
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Department *</label>
-                                        <select 
-                                            name="department"
-                                            value={form.department} 
-                                            onChange={handleFormChange} 
-                                            className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
-                                        >
-                                            {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Status</label>
-                                        <select 
-                                            name="status"
-                                            value={form.status} 
-                                            onChange={handleFormChange} 
-                                            className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
-                                        >
-                                            <option value="Active">Active</option>
-                                            <option value="On Leave">On Leave</option>
-                                            <option value="Terminated">Terminated</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Monthly Salary (Rs.) *</label>
-                                        <input 
-                                            name="salary"
-                                            type="number" 
-                                            min="0" 
-                                            value={form.salary} 
-                                            onChange={handleFormChange} 
-                                            placeholder="e.g. 35000" 
-                                            className={`w-full px-4 py-2.5 border ${formErrors.salary ? 'border-red-500' : 'border-navy-200'} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500`} 
-                                        />
-                                        {formErrors.salary && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-tight">{formErrors.salary}</p>}
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Hire Date</label>
-                                        <input 
-                                            name="hireDate"
-                                            type="date" 
-                                            value={form.hireDate} 
-                                            onChange={handleFormChange} 
-                                            className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" 
-                                        />
-                                    </div>
-                                    <div className="col-span-1 sm:col-span-2">
-                                        <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">
-                                            Password {editingStaff ? '(Leave blank to keep current)' : '*'}
-                                        </label>
-                                        <input 
-                                            name="password"
-                                            type="password" 
-                                            value={form.password} 
-                                            onChange={handleFormChange} 
-                                            placeholder="••••••••" 
-                                            className={`w-full px-4 py-2.5 border ${formErrors.password ? 'border-red-500' : 'border-navy-200'} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500`} 
-                                        />
-                                        {formErrors.password && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-tight">{formErrors.password}</p>}
+                            <form onSubmit={handleSubmit} className="p-6 space-y-8">
+                                {/* Section 1: Identity & Security */}
+                                <div className="space-y-4">
+                                    <h3 className="text-xs font-black text-teal-600 uppercase tracking-widest flex items-center gap-2">
+                                        <Shield size={14} /> Identity & Security
+                                    </h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <FormInput label="Full Name *" name="name" value={form.name} onChange={handleFormChange} error={formErrors.name} placeholder="Sarah Wilson" />
+                                        <FormInput label="Email Address *" name="email" type="email" value={form.email} onChange={handleFormChange} error={formErrors.email} placeholder="staff@hotel.com" />
+                                        <FormInput label="NIC / ID Number *" name="nic" value={form.nic} onChange={handleFormChange} error={formErrors.nic} placeholder="e.g. 199512345678" />
+                                        <FormInput label="Password *" name="password" type="password" value={form.password} onChange={handleFormChange} error={formErrors.password} placeholder={editingStaff ? "Leave blank to keep current" : "••••••••"} />
                                     </div>
                                 </div>
-                                <div className="flex gap-3 pt-2">
-                                    <button type="button" onClick={() => setModalOpen(false)} className="flex-1 py-2.5 border border-navy-200 text-navy-600 rounded-xl text-sm font-medium hover:bg-navy-50 transition-colors">Cancel</button>
-                                    <button type="submit" disabled={saving} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-navy-900 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-60">
-                                        {saving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
-                                        {editingStaff ? 'Save Changes' : 'Add Employee'}
+
+                                {/* Section 2: Professional Details */}
+                                <div className="space-y-4 pt-4 border-t border-navy-50">
+                                    <h3 className="text-xs font-black text-navy-400 uppercase tracking-widest flex items-center gap-2">
+                                        <Clock size={14} /> Professional Details
+                                    </h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <FormInput label="Job Title *" name="jobTitle" value={form.jobTitle} onChange={handleFormChange} error={formErrors.jobTitle} placeholder="Senior Receptionist" />
+                                        <FormSelect label="Department *" name="department" value={form.department} onChange={handleFormChange} options={DEPARTMENTS} />
+                                        <FormInput label="Monthly Salary (Rs.) *" name="salary" type="number" value={form.salary} onChange={handleFormChange} error={formErrors.salary} placeholder="45000" />
+                                        <FormInput label="Hire Date" name="hireDate" type="date" value={form.hireDate} onChange={handleFormChange} />
+                                        <FormSelect label="Status" name="status" value={form.status} onChange={handleFormChange} options={['Active', 'On Leave', 'Terminated']} />
+                                    </div>
+                                </div>
+
+                                {/* Section 3: Personal & Sensitive */}
+                                <div className="space-y-4 pt-4 border-t border-navy-50">
+                                    <h3 className="text-xs font-black text-red-400 uppercase tracking-widest flex items-center gap-2">
+                                        <UserPlus size={14} /> Personal & Sensitive Info
+                                    </h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <FormInput label="Contact Phone" name="phone" value={form.phone} onChange={handleFormChange} error={formErrors.phone} placeholder="07XXXXXXXX" maxLength={10} />
+                                        <FormSelect label="Gender" name="gender" value={form.gender} onChange={handleFormChange} options={['Male', 'Female', 'Other']} />
+                                        <FormInput label="Date of Birth" name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={handleFormChange} />
+                                        <FormInput label="Emergency Contact" name="emergencyContact" value={form.emergencyContact} onChange={handleFormChange} placeholder="Name - 07XXXXXXXX" />
+                                        <div className="col-span-1 sm:col-span-2">
+                                            <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1.5 ml-1">Permanent Address</label>
+                                            <textarea 
+                                                name="address"
+                                                value={form.address} 
+                                                onChange={handleFormChange} 
+                                                rows="3"
+                                                placeholder="Enter full residential address..." 
+                                                className="w-full px-4 py-3 bg-navy-50/50 border border-navy-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all resize-none font-medium"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4 pt-6 border-t border-navy-50">
+                                    <button type="button" onClick={() => setModalOpen(false)} className="flex-1 py-4 border border-navy-200 text-navy-600 rounded-2xl text-sm font-bold uppercase tracking-widest hover:bg-navy-50 transition-all">Cancel</button>
+                                    <button type="submit" disabled={saving} className="flex-1 flex items-center justify-center gap-3 py-4 bg-navy-900 text-white rounded-2xl text-sm font-bold uppercase tracking-widest hover:bg-teal-600 transition-all shadow-xl shadow-navy-950/20 disabled:opacity-60">
+                                        {saving ? <RefreshCw size={18} className="animate-spin" /> : <Save size={18} />}
+                                        {editingStaff ? 'Update Record' : 'Create Record'}
                                     </button>
                                 </div>
                             </form>
@@ -785,5 +739,37 @@ const Staff = () => {
         </div>
     );
 };
+
+const FormInput = ({ label, name, value, onChange, error, type = "text", placeholder = "", ...props }) => (
+    <div className="space-y-1.5">
+        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest ml-1">{label}</label>
+        <input 
+            name={name}
+            type={type}
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            className={`w-full px-4 py-3 bg-navy-50/50 border ${error ? 'border-red-500' : 'border-navy-100'} rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all font-medium placeholder:text-navy-200`}
+            {...props}
+        />
+        {error && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1 uppercase tracking-tighter">{error}</p>}
+    </div>
+);
+
+const FormSelect = ({ label, name, value, onChange, options }) => (
+    <div className="space-y-1.5">
+        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest ml-1">{label}</label>
+        <select 
+            name={name}
+            value={value}
+            onChange={onChange}
+            className="w-full px-4 py-3 bg-navy-50/50 border border-navy-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all font-medium appearance-none"
+        >
+            {options.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+            ))}
+        </select>
+    </div>
+);
 
 export default Staff;
