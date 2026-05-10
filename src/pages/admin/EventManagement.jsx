@@ -24,7 +24,7 @@ const PAYMENT_COLORS = {
 
 const PAYMENT_LABELS = {
     pending: 'Pending',
-    deposit_paid: 'Deposit Paid',
+    deposit_paid: 'Advance Paid',
     fully_paid: 'Fully Paid',
     refunded: 'Refunded',
 };
@@ -304,6 +304,7 @@ export default function EventManagement() {
                                     {selectedBooking.paymentStatus === 'deposit_paid' && (
                                         <div className="flex justify-between text-navy-600"><span>Balance Due</span><span className="font-bold text-orange-600">{formatCurrency(selectedBooking.totalAmount - selectedBooking.paidAmount)}</span></div>
                                     )}
+
                                     <div className="flex justify-between text-navy-600"><span>Method</span><span className="capitalize">{selectedBooking.paymentMethod}</span></div>
                                     {selectedBooking.paymentDetails?.cardLast4 && (
                                         <div className="flex justify-between text-navy-600"><span>Card</span><span>{selectedBooking.paymentDetails.cardBrand} •••• {selectedBooking.paymentDetails.cardLast4}</span></div>
