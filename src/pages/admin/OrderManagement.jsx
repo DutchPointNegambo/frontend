@@ -15,9 +15,11 @@ import {
     Plus
 } from 'lucide-react';
 import { fetchAdminOrders, updateAdminOrderStatus } from '../../utils/api';
-import toast from 'react-hot-toast';
+import { useToast } from '../../components/admin_components/useToast';
+import Toast from '../../components/admin_components/Toast';
 
 const OrderManagement = () => {
+    const { toast: toastState, showToast, clearToast } = useToast();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('all');
@@ -41,11 +43,11 @@ const OrderManagement = () => {
             setOrders(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Failed to fetch orders:', error);
-            toast.error('Failed to load orders');
+            showToast('Failed to load orders', 'error');
         } finally {
             setLoading(false);
         }
-    }, [statusFilter, searchTerm]);
+    }, [statusFilter, searchTerm, showToast]);
 
     useEffect(() => {
         loadOrders();
@@ -54,19 +56,19 @@ const OrderManagement = () => {
     const handleStatusUpdate = async (id, newStatus) => {
         try {
             await updateAdminOrderStatus(id, { status: newStatus });
-            toast.success(`Order status updated to ${newStatus}`);
+            showToast(`Order status updated to ${newStatus}`, 'success');
             loadOrders();
             if (selectedOrder && selectedOrder._id === id) {
                 setIsDetailModalOpen(false);
             }
         } catch (error) {
-            toast.error('Failed to update status');
+            showToast('Failed to update status', 'error');
         }
     };
 
     const handleExport = () => {
         if (orders.length === 0) {
-            toast.error('No data to export');
+            showToast('No data to export', 'error');
             return;
         }
 
@@ -96,7 +98,7 @@ const OrderManagement = () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        toast.success('Exporting data...');
+        showToast('Exporting data...', 'success');
     };
 
     const getStatusColor = (status) => {
@@ -138,7 +140,7 @@ const OrderManagement = () => {
 
             const { createOrder: apiCreateOrder } = await import('../../utils/api');
             await apiCreateOrder(payload);
-            toast.success('Order created successfully');
+            showToast('Order created successfully', 'success');
             setIsAddModalOpen(false);
             loadOrders();
             setNewOrder({
@@ -149,7 +151,7 @@ const OrderManagement = () => {
                 total: 0
             });
         } catch (error) {
-            toast.error(error.message || 'Failed to create order');
+            showToast(error.message || 'Failed to create order', 'error');
         } finally {
             setCreating(false);
         }
@@ -171,6 +173,7 @@ const OrderManagement = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
+            {toastState && <Toast message={toastState.message} type={toastState.type} onClose={clearToast} />}
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
@@ -238,29 +241,27 @@ const OrderManagement = () => {
                                 <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Order ID</th>
                                 <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Guest</th>
                                 <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Items</th>
-                                <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Total</th>
-                                <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider text-right">Actions</th>
+                                <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider text-right">Total</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-navy-50">
                             {loading ? (
                                 Array(5).fill(0).map((_, i) => (
                                     <tr key={i} className="animate-pulse">
-                                        <td colSpan="6" className="px-6 py-4 h-16 bg-navy-50/10"></td>
+                                        <td colSpan="4" className="px-6 py-4 h-16 bg-navy-50/10"></td>
                                     </tr>
                                 ))
                             ) : orders.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-12 text-center text-navy-400 font-medium">
+                                    <td colSpan="4" className="px-6 py-12 text-center text-navy-400 font-medium">
                                         No orders found matching your criteria
                                     </td>
                                 </tr>
                             ) : (
                                 orders.map((order) => (
-                                    <tr key={order._id} className="hover:bg-navy-50/30 transition-colors group">
+                                    <tr key={order._id} onClick={() => { setSelectedOrder(order); setIsDetailModalOpen(true); }} className="hover:bg-navy-50/30 transition-colors group cursor-pointer">
                                         <td className="px-6 py-4 font-mono text-xs text-navy-500">
-                                            #{order._id.slice(-6).toUpperCase()}
+                                            #{order._id?.slice(-6).toUpperCase() || 'N/A'}
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="font-semibold text-navy-900">{order.guestInfo?.name || 'Guest'}</div>
@@ -268,31 +269,14 @@ const OrderManagement = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="text-sm text-navy-700">
-                                                {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
+                                                {order.items?.length || 0} {(order.items?.length || 0) === 1 ? 'item' : 'items'}
                                             </div>
                                             <div className="text-[10px] text-navy-400 truncate max-w-[150px]">
-                                                {order.items.map(i => i.name).join(', ')}
+                                                {order.items?.map(i => i.name).join(', ') || 'No items'}
                                             </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="font-bold text-navy-900">Rs. {order.total.toLocaleString()}</div>
-                                            <div className={`text-[10px] font-bold uppercase ${order.paymentStatus === 'paid' ? 'text-teal-600' : 'text-amber-600'}`}>
-                                                {order.paymentStatus}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(order.status)}`}>
-                                                {getStatusIcon(order.status)}
-                                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                                            </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <button 
-                                                onClick={() => { setSelectedOrder(order); setIsDetailModalOpen(true); }}
-                                                className="p-2 text-navy-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-all"
-                                            >
-                                                <Eye size={18} />
-                                            </button>
+                                            <div className="font-bold text-navy-900">Rs. {order.total?.toLocaleString() || '0'}</div>
                                         </td>
                                     </tr>
                                 ))
@@ -337,9 +321,9 @@ const OrderManagement = () => {
                                     <div className="flex flex-col gap-3">
                                         <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold w-fit ${getStatusColor(selectedOrder.status)}`}>
                                             {getStatusIcon(selectedOrder.status)}
-                                            {selectedOrder.status.toUpperCase()}
+                                            {(selectedOrder.status || 'pending').toUpperCase()}
                                         </span>
-                                        <p className="text-xs text-navy-400">Placed on {new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                                        <p className="text-xs text-navy-400">Placed on {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleString() : 'Unknown date'}</p>
                                     </div>
                                 </div>
                             </div>
