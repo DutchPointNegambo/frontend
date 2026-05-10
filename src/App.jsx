@@ -49,12 +49,17 @@ const AdminEventManagement = lazy(() => import('./pages/admin/EventManagement'))
 const PackageManagement = lazy(() => import('./pages/admin/PackageManagement'))
 const InventoryManagement = lazy(() => import('./pages/admin/InventoryManagement'))
 
+const ReceptionistLayout = lazy(() => import('./pages/receptionist/ReceptionistLayout'))
+const ReceptionistDashboard = lazy(() => import('./pages/receptionist/ReceptionistDashboard'))
+const ReceptionistScanner = lazy(() => import('./pages/receptionist/ReceptionistScanner'))
+const ReceptionistProfile = lazy(() => import('./pages/receptionist/ReceptionistProfile'))
+
 function App() {
 
   useIdleTimeout(15);
   
   const location = useLocation();
-  const hideNavbarRoutes = ['/admin', '/addRoom', '/employee'];
+  const hideNavbarRoutes = ['/admin', '/addRoom', '/employee', '/receptionist'];
   const shouldShowNavbar = !hideNavbarRoutes.some(route => location.pathname.startsWith(route));
   
 
@@ -110,6 +115,14 @@ function App() {
             <Route path="events" element={<AdminEventManagement />} />
             <Route path="package-management" element={<PackageManagement />} />
             <Route path="inventory" element={<InventoryManagement />} />
+          </Route>
+
+          {/* Receptionist Routes */}
+          <Route path="/receptionist" element={<ReceptionistLayout />}>
+            <Route path="dashboard" element={<ReceptionistDashboard />} />
+            <Route path="bookings" element={<BookingManagement />} />
+            <Route path="scanner" element={<ReceptionistScanner />} />
+            <Route path="profile" element={<ReceptionistProfile />} />
           </Route>
         </Routes>
       </Suspense>
