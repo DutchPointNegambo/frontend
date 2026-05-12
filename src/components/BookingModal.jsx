@@ -25,7 +25,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
     });
     const [cardErrors, setCardErrors] = useState({});
 
-    // Pre-fill user info
+    // Pre-filling user data
     useEffect(() => {
         if (user) {
             setFormData(prev => ({
@@ -38,7 +38,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
         }
     }, [user, isOpen]);
 
-    // ── Card validation helpers ──────────────────────────────────────────────
+    //Card validation helpers
     const luhnCheck = (num) => {
         const digits = num.replace(/\s/g, '');
         let sum = 0, alt = false;

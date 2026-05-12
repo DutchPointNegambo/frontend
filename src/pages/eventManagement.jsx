@@ -3,7 +3,7 @@ import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 import EventBookingModal from '../components/EventBookingModal'
-
+import { Calendar, Users, Star, ArrowRight, Check, Loader2, Sparkles, Utensils, Plus } from 'lucide-react'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -13,28 +13,28 @@ const eventTypes = [
     {
         id: 'birthday',
         name: 'Birthday Party',
-        image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&q=80',
         description: 'Create unforgettable birthday memories with our festive packages.',
         icon: '🎂',
     },
     {
         id: 'wedding',
         name: 'Wedding',
-        image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&q=80',
         description: 'Your dream wedding brought to life with elegance and grace.',
         icon: '💍',
     },
     {
         id: 'anniversary',
         name: 'Anniversary',
-        image: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=800&q=80',
         description: 'Celebrate your journey together in a truly romantic setting.',
         icon: '💑',
     },
     {
         id: 'corporate',
         name: 'Corporate Event',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
         description: 'Professional gatherings crafted for lasting impressions.',
         icon: '🏢',
     },
@@ -79,7 +79,6 @@ const EventManagement = () => {
     // Booking modal state
     const [showModal, setShowModal] = useState(false)
 
-
     // Fetch dynamic options
     useEffect(() => {
         const fetchOptions = async () => {
@@ -122,7 +121,7 @@ const EventManagement = () => {
             const addonsTotal = selectedAddons.reduce((sum, addon) => sum + addon.price, 0)
             setTotalAmount(selectedDeco.price + (selectedFood.pricePerHead * guestCount) + addonsTotal)
         }
-    }, [guestCount, decorationType, foodPackage, selectedAddons])
+    }, [guestCount, decorationType, foodPackage, selectedAddons, selectedDeco, selectedFood])
 
     // ── Live availability check via API ────────────────────────────────────────
     const checkAvailability = useCallback(async (date, slot) => {
@@ -146,85 +145,78 @@ const EventManagement = () => {
     const handleEventTypeSelect = (type) => {
         setSelectedEventType(type)
         setStep(2)
+        window.scrollTo({ top: 400, behavior: 'smooth' });
     }
 
+    const formatPrice = (price) => `Rs. ${price.toLocaleString()}`
 
     // ── Success screen ─────────────────────────────────────────────────────────
     if (bookingSuccess) {
         return (
-            <div className="min-h-screen flex flex-col bg-gray-50">
-                <div className="flex-grow flex items-center justify-center pt-24 pb-16">
-                    <div className="max-w-lg w-full mx-4 bg-white rounded-3xl shadow-2xl overflow-hidden">
-                        <div className="p-8 text-center" style={{ background: 'linear-gradient(135deg,#0f2942,#1a4a72)' }}>
-                            <div className="text-6xl mb-4">🎉</div>
-                            <h2 className="text-3xl font-bold text-white mb-2">Booking Confirmed!</h2>
-                            <p className="text-white/70">Your event has been successfully reserved.</p>
+            <div className="min-h-screen flex flex-col bg-navy-50">
+                <div className="flex-grow flex items-center justify-center pt-32 pb-16 px-4">
+                    <div className="max-w-lg w-full bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-scale-in">
+                        <div className="p-10 text-center relative" style={{ background: 'linear-gradient(135deg, var(--color-navy-900), var(--color-navy-800))' }}>
+                            <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                                <Sparkles className="w-full h-full" />
+                            </div>
+                            <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-500 rounded-full mb-6 shadow-lg shadow-emerald-500/20">
+                                <Check className="text-white w-10 h-10" strokeWidth={3} />
+                            </div>
+                            <h2 className="text-3xl font-serif font-bold text-white mb-2">Booking Confirmed!</h2>
+                            <p className="text-navy-100/70">Your luxury event has been successfully reserved.</p>
                         </div>
-                        <div className="p-8 space-y-4">
-                            <div className="bg-gray-50 rounded-2xl p-5 space-y-3 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Booking Ref</span>
-                                    <span className="font-bold text-gray-800">{bookingSuccess.bookingRef}</span>
+                        <div className="p-8 space-y-6">
+                            <div className="bg-navy-50/50 rounded-2xl p-6 space-y-4 border border-navy-100">
+                                <div className="flex justify-between items-center pb-3 border-b border-navy-100/50">
+                                    <span className="text-navy-400 text-xs font-bold uppercase tracking-widest">Booking Ref</span>
+                                    <span className="font-bold text-navy-900 font-mono">{bookingSuccess.bookingRef}</span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Event</span>
-                                    <span className="font-semibold text-gray-800 capitalize">{bookingSuccess.eventType}</span>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <span className="text-navy-400 text-[10px] font-bold uppercase tracking-widest block">Event</span>
+                                        <span className="font-bold text-navy-800 capitalize">{bookingSuccess.eventType}</span>
+                                    </div>
+                                    <div className="space-y-1 text-right">
+                                        <span className="text-navy-400 text-[10px] font-bold uppercase tracking-widest block">Slot</span>
+                                        <span className="font-bold text-navy-800 capitalize">
+                                            {bookingSuccess.timeSlot === 'day' ? '☀️ Day' : '🌙 Night'}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Date</span>
-                                    <span className="font-semibold text-gray-800">
+                                <div className="space-y-1">
+                                    <span className="text-navy-400 text-[10px] font-bold uppercase tracking-widest block">Date</span>
+                                    <span className="font-bold text-navy-800">
                                         {new Date(bookingSuccess.eventDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                                     </span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Decoration</span>
-                                    <span className="font-semibold text-gray-800 capitalize">{bookingSuccess.decoration?.name || bookingSuccess.decoration || '—'}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Food</span>
-                                    <span className="font-semibold text-gray-800 capitalize">{bookingSuccess.foodPackage?.name || bookingSuccess.foodPackage || '—'}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Slot</span>
-                                    <span className="font-semibold text-gray-800 capitalize">
-                                        {bookingSuccess.timeSlot === 'day' ? '☀️ Day' : '🌙 Night'}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Guests</span>
-                                    <span className="font-semibold text-gray-800">{bookingSuccess.guests}</span>
-                                </div>
-                                <div className="flex justify-between border-t border-gray-200 pt-3 mt-3">
-                                    <span className="text-gray-700 font-bold">Total</span>
-                                    <span className="font-bold text-teal-600 text-lg">Rs. {bookingSuccess.totalAmount?.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Paid Now</span>
-                                    <span className="font-bold text-emerald-600">Rs. {bookingSuccess.paidAmount?.toLocaleString()}</span>
-                                </div>
-                                {bookingSuccess.paymentStatus === 'deposit_paid' && (
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">Balance Due</span>
-                                        <span className="font-semibold text-orange-600">Rs. {(bookingSuccess.totalAmount - bookingSuccess.paidAmount)?.toLocaleString()}</span>
+                                <div className="pt-4 border-t border-navy-100 flex justify-between items-end">
+                                    <div>
+                                        <span className="text-navy-400 text-[10px] font-bold uppercase tracking-widest block mb-1">Total Amount</span>
+                                        <span className="font-serif font-bold text-navy-900 text-2xl">{formatPrice(bookingSuccess.totalAmount)}</span>
                                     </div>
-                                )}
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Payment</span>
-                                    <span className={`font-semibold text-xs px-2 py-0.5 rounded-full ${bookingSuccess.paymentStatus === 'fully_paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                                        {bookingSuccess.paymentStatus === 'fully_paid' ? 'Fully Paid' : 'Advance Paid (25%)'}
-                                    </span>
+                                    <div className="text-right">
+                                        <span className="text-emerald-600 text-xs font-bold block mb-1">Paid Advance</span>
+                                        <span className="font-bold text-emerald-600">{formatPrice(bookingSuccess.paidAmount)}</span>
+                                    </div>
                                 </div>
-
                             </div>
-                            <p className="text-gray-400 text-xs text-center">A confirmation will be sent to {bookingSuccess.guestInfo?.email}</p>
+                            
                             <button
-                                onClick={() => { setBookingSuccess(null); setStep(1); setSelectedEventType(null); setEventDate(''); setDateAvailability(null); setPaymentType('full'); setSpecialRequests('') }}
-
-                                className="w-full py-3 rounded-xl font-bold text-white transition-all hover:opacity-90"
-                                style={{ background: 'linear-gradient(135deg,#14b8a6,#0d9488)' }}
+                                onClick={() => { 
+                                    setBookingSuccess(null); 
+                                    setStep(1); 
+                                    setSelectedEventType(null); 
+                                    setEventDate(''); 
+                                    setDateAvailability(null);
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                className="w-full py-4 rounded-xl font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl"
+                                style={{ background: 'linear-gradient(135deg, var(--color-navy-900), var(--color-navy-700))' }}
                             >
                                 Book Another Event
                             </button>
+                            <p className="text-navy-400 text-[10px] text-center italic">A confirmation email has been sent to your registered address.</p>
                         </div>
                     </div>
                 </div>
@@ -234,75 +226,120 @@ const EventManagement = () => {
     }
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-50">
-            <div className="flex-grow pt-24 pb-16">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col min-h-screen bg-white">
+            <div className="flex-grow">
+                
+                {/* ── HERO BANNER ────────────────────────────────────────────── */}
+                <section className="relative h-[60vh] md:h-[75vh] flex items-center justify-center overflow-hidden">
+                    {/* Background Images with overlay */}
+                    <div className="absolute inset-0 z-0">
+                        <img 
+                            src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1600&q=80" 
+                            alt="Luxury Event" 
+                            className="w-full h-full object-cover animate-hero-zoom"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-b from-navy-900/80 via-navy-900/40 to-white" />
+                    </div>
 
-                    {/* Header */}
-                    <div className="text-center mb-12">
-                        <h1 className="text-4xl md:text-5xl font-bold text-navy-900 mb-4 animate-fade-in-up">
-                            Event Management
+                    <div className="relative z-10 max-w-5xl mx-auto px-4 text-center">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold uppercase tracking-[0.3em] mb-6 animate-fade-in">
+                            <Sparkles size={14} className="text-gold-400" />
+                            Premier Event Hosting
+                        </div>
+                        <h1 className="text-5xl md:text-7xl font-serif font-bold text-white mb-6 animate-fade-in-up">
+                            Celebrate Life's <span className="italic text-gold-200">Finest</span> Moments
                         </h1>
-                        <p className="text-lg text-gray-600 max-w-2xl mx-auto animate-fade-in-up delay-100">
-                            Plan your perfect event with us. Select your event type, then customise your decoration and dining options.
+                        <p className="text-lg md:text-xl text-navy-100 max-w-2xl mx-auto mb-10 animate-fade-in-up animation-delay-200 leading-relaxed">
+                            From intimate birthdays to grand weddings, we provide the perfect canvas for your most cherished memories at Dutch Point Resort.
                         </p>
+                        
 
-                        {/* Step indicator */}
-                        <div className="flex items-center justify-center gap-4 mt-8">
-                            {[1, 2, 3].map((s) => (
-                                <div key={s} className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => {
-                                            if (s === 1) setStep(1)
-                                            else if (s === 2 && selectedEventType) setStep(2)
-                                            else if (s === 3 && selectedEventType && eventDate && dateAvailability === 'available') setStep(3)
-                                        }}
-                                        className={`w-9 h-9 rounded-full font-bold text-sm transition-all duration-300 flex items-center justify-center
-                                        ${step === s
-                                                ? 'bg-navy-900 text-white shadow-lg scale-110'
-                                                : s < step
-                                                    ? 'bg-teal-500 text-white'
-                                                    : 'bg-gray-200 text-gray-400 cursor-default'
-                                            }`}
-                                        style={{ backgroundColor: step === s ? '#0f2942' : s < step ? '#14b8a6' : undefined }}
-                                    >
-                                        {s < step ? '✓' : s}
-                                    </button>
-                                    <span className={`text-sm font-medium ${step === s ? 'text-gray-900' : 'text-gray-400'}`}>
-                                        {s === 1 ? 'Event Type' : s === 2 ? 'Customise' : 'Booking'}
-                                    </span>
-                                    {s < 3 && <div className={`w-12 h-0.5 ${step > s ? 'bg-teal-500' : 'bg-gray-200'}`} />}
+                    </div>
+                </section>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 pb-20">
+                    
+                    {/* ── STEP INDICATOR ───────────────────────────────────────── */}
+                    <div className="glass-summary rounded-3xl p-8 shadow-2xl mb-16 border border-navy-100">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-4">
+                            {[
+                                { s: 1, label: 'Event Type', icon: <Star size={18} /> },
+                                { s: 2, label: 'Customise', icon: <Sparkles size={18} /> },
+                                { s: 3, label: 'Finalize', icon: <Check size={18} /> }
+                            ].map((stepObj) => (
+                                <div key={stepObj.s} className="flex-1 w-full md:w-auto">
+                                    <div className="flex flex-col items-center gap-3 relative">
+                                        <button
+                                            onClick={() => {
+                                                if (stepObj.s === 1) setStep(1)
+                                                else if (stepObj.s === 2 && selectedEventType) setStep(2)
+                                            }}
+                                            className={`w-14 h-14 rounded-2xl font-bold transition-all duration-500 flex items-center justify-center relative z-10
+                                            ${step === stepObj.s
+                                                    ? 'bg-navy-900 text-white shadow-2xl scale-110 shadow-navy-900/30 ring-4 ring-gold-200/50'
+                                                    : step > stepObj.s
+                                                        ? 'bg-emerald-500 text-white shadow-lg'
+                                                        : 'bg-navy-50 text-navy-300'
+                                                }`}
+                                        >
+                                            {step > stepObj.s ? <Check size={24} strokeWidth={3} /> : stepObj.icon}
+                                        </button>
+                                        <div className="text-center">
+                                            <p className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-1 ${step === stepObj.s ? 'text-gold-600' : 'text-navy-300'}`}>Step 0{stepObj.s}</p>
+                                            <p className={`text-sm font-bold ${step === stepObj.s ? 'text-navy-900' : 'text-navy-400'}`}>{stepObj.label}</p>
+                                        </div>
+                                        
+                                        {/* Connector line for desktop */}
+                                        {stepObj.s < 3 && (
+                                            <div className="hidden md:block absolute top-7 left-[calc(50%+2.5rem)] w-[calc(100%-5rem)] h-1 bg-navy-50 rounded-full">
+                                                <div 
+                                                    className="h-full bg-emerald-500 transition-all duration-700 rounded-full" 
+                                                    style={{ width: step > stepObj.s ? '100%' : '0%' }}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>
-
                     </div>
 
-                    {/*step 1*/}
+                    {/* ── STEP 1: EVENT TYPE ───────────────────────────────────── */}
                     {step === 1 && (
                         <div className="animate-fade-in-up">
-                            <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">What are you celebrating?</h2>
-                            <p className="text-center text-gray-500 mb-8">Choose your event type to get started</p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {eventTypes.map((event) => (
+                            <div className="text-center mb-12">
+                                <h2 className="text-3xl md:text-4xl font-serif font-bold text-navy-900 mb-4">What are you celebrating?</h2>
+                                <p className="text-navy-400 max-w-xl mx-auto">Select the type of event you're planning to reveal tailored packages and settings.</p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                                {eventTypes.map((event, idx) => (
                                     <button
                                         key={event.id}
                                         onClick={() => handleEventTypeSelect(event)}
-                                        className={`group relative rounded-2xl overflow-hidden shadow-lg text-left transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl focus:outline-none
-                                        ${selectedEventType?.id === event.id ? 'ring-4 ring-teal-400 ring-offset-2' : ''}`}
+                                        className="group relative rounded-[2rem] overflow-hidden bg-white shadow-xl text-left transition-all duration-500 hover:-translate-y-4 hover:shadow-navy-900/10 focus:outline-none animate-card-reveal"
+                                        style={{ animationDelay: `${idx * 0.1}s` }}
                                     >
-                                        <div className="aspect-[4/3] overflow-hidden">
+                                        <div className="aspect-[4/5] overflow-hidden">
                                             <img
                                                 src={event.image}
                                                 alt={event.name}
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                                             />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-900/20 to-transparent opacity-80" />
                                         </div>
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                                        <div className="absolute bottom-0 left-0 right-0 p-5">
-                                            <div className="text-3xl mb-1">{event.icon}</div>
-                                            <h3 className="text-xl font-bold text-white">{event.name}</h3>
-                                            <p className="text-white/80 text-sm mt-1 leading-snug">{event.description}</p>
+                                        
+                                        <div className="absolute bottom-0 left-0 right-0 p-8 transform transition-transform duration-500 group-hover:translate-y-[-10px]">
+                                            <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center text-3xl mb-4 border border-white/20">
+                                                {event.icon}
+                                            </div>
+                                            <h3 className="text-2xl font-serif font-bold text-white mb-2">{event.name}</h3>
+                                            <p className="text-navy-100/80 text-sm leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-500 line-clamp-2">
+                                                {event.description}
+                                            </p>
+                                            <div className="mt-4 flex items-center gap-2 text-gold-300 font-bold text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                                                Choose Event <ArrowRight size={14} />
+                                            </div>
                                         </div>
                                     </button>
                                 ))}
@@ -310,185 +347,193 @@ const EventManagement = () => {
                         </div>
                     )}
 
-                    {/* ── STEP 2: Customise ────────────────────────────────────*/}
+                    {/* ── STEP 2: CUSTOMISE ──────────────────────────────────── */}
                     {step === 2 && selectedEventType && (
                         <div className="animate-fade-in-up">
-                            {/* Selected event badge */}
-                            <div className="flex items-center gap-3 mb-8">
+                            {/* Breadcrumb style navigation */}
+                            <div className="flex items-center gap-4 mb-10 bg-navy-50 w-fit px-6 py-3 rounded-2xl border border-navy-100">
                                 <button
                                     onClick={() => setStep(1)}
-                                    className="text-sm text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1 transition-colors"
+                                    className="text-xs font-bold text-navy-400 hover:text-navy-900 uppercase tracking-widest transition-colors"
                                 >
-                                    ← Change Event
+                                    Events
                                 </button>
-                                <span className="text-gray-300">|</span>
-                                <span className="text-2xl">{selectedEventType.icon}</span>
-                                <span className="font-semibold text-gray-700">{selectedEventType.name}</span>
+                                <div className="w-1 h-1 rounded-full bg-navy-200" />
+                                <span className="text-xs font-bold text-gold-600 uppercase tracking-widest">{selectedEventType.name}</span>
+                                <Sparkles className="text-gold-400" size={14} />
                             </div>
 
-                            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                            <div className="grid grid-cols-1 xl:grid-cols-3 gap-12">
                                 {/* Left Column: Options */}
-                                <div className="xl:col-span-2 space-y-10">
+                                <div className="xl:col-span-2 space-y-12">
 
                                     {/* ── Date & Time Slot ── */}
-                                    <div className="bg-white rounded-2xl shadow-md p-6">
-                                        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                            <span className="text-2xl">📅</span> Event Date &amp; Time
-                                        </h3>
-
-                                        {/* Date picker */}
-                                        <div className="mb-5">
-                                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Select Date</label>
-                                            <input
-                                                type="date"
-                                                min={today}
-                                                value={eventDate}
-                                                onChange={(e) => setEventDate(e.target.value)}
-                                                className="w-full sm:w-64 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-teal-400 text-sm"
-                                            />
+                                    <div className="bg-white rounded-[2rem] shadow-xl p-10 border border-navy-50">
+                                        <div className="flex items-center gap-4 mb-8">
+                                            <div className="w-12 h-12 bg-navy-50 rounded-2xl flex items-center justify-center text-navy-900">
+                                                <Calendar size={24} />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-xl font-serif font-bold text-navy-900">Timing & Schedule</h3>
+                                                <p className="text-navy-400 text-xs">Choose your preferred date and session</p>
+                                            </div>
                                         </div>
 
-                                        {/* Day / Night toggle */}
-                                        <div className="mb-5">
-                                            <label className="block text-sm font-medium text-gray-600 mb-2">Select Slot</label>
-                                            <div className="inline-flex rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                                                <button
-                                                    onClick={() => setTimeSlot('day')}
-                                                    className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold transition-all duration-200
-                                                    ${timeSlot === 'day'
-                                                            ? 'text-white shadow-inner'
-                                                            : 'bg-white text-gray-500 hover:bg-gray-50'
-                                                        }`}
-                                                    style={timeSlot === 'day' ? { background: 'linear-gradient(135deg,#f59e0b,#ef6c00)' } : {}}
-                                                >
-                                                    ☀️ Day
-                                                </button>
-                                                <button
-                                                    onClick={() => setTimeSlot('night')}
-                                                    className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold transition-all duration-200
-                                                    ${timeSlot === 'night'
-                                                            ? 'text-white shadow-inner'
-                                                            : 'bg-white text-gray-500 hover:bg-gray-50'
-                                                        }`}
-                                                    style={timeSlot === 'night' ? { background: 'linear-gradient(135deg,#4338ca,#1e1b4b)' } : {}}
-                                                >
-                                                    🌙 Night
-                                                </button>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            {/* Date picker */}
+                                            <div className="space-y-3">
+                                                <label className="block text-[10px] font-bold text-navy-500 uppercase tracking-widest px-1">Selected Date</label>
+                                                <input
+                                                    type="date"
+                                                    min={today}
+                                                    value={eventDate}
+                                                    onChange={(e) => setEventDate(e.target.value)}
+                                                    className="w-full bg-navy-50/50 border border-navy-100 rounded-2xl px-6 py-4 text-navy-900 font-bold focus:outline-none focus:ring-4 focus:ring-navy-900/5 transition-all text-sm"
+                                                />
+                                            </div>
+
+                                            {/* Day / Night toggle */}
+                                            <div className="space-y-3">
+                                                <label className="block text-[10px] font-bold text-navy-500 uppercase tracking-widest px-1">Time Session</label>
+                                                <div className="grid grid-cols-2 p-1 bg-navy-50 rounded-2xl border border-navy-100/50">
+                                                    <button
+                                                        onClick={() => setTimeSlot('day')}
+                                                        className={`flex items-center justify-center gap-3 py-3 rounded-xl text-sm font-bold transition-all duration-300
+                                                        ${timeSlot === 'day'
+                                                                ? 'bg-white text-navy-900 shadow-md ring-1 ring-navy-100'
+                                                                : 'text-navy-400 hover:text-navy-600'
+                                                            }`}
+                                                    >
+                                                        ☀️ Day
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setTimeSlot('night')}
+                                                        className={`flex items-center justify-center gap-3 py-3 rounded-xl text-sm font-bold transition-all duration-300
+                                                        ${timeSlot === 'night'
+                                                                ? 'bg-navy-900 text-white shadow-lg'
+                                                                : 'text-navy-400 hover:text-navy-600'
+                                                            }`}
+                                                    >
+                                                        🌙 Night
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
 
                                         {/* Availability status */}
-                                        {dateAvailability === 'loading' && (
-                                            <div className="flex items-center gap-2 text-gray-400 text-sm">
-                                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                                                </svg>
-                                                Checking availability…
-                                            </div>
-                                        )}
-                                        {dateAvailability === 'booked' && (
-                                            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-50 border border-red-200">
-                                                <span className="text-xl">🚫</span>
-                                                <div>
-                                                    <p className="text-red-700 font-semibold text-sm">Already Booked</p>
-                                                    <p className="text-red-500 text-xs mt-0.5">
-                                                        The {timeSlot === 'day' ? 'daytime' : 'evening'} slot on{' '}
-                                                        {new Date(eventDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}{' '}
-                                                        is already reserved. Please choose a different date or slot.
-                                                    </p>
+                                        <div className="mt-8">
+                                            {dateAvailability === 'loading' && (
+                                                <div className="flex items-center gap-3 text-navy-400 text-sm bg-navy-50/50 p-4 rounded-2xl">
+                                                    <Loader2 className="animate-spin text-navy-900" size={18} />
+                                                    Checking venue schedule...
                                                 </div>
-                                            </div>
-                                        )}
-                                        {dateAvailability === 'available' && (
-                                            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-teal-50 border border-teal-200">
-                                                <span className="text-xl">✅</span>
-                                                <div>
-                                                    <p className="text-teal-700 font-semibold text-sm">Available!</p>
-                                                    <p className="text-teal-600 text-xs mt-0.5">
-                                                        {timeSlot === 'day' ? 'Daytime' : 'Evening'} slot on{' '}
-                                                        {new Date(eventDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}{' '}
-                                                        is open for booking.
-                                                    </p>
+                                            )}
+                                            {dateAvailability === 'booked' && (
+                                                <div className="flex items-center gap-4 px-6 py-5 rounded-2xl bg-red-50 border border-red-100 animate-shake">
+                                                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 font-bold text-xl">!</div>
+                                                    <div>
+                                                        <p className="text-red-900 font-bold text-sm">Session Fully Booked</p>
+                                                        <p className="text-red-600/70 text-xs mt-1">
+                                                            The {timeSlot === 'day' ? 'day' : 'night'} slot on this date is already reserved.
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                        {dateAvailability === null && (
-                                            <p className="text-gray-400 text-xs">Please select a date to check availability.</p>
-                                        )}
-                                    </div>
-
-                                    {/* Guest Count */}
-                                    <div className="bg-white rounded-2xl shadow-md p-6">
-                                        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                            <span className="text-2xl">👥</span> Number of Guests
-                                        </h3>
-                                        <div className="flex items-center gap-4">
-                                            <button
-                                                onClick={() => setGuestCount(g => Math.max(1, g - 5))}
-                                                className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-lg flex items-center justify-center transition-colors"
-                                            >-</button>
-                                            <input
-                                                type="number"
-                                                min="1"
-                                                value={guestCount}
-                                                onChange={(e) => setGuestCount(Math.max(1, parseInt(e.target.value) || 0))}
-                                                className="w-24 text-center text-2xl font-bold px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:outline-none"
-                                                style={{ '--tw-ring-color': '#14b8a6' }}
-                                            />
-                                            <button
-                                                onClick={() => setGuestCount(g => g + 5)}
-                                                className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-lg flex items-center justify-center transition-colors"
-                                            >+</button>
-                                            <span className="text-gray-500 text-sm">guests</span>
+                                            )}
+                                            {dateAvailability === 'available' && (
+                                                <div className="flex items-center gap-4 px-6 py-5 rounded-[1.5rem] bg-emerald-50 border border-emerald-100 animate-scale-in">
+                                                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
+                                                        <Check size={20} strokeWidth={3} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-emerald-900 font-bold text-sm">Venue is Available</p>
+                                                        <p className="text-emerald-600/70 text-xs mt-1">
+                                                            Perfect! Your selected slot is open for your celebration.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
+                                    {/* Guest Count */}
+                                    <div className="bg-white rounded-[2rem] shadow-xl p-10 border border-navy-50">
+                                        <div className="flex items-center justify-between mb-8">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 bg-navy-50 rounded-2xl flex items-center justify-center text-navy-900">
+                                                    <Users size={24} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-xl font-serif font-bold text-navy-900">Guest Attendance</h3>
+                                                    <p className="text-navy-400 text-xs">Estimate your total number of visitors</p>
+                                                </div>
+                                            </div>
+                                            <div className="bg-navy-950 text-white px-5 py-2 rounded-xl text-2xl font-serif font-bold italic">
+                                                {guestCount}
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="relative pt-6 px-2">
+                                            <input
+                                                type="range"
+                                                min="10"
+                                                max="200"
+                                                step="5"
+                                                value={guestCount}
+                                                onChange={(e) => setGuestCount(Math.min(200, parseInt(e.target.value)))}
+                                                className="w-full h-2 bg-navy-100 rounded-full appearance-none cursor-pointer accent-navy-900"
+                                            />
+                                            <div className="flex justify-between mt-4 text-[10px] font-bold text-navy-300 uppercase tracking-widest">
+                                                <span>10 Guests</span>
+                                                <span>200 Guests</span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
                                     {/* Decoration Selection */}
-                                    <div>
-                                        <h3 className="text-xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-                                            <span className="text-2xl">✨</span> Decoration Style
-                                        </h3>
-                                        <p className="text-gray-500 text-sm mb-5">Choose a decoration package that sets the mood</p>
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-4 px-2">
+                                            <div className="w-12 h-12 bg-gold-50 rounded-2xl flex items-center justify-center text-gold-600">
+                                                <Sparkles size={24} />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-2xl font-serif font-bold text-navy-900">Decoration Theme</h3>
+                                                <p className="text-navy-400 text-sm">Select an aesthetic that matches your vision</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                             {decorationOptions.map((deco) => (
                                                 <button
                                                     key={deco._id || deco.id}
                                                     onClick={() => setDecorationType(deco._id || deco.id)}
-                                                    className={`group rounded-2xl overflow-hidden text-left transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 focus:outline-none
+                                                    className={`group relative flex flex-col bg-white rounded-[2rem] overflow-hidden text-left transition-all duration-500 shadow-lg hover:shadow-2xl hover:-translate-y-2
                                                     ${decorationType === (deco._id || deco.id)
-                                                            ? 'ring-4 ring-teal-400 ring-offset-2'
-                                                            : 'ring-2 ring-transparent'
+                                                            ? 'ring-4 ring-gold-400 shadow-gold-200/50'
+                                                            : 'ring-1 ring-navy-100'
                                                         }`}
                                                 >
-                                                    <div className="relative aspect-[4/3] overflow-hidden">
+                                                    <div className="relative aspect-video overflow-hidden">
                                                         <img
                                                             src={deco.image}
                                                             alt={deco.name}
-                                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                         />
-                                                        {decorationType === (deco._id || deco.id) && (
-                                                            <div className="absolute top-3 right-3 w-7 h-7 bg-teal-500 rounded-full flex items-center justify-center shadow-md">
-                                                                <span className="text-white text-xs font-bold">✓</span>
+                                                        <div className="absolute top-4 right-4 z-10">
+                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${decorationType === (deco._id || deco.id) ? 'bg-gold-500 text-navy-950 scale-110' : 'bg-white/20 backdrop-blur-md text-white border border-white/30'}`}>
+                                                                <Check size={16} strokeWidth={3} />
                                                             </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="p-4 bg-white">
-                                                        <div className="flex justify-between items-center mb-1">
-                                                            <span className="font-bold text-gray-900 capitalize">{deco.name}</span>
-                                                            <span className="text-teal-600 font-bold">Rs. {deco.price.toLocaleString()}</span>
                                                         </div>
-                                                        <p className="text-gray-500 text-xs mb-3">{deco.description}</p>
-                                                        <div>
-                                                            <p className="text-xs font-semibold text-gray-700 mb-1.5">What's included:</p>
-                                                            <ul className="space-y-1">
-                                                                {deco.includes.map((item, i) => (
-                                                                    <li key={i} className="text-xs text-gray-600 flex items-start gap-1.5">
-                                                                        <span className="text-teal-500 mt-0.5 flex-shrink-0">•</span>
-                                                                        {item}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-navy-900/60 to-transparent" />
+                                                        <div className="absolute bottom-4 left-6">
+                                                            <p className="text-white font-serif font-bold text-lg capitalize">{deco.name}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="p-6 space-y-4 flex-grow flex flex-col">
+                                                        <p className="text-navy-400 text-xs leading-relaxed line-clamp-2">{deco.description}</p>
+                                                        <div className="space-y-2 mt-auto">
+                                                            <p className="text-[10px] font-bold text-navy-300 uppercase tracking-widest">Pricing</p>
+                                                            <p className="text-navy-900 font-bold text-xl">{formatPrice(deco.price)}</p>
                                                         </div>
                                                     </div>
                                                 </button>
@@ -497,50 +542,54 @@ const EventManagement = () => {
                                     </div>
 
                                     {/* Food Package Selection */}
-                                    <div>
-                                        <h3 className="text-xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-                                            <span className="text-2xl">🍽️</span> Food Package
-                                        </h3>
-                                        <p className="text-gray-500 text-sm mb-5">Select a dining experience for your guests</p>
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-4 px-2">
+                                            <div className="w-12 h-12 bg-navy-50 rounded-2xl flex items-center justify-center text-navy-900">
+                                                <Utensils size={24} />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-2xl font-serif font-bold text-navy-900">Culinary Experience</h3>
+                                                <p className="text-navy-400 text-sm">A curated menu selection for your guests</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                             {foodPackages.map((food) => (
                                                 <button
                                                     key={food._id || food.id}
                                                     onClick={() => setFoodPackage(food._id || food.id)}
-                                                    className={`group rounded-2xl overflow-hidden text-left transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 focus:outline-none
+                                                    className={`group relative flex bg-white rounded-[2rem] overflow-hidden text-left transition-all duration-500 shadow-lg hover:shadow-2xl border-2
                                                     ${foodPackage === (food._id || food.id)
-                                                            ? 'ring-4 ring-teal-400 ring-offset-2'
-                                                            : 'ring-2 ring-transparent'
+                                                            ? 'border-navy-900 bg-navy-50/10'
+                                                            : 'border-transparent hover:border-navy-100'
                                                         }`}
                                                 >
-                                                    <div className="relative aspect-[4/3] overflow-hidden">
+                                                    <div className="w-1/3 overflow-hidden">
                                                         <img
                                                             src={food.image}
                                                             alt={food.name}
-                                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                         />
-                                                        {foodPackage === (food._id || food.id) && (
-                                                            <div className="absolute top-3 right-3 w-7 h-7 bg-teal-500 rounded-full flex items-center justify-center shadow-md">
-                                                                <span className="text-white text-xs font-bold">✓</span>
-                                                            </div>
-                                                        )}
                                                     </div>
-                                                    <div className="p-4 bg-white">
-                                                        <div className="flex justify-between items-center mb-1">
-                                                            <span className="font-bold text-gray-900 capitalize">{food.name}</span>
-                                                            <span className="text-teal-600 font-bold">Rs. {food.pricePerHead.toLocaleString()}<span className="text-xs font-normal text-gray-400">/head</span></span>
-                                                        </div>
-                                                        <p className="text-gray-500 text-xs mb-3">{food.description}</p>
+                                                    <div className="w-2/3 p-8 flex flex-col justify-between">
                                                         <div>
-                                                            <p className="text-xs font-semibold text-gray-700 mb-1.5">Menu details:</p>
-                                                            <ul className="space-y-1">
-                                                                {food.includes.map((item, i) => (
-                                                                    <li key={i} className="text-xs text-gray-600 flex items-start gap-1.5">
-                                                                        <span className="text-teal-500 mt-0.5 flex-shrink-0">•</span>
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <h4 className="text-xl font-serif font-bold text-navy-900 capitalize">{food.name}</h4>
+                                                                {foodPackage === (food._id || food.id) && <Check className="text-navy-900" size={20} strokeWidth={3} />}
+                                                            </div>
+                                                            <p className="text-navy-400 text-xs mb-4">{food.description}</p>
+                                                            <ul className="space-y-2 mb-6">
+                                                                {food.includes.slice(0, 3).map((item, i) => (
+                                                                    <li key={i} className="text-[10px] text-navy-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                                                                        <div className="w-1 h-1 rounded-full bg-gold-400" />
                                                                         {item}
                                                                     </li>
                                                                 ))}
                                                             </ul>
+                                                        </div>
+                                                        <div className="flex items-baseline gap-1">
+                                                            <span className="text-2xl font-bold text-navy-900">{formatPrice(food.pricePerHead)}</span>
+                                                            <span className="text-navy-300 text-[10px] font-bold uppercase tracking-widest">/ Guest</span>
                                                         </div>
                                                     </div>
                                                 </button>
@@ -549,135 +598,135 @@ const EventManagement = () => {
                                     </div>
 
                                     {/* Add-ons Section */}
-                                    <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 mb-8">
-                                        <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                                            <span className="p-2 bg-teal-50 text-teal-600 rounded-xl">➕</span>
-                                            Optional Add-ons
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {addonOptions.map(addon => {
-                                                const isSelected = selectedAddons.some(a => (a._id || a.id) === (addon._id || addon.id))
-                                                return (
-                                                    <button
-                                                        key={addon._id || addon.id}
-                                                        onClick={() => {
-                                                            if (isSelected) {
-                                                                setSelectedAddons(prev => prev.filter(a => (a._id || a.id) !== (addon._id || addon.id)))
-                                                            } else {
-                                                                setSelectedAddons(prev => [...prev, addon])
-                                                            }
-                                                        }}
-                                                        className={`flex items-start gap-4 p-4 rounded-2xl border-2 text-left transition-all duration-200 ${isSelected ? 'border-teal-500 bg-teal-50/50 shadow-md ring-4 ring-teal-500/10' : 'border-gray-100 bg-white hover:border-gray-200 hover:bg-gray-50'
-                                                            }`}
-                                                    >
-                                                        <span className="text-3xl">{addon.icon}</span>
-                                                        <div className="flex-1">
-                                                            <div className="flex justify-between items-start mb-1">
-                                                                <h4 className="font-bold text-gray-900 leading-tight text-sm">{addon.name}</h4>
-                                                                {isSelected && <span className="text-teal-600 text-sm">✓</span>}
+                                    <div className="bg-navy-950 rounded-[2.5rem] p-12 text-white shadow-2xl relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500/10 rounded-full blur-3xl -mr-32 -mt-32" />
+                                        
+                                        <div className="relative z-10">
+                                            <div className="flex items-center gap-4 mb-10">
+                                                <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center">
+                                                    <Plus size={28} className="text-gold-400" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-2xl font-serif font-bold">Enhance Your Event</h3>
+                                                    <p className="text-white/40 text-sm italic">Optional additions for a personalized touch</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                {addonOptions.map(addon => {
+                                                    const isSelected = selectedAddons.some(a => (a._id || a.id) === (addon._id || addon.id))
+                                                    return (
+                                                        <button
+                                                            key={addon._id || addon.id}
+                                                            onClick={() => {
+                                                                if (isSelected) {
+                                                                    setSelectedAddons(prev => prev.filter(a => (a._id || a.id) !== (addon._id || addon.id)))
+                                                                } else {
+                                                                    setSelectedAddons(prev => [...prev, addon])
+                                                                }
+                                                            }}
+                                                            className={`flex items-start gap-5 p-6 rounded-3xl transition-all duration-300 group border-2 ${isSelected ? 'bg-white text-navy-950 border-gold-400' : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                                                }`}
+                                                        >
+                                                            <span className="text-4xl group-hover:scale-110 transition-transform">{addon.icon}</span>
+                                                            <div className="text-left flex-1">
+                                                                <div className="flex justify-between items-center mb-1">
+                                                                    <h4 className="font-bold text-lg">{addon.name}</h4>
+                                                                    {isSelected && <div className="w-5 h-5 bg-navy-950 rounded-full flex items-center justify-center text-white text-[10px]">✓</div>}
+                                                                </div>
+                                                                <p className={`text-[10px] leading-relaxed mb-3 ${isSelected ? 'text-navy-400' : 'text-white/40'}`}>{addon.description}</p>
+                                                                <p className={`font-bold ${isSelected ? 'text-navy-900' : 'text-gold-400'}`}>{formatPrice(addon.price)}</p>
                                                             </div>
-                                                            <p className="text-[10px] text-gray-500 line-clamp-2 mb-2">{addon.description}</p>
-                                                            <p className="text-xs font-bold text-teal-600">Rs. {addon.price.toLocaleString()}</p>
-                                                        </div>
-                                                    </button>
-                                                )
-                                            })}
+                                                        </button>
+                                                    )
+                                                })}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Right Column: Summary */}
+                                {/* Right Column: Summary Panel */}
                                 <div className="xl:col-span-1">
-                                    <div className="sticky top-28 rounded-2xl shadow-xl overflow-hidden" style={{ background: '#0f2942' }}>
-                                        <div className="p-6 text-white">
-                                            <h2 className="text-2xl font-bold mb-6">Cost Summary</h2>
+                                    <div className="sticky top-28 rounded-[2.5rem] shadow-2xl overflow-hidden glass-summary border border-navy-100">
+                                        <div className="p-10">
+                                            <div className="flex items-center gap-3 mb-8">
+                                                <div className="w-10 h-10 bg-navy-900 rounded-xl flex items-center justify-center text-white">
+                                                    <Star size={18} />
+                                                </div>
+                                                <h2 className="text-2xl font-serif font-bold text-navy-900">Event Proposal</h2>
+                                            </div>
 
-                                            <div className="space-y-3 mb-6">
-                                                {/* Event Type */}
-                                                <div className="flex items-center gap-3 py-3 border-b border-white/10">
-                                                    <span className="text-xl">{selectedEventType.icon}</span>
-                                                    <div className="flex-1">
-                                                        <p className="text-white/60 text-xs">Event Type</p>
-                                                        <p className="font-medium text-sm">{selectedEventType.name}</p>
+                                            <div className="space-y-6">
+                                                {/* Details Table */}
+                                                <div className="space-y-4">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-navy-400 text-[10px] font-bold uppercase tracking-[0.2em]">Package</span>
+                                                        <span className="text-navy-900 font-bold text-sm bg-navy-50 px-3 py-1 rounded-lg">{selectedEventType.name}</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-navy-400 text-[10px] font-bold uppercase tracking-[0.2em]">Date</span>
+                                                        <span className="text-navy-900 font-bold text-sm">
+                                                            {eventDate ? new Date(eventDate + 'T12:00:00').toLocaleDateString('en-US', { day: 'numeric', month: 'short' }) : '---'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-navy-400 text-[10px] font-bold uppercase tracking-[0.2em]">Slot</span>
+                                                        <span className="text-navy-900 font-bold text-sm capitalize">{timeSlot}</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-navy-400 text-[10px] font-bold uppercase tracking-[0.2em]">Attendance</span>
+                                                        <span className="text-navy-900 font-bold text-sm">{guestCount} Guests</span>
                                                     </div>
                                                 </div>
-                                                {/* Date & Slot */}
-                                                <div className="flex justify-between items-center py-3 border-b border-white/10">
-                                                    <div>
-                                                        <p className="text-white/60 text-xs">Date &amp; Slot</p>
-                                                        <p className="font-medium text-sm">
-                                                            {eventDate
-                                                                ? `${new Date(eventDate + 'T12:00:00').toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })} · ${timeSlot === 'day' ? '☀️ Day' : '🌙 Night'}`
-                                                                : <span className="text-white/40 italic">Not selected</span>}
-                                                        </p>
+
+                                                <div className="h-px bg-navy-100 w-full" />
+
+                                                {/* Price Breakdown */}
+                                                <div className="space-y-4">
+                                                    <div className="flex justify-between text-sm">
+                                                        <span className="text-navy-500 font-medium">Decoration Venue Fee</span>
+                                                        <span className="text-navy-900 font-bold">{formatPrice(selectedDeco?.price || 0)}</span>
                                                     </div>
-                                                    {dateAvailability === 'booked' && (
-                                                        <span className="text-xs font-bold text-red-400 bg-red-400/10 px-2 py-0.5 rounded-full">Booked</span>
-                                                    )}
-                                                    {dateAvailability === 'available' && (
-                                                        <span className="text-xs font-bold text-teal-400 bg-teal-400/10 px-2 py-0.5 rounded-full">Free ✓</span>
-                                                    )}
-                                                </div>
-                                                {/* Guests */}
-                                                <div className="flex justify-between items-center py-3 border-b border-white/10">
-                                                    <div>
-                                                        <p className="text-white/60 text-xs">Guests</p>
-                                                        <p className="font-medium text-sm">{guestCount} people</p>
+                                                    <div className="flex justify-between text-sm">
+                                                        <span className="text-navy-500 font-medium">Catering ({guestCount} pers.)</span>
+                                                        <span className="text-navy-900 font-bold">{formatPrice((selectedFood?.pricePerHead || 0) * guestCount)}</span>
                                                     </div>
-                                                </div>
-                                                {/* Decoration */}
-                                                <div className="flex justify-between items-center py-3 border-b border-white/10">
-                                                    <div>
-                                                        <p className="text-white/60 text-xs">Decoration</p>
-                                                        <p className="font-medium text-sm capitalize">{selectedDeco?.name}</p>
-                                                    </div>
-                                                    <span className="font-semibold">Rs. {selectedDeco?.price.toLocaleString()}</span>
-                                                </div>
-                                                {/* Food */}
-                                                <div className="flex justify-between items-center py-3 border-b border-white/10">
-                                                    <div>
-                                                        <p className="text-white/60 text-xs">Food ({guestCount} × Rs. {selectedFood?.pricePerHead.toLocaleString()})</p>
-                                                        <p className="font-medium text-sm capitalize">{selectedFood?.name} Package</p>
-                                                    </div>
-                                                    <span className="font-semibold">Rs. {((selectedFood?.pricePerHead || 0) * guestCount).toLocaleString()}</span>
-                                                </div>
-                                                {/* Add-ons */}
-                                                {selectedAddons.length > 0 && (
-                                                    <div className="py-3 border-b border-white/10">
-                                                        <p className="text-white/60 text-xs mb-2">Add-ons</p>
-                                                        <div className="space-y-1.5">
+                                                    {selectedAddons.length > 0 && (
+                                                        <div className="space-y-2">
+                                                            <p className="text-[10px] font-bold text-navy-300 uppercase tracking-widest pt-2">Add-on Services</p>
                                                             {selectedAddons.map(a => (
-                                                                <div key={a.id} className="flex justify-between text-xs">
-                                                                    <span className="text-white/80">• {a.name}</span>
-                                                                    <span className="font-medium">Rs. {a.price.toLocaleString()}</span>
+                                                                <div key={a.id} className="flex justify-between text-xs pl-2 border-l-2 border-gold-200">
+                                                                    <span className="text-navy-400">{a.name}</span>
+                                                                    <span className="text-navy-700 font-semibold">{formatPrice(a.price)}</span>
                                                                 </div>
                                                             ))}
                                                         </div>
-                                                    </div>
-                                                )}
-                                                {/* Total */}
-                                                <div className="flex justify-between items-center pt-4">
-                                                    <span className="text-lg font-bold">Total Estimate</span>
-                                                    <span className="text-2xl font-bold text-teal-400">Rs. {totalAmount.toLocaleString()}</span>
+                                                    )}
+                                                </div>
+
+                                                <div className="bg-navy-950 rounded-2xl p-8 text-center space-y-2 mt-8 shadow-xl shadow-navy-900/20">
+                                                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.3em]">Total Estimated Value</p>
+                                                    <h3 className="text-3xl font-serif font-bold text-gold-400">{formatPrice(totalAmount)}</h3>
+                                                </div>
+
+                                                <button
+                                                    onClick={() => {
+                                                        if (!eventDate) return toast.error('Please select an event date first.')
+                                                        if (dateAvailability === 'booked') return toast.error('This slot is already booked. Please choose a different date or slot.')
+                                                        if (dateAvailability !== 'available') return toast.error('Please wait for availability to be confirmed.')
+                                                        setShowModal(true)
+                                                    }}
+                                                    className="w-full py-5 rounded-2xl font-bold text-navy-950 shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 mt-4"
+                                                    style={{ background: 'linear-gradient(135deg, var(--color-gold-400), var(--color-gold-600))' }}
+                                                >
+                                                    Reserve Event <ArrowRight size={20} />
+                                                </button>
+
+                                                <div className="flex items-center justify-center gap-2 text-navy-300 text-[10px] font-bold uppercase tracking-widest mt-6">
+                                                    <Sparkles size={12} className="text-gold-500" />
+                                                    Luxury Resort Standards Apply
                                                 </div>
                                             </div>
-
-                                            <button
-                                                onClick={() => {
-                                                    if (!eventDate) return toast.error('Please select an event date first.')
-                                                    if (dateAvailability === 'booked') return toast.error('This slot is already booked. Please choose a different date or slot.')
-                                                    if (dateAvailability !== 'available') return toast.error('Please wait for availability to be confirmed.')
-                                                    setShowModal(true)
-                                                }}
-                                                className="w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5"
-                                                style={{ background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }}
-                                            >
-                                                Book This Event →
-                                            </button>
-
-                                            <p className="text-xs text-white/40 text-center mt-4">
-                                                *Final prices may vary based on specific requirements and seasonal availability.
-                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -685,32 +734,32 @@ const EventManagement = () => {
                         </div>
                     )}
 
-                <EventBookingModal 
-                    isOpen={showModal}
-                    onClose={() => setShowModal(false)}
-                    eventData={{
-                        selectedEventType,
-                        eventDate,
-                        timeSlot,
-                        guestCount,
-                        decorationType,
-                        foodPackage,
-                        totalAmount,
-                        selectedAddons,
-                        selectedDeco,
-                        selectedFood
-                    }}
-                    onSuccess={(data) => {
-                        setShowModal(false);
-                        setBookingSuccess(data);
-                    }}
-                />
-
+                    <EventBookingModal 
+                        isOpen={showModal}
+                        onClose={() => setShowModal(false)}
+                        eventData={{
+                            selectedEventType,
+                            eventDate,
+                            timeSlot,
+                            guestCount,
+                            decorationType,
+                            foodPackage,
+                            totalAmount,
+                            selectedAddons,
+                            selectedDeco,
+                            selectedFood
+                        }}
+                        onSuccess={(data) => {
+                            setShowModal(false);
+                            setBookingSuccess(data);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                    />
+                </div>
             </div>
+            <Footer />
         </div>
-        <Footer />
-    </div>
-    )
+    );
 }
 
 
