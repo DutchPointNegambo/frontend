@@ -13,34 +13,34 @@ const eventTypes = [
     {
         id: 'birthday',
         name: 'Birthday Party',
-        image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&q=80',
+        image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1778605139/Birthday_Decorations_For_Bf_dj2hf9.jpg',
         description: 'Create unforgettable birthday memories with our festive packages.',
         icon: '🎂',
     },
     {
         id: 'wedding',
         name: 'Wedding',
-        image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&q=80',
+        image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1778605527/wedding_dqzoby.jpg',
         description: 'Your dream wedding brought to life with elegance and grace.',
         icon: '💍',
     },
     {
         id: 'anniversary',
         name: 'Anniversary',
-        image: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=800&q=80',
+        image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1778606170/aniversary_wl8cqf.jpg',
         description: 'Celebrate your journey together in a truly romantic setting.',
         icon: '💑',
     },
     {
         id: 'corporate',
         name: 'Corporate Event',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
+        image: 'https://res.cloudinary.com/dztzaoo6r/image/upload/v1778606320/coporate_dhj1ae.jpg',
         description: 'Professional gatherings crafted for lasting impressions.',
         icon: '🏢',
     },
 ]
 
-// Fallback data for initial rendering or empty DB
+
 const DEFAULT_DECORATIONS = [
     { _id: 'simple', name: 'Simple', price: 50000, description: 'Clean, minimal decor with a fresh and cheerful feel.', image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&q=80', includes: ['Balloon clusters', 'Fresh flower centerpieces'] },
     { _id: 'elegant', name: 'Elegant', price: 75000, description: 'Sophisticated styling with premium floral arrangements.', image: 'https://images.unsplash.com/photo-1478146059778-26e0a2309283?w=600&q=80', includes: ['Premium floral arches', 'Crystal candelabras'] },
@@ -52,7 +52,6 @@ const DEFAULT_FOOD = [
 ];
 const DEFAULT_ADDONS = [];
 
-// ─── Component ─────────────────────────────────────────────────────────────────
 
 const EventManagement = () => {
     const { user } = useAuth()
@@ -65,18 +64,18 @@ const EventManagement = () => {
     const [foodPackage, setFoodPackage] = useState('standard')
     const [totalAmount, setTotalAmount] = useState(0)
 
-    // Dynamic Options
+    // data fetch from db
     const [decorationOptions, setDecorationOptions] = useState(DEFAULT_DECORATIONS)
     const [foodPackages, setFoodPackages] = useState(DEFAULT_FOOD)
     const [addonOptions, setAddonOptions] = useState(DEFAULT_ADDONS)
-    const [bookingSuccess, setBookingSuccess] = useState(null)  // confirmed booking object
+    const [bookingSuccess, setBookingSuccess] = useState(null)
     const [selectedAddons, setSelectedAddons] = useState([])
     const [optionsLoading, setOptionsLoading] = useState(true)
 
-    // Availability state
-    const [dateAvailability, setDateAvailability] = useState(null)   // null | 'loading' | 'available' | 'booked'
 
-    // Booking modal state
+    const [dateAvailability, setDateAvailability] = useState(null)
+
+
     const [showModal, setShowModal] = useState(false)
 
     // Fetch dynamic options
@@ -112,10 +111,10 @@ const EventManagement = () => {
     const selectedDeco = decorationOptions.find(d => (d._id || d.id) === decorationType)
     const selectedFood = foodPackages.find(f => (f._id || f.id) === foodPackage)
 
-    // Minimum selectable date = today
+
     const today = new Date().toISOString().split('T')[0]
 
-    // Recalculate total
+
     useEffect(() => {
         if (selectedDeco && selectedFood) {
             const addonsTotal = selectedAddons.reduce((sum, addon) => sum + addon.price, 0)
@@ -123,7 +122,7 @@ const EventManagement = () => {
         }
     }, [guestCount, decorationType, foodPackage, selectedAddons, selectedDeco, selectedFood])
 
-    // ── Live availability check via API ────────────────────────────────────────
+
     const checkAvailability = useCallback(async (date, slot) => {
         if (!date) { setDateAvailability(null); return }
         setDateAvailability('loading')
@@ -132,11 +131,11 @@ const EventManagement = () => {
             const data = await res.json()
             setDateAvailability(data.available ? 'available' : 'booked')
         } catch {
-            setDateAvailability(null)   // network error — silently reset
+            setDateAvailability(null)
         }
     }, [])
 
-    // Debounced trigger when date or slot changes
+
     useEffect(() => {
         const timer = setTimeout(() => checkAvailability(eventDate, timeSlot), 400)
         return () => clearTimeout(timer)
@@ -150,7 +149,7 @@ const EventManagement = () => {
 
     const formatPrice = (price) => `Rs. ${price.toLocaleString()}`
 
-    // ── Success screen ─────────────────────────────────────────────────────────
+    //Success screen 
     if (bookingSuccess) {
         return (
             <div className="min-h-screen flex flex-col bg-navy-50">
@@ -201,13 +200,13 @@ const EventManagement = () => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <button
-                                onClick={() => { 
-                                    setBookingSuccess(null); 
-                                    setStep(1); 
-                                    setSelectedEventType(null); 
-                                    setEventDate(''); 
+                                onClick={() => {
+                                    setBookingSuccess(null);
+                                    setStep(1);
+                                    setSelectedEventType(null);
+                                    setEventDate('');
                                     setDateAvailability(null);
                                     window.scrollTo({ top: 0, behavior: 'smooth' });
                                 }}
@@ -228,14 +227,14 @@ const EventManagement = () => {
     return (
         <div className="flex flex-col min-h-screen bg-white">
             <div className="flex-grow">
-                
-                {/* ── HERO BANNER ────────────────────────────────────────────── */}
+
+
                 <section className="relative h-[60vh] md:h-[75vh] flex items-center justify-center overflow-hidden">
-                    {/* Background Images with overlay */}
+
                     <div className="absolute inset-0 z-0">
-                        <img 
-                            src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1600&q=80" 
-                            alt="Luxury Event" 
+                        <img
+                            src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1600&q=80"
+                            alt="Luxury Event"
                             className="w-full h-full object-cover animate-hero-zoom"
                         />
                         <div className="absolute inset-0 bg-gradient-to-b from-navy-900/80 via-navy-900/40 to-white" />
@@ -252,14 +251,14 @@ const EventManagement = () => {
                         <p className="text-lg md:text-xl text-navy-100 max-w-2xl mx-auto mb-10 animate-fade-in-up animation-delay-200 leading-relaxed">
                             From intimate birthdays to grand weddings, we provide the perfect canvas for your most cherished memories at Dutch Point Resort.
                         </p>
-                        
+
 
                     </div>
                 </section>
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 pb-20">
-                    
-                    {/* ── STEP INDICATOR ───────────────────────────────────────── */}
+
+                    {/*step indicator*/}
                     <div className="glass-summary rounded-3xl p-8 shadow-2xl mb-16 border border-navy-100">
                         <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-4">
                             {[
@@ -288,12 +287,12 @@ const EventManagement = () => {
                                             <p className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-1 ${step === stepObj.s ? 'text-gold-600' : 'text-navy-300'}`}>Step 0{stepObj.s}</p>
                                             <p className={`text-sm font-bold ${step === stepObj.s ? 'text-navy-900' : 'text-navy-400'}`}>{stepObj.label}</p>
                                         </div>
-                                        
-                                        {/* Connector line for desktop */}
+
+
                                         {stepObj.s < 3 && (
                                             <div className="hidden md:block absolute top-7 left-[calc(50%+2.5rem)] w-[calc(100%-5rem)] h-1 bg-navy-50 rounded-full">
-                                                <div 
-                                                    className="h-full bg-emerald-500 transition-all duration-700 rounded-full" 
+                                                <div
+                                                    className="h-full bg-emerald-500 transition-all duration-700 rounded-full"
                                                     style={{ width: step > stepObj.s ? '100%' : '0%' }}
                                                 />
                                             </div>
@@ -304,14 +303,14 @@ const EventManagement = () => {
                         </div>
                     </div>
 
-                    {/* ── STEP 1: EVENT TYPE ───────────────────────────────────── */}
+                    {/*step1*/}
                     {step === 1 && (
                         <div className="animate-fade-in-up">
                             <div className="text-center mb-12">
                                 <h2 className="text-3xl md:text-4xl font-serif font-bold text-navy-900 mb-4">What are you celebrating?</h2>
                                 <p className="text-navy-400 max-w-xl mx-auto">Select the type of event you're planning to reveal tailored packages and settings.</p>
                             </div>
-                            
+
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                                 {eventTypes.map((event, idx) => (
                                     <button
@@ -328,7 +327,7 @@ const EventManagement = () => {
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-900/20 to-transparent opacity-80" />
                                         </div>
-                                        
+
                                         <div className="absolute bottom-0 left-0 right-0 p-8 transform transition-transform duration-500 group-hover:translate-y-[-10px]">
                                             <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center text-3xl mb-4 border border-white/20">
                                                 {event.icon}
@@ -347,10 +346,10 @@ const EventManagement = () => {
                         </div>
                     )}
 
-                    {/* ── STEP 2: CUSTOMISE ──────────────────────────────────── */}
+                    {/*step2*/}
                     {step === 2 && selectedEventType && (
                         <div className="animate-fade-in-up">
-                            {/* Breadcrumb style navigation */}
+
                             <div className="flex items-center gap-4 mb-10 bg-navy-50 w-fit px-6 py-3 rounded-2xl border border-navy-100">
                                 <button
                                     onClick={() => setStep(1)}
@@ -364,10 +363,10 @@ const EventManagement = () => {
                             </div>
 
                             <div className="grid grid-cols-1 xl:grid-cols-3 gap-12">
-                                {/* Left Column: Options */}
+
                                 <div className="xl:col-span-2 space-y-12">
 
-                                    {/* ── Date & Time Slot ── */}
+
                                     <div className="bg-white rounded-[2rem] shadow-xl p-10 border border-navy-50">
                                         <div className="flex items-center gap-4 mb-8">
                                             <div className="w-12 h-12 bg-navy-50 rounded-2xl flex items-center justify-center text-navy-900">
@@ -392,7 +391,7 @@ const EventManagement = () => {
                                                 />
                                             </div>
 
-                                            {/* Day / Night toggle */}
+                                            {/*day-night*/}
                                             <div className="space-y-3">
                                                 <label className="block text-[10px] font-bold text-navy-500 uppercase tracking-widest px-1">Time Session</label>
                                                 <div className="grid grid-cols-2 p-1 bg-navy-50 rounded-2xl border border-navy-100/50">
@@ -420,7 +419,7 @@ const EventManagement = () => {
                                             </div>
                                         </div>
 
-                                        {/* Availability status */}
+
                                         <div className="mt-8">
                                             {dateAvailability === 'loading' && (
                                                 <div className="flex items-center gap-3 text-navy-400 text-sm bg-navy-50/50 p-4 rounded-2xl">
@@ -432,7 +431,7 @@ const EventManagement = () => {
                                                 <div className="flex items-center gap-4 px-6 py-5 rounded-2xl bg-red-50 border border-red-100 animate-shake">
                                                     <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 font-bold text-xl">!</div>
                                                     <div>
-                                                        <p className="text-red-900 font-bold text-sm">Session Fully Booked</p>
+                                                        <p className="text-red-900 font-bold text-sm">Not Available</p>
                                                         <p className="text-red-600/70 text-xs mt-1">
                                                             The {timeSlot === 'day' ? 'day' : 'night'} slot on this date is already reserved.
                                                         </p>
@@ -445,7 +444,7 @@ const EventManagement = () => {
                                                         <Check size={20} strokeWidth={3} />
                                                     </div>
                                                     <div>
-                                                        <p className="text-emerald-900 font-bold text-sm">Venue is Available</p>
+                                                        <p className="text-emerald-900 font-bold text-sm">Slot is Available</p>
                                                         <p className="text-emerald-600/70 text-xs mt-1">
                                                             Perfect! Your selected slot is open for your celebration.
                                                         </p>
@@ -463,15 +462,15 @@ const EventManagement = () => {
                                                     <Users size={24} />
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-xl font-serif font-bold text-navy-900">Guest Attendance</h3>
-                                                    <p className="text-navy-400 text-xs">Estimate your total number of visitors</p>
+                                                    <h3 className="text-xl font-serif font-bold text-navy-900">Guests</h3>
+                                                    <p className="text-navy-400 text-xs">Number of guests planed to invite</p>
                                                 </div>
                                             </div>
                                             <div className="bg-navy-950 text-white px-5 py-2 rounded-xl text-2xl font-serif font-bold italic">
                                                 {guestCount}
                                             </div>
                                         </div>
-                                        
+
                                         <div className="relative pt-6 px-2">
                                             <input
                                                 type="range"
@@ -530,12 +529,28 @@ const EventManagement = () => {
                                                         </div>
                                                     </div>
                                                     <div className="p-6 space-y-4 flex-grow flex flex-col">
-                                                        <p className="text-navy-400 text-xs leading-relaxed line-clamp-2">{deco.description}</p>
-                                                        <div className="space-y-2 mt-auto">
-                                                            <p className="text-[10px] font-bold text-navy-300 uppercase tracking-widest">Pricing</p>
+                                                        <p className="text-navy-400 text-xs leading-relaxed line-clamp-2 mb-2">{deco.description}</p>
+
+                                                        {deco.includes && Array.isArray(deco.includes) && deco.includes.length > 0 && (
+                                                            <div className="space-y-2 mb-4">
+                                                                <p className="text-[10px] font-bold text-navy-300 uppercase tracking-widest">Included Features</p>
+                                                                <ul className="grid grid-cols-1 gap-1.5">
+                                                                    {deco.includes.map((item, i) => (
+                                                                        <li key={i} className="flex items-center gap-2 text-[10px] font-bold text-navy-600 uppercase tracking-tight">
+                                                                            <div className="w-1.5 h-1.5 rounded-full bg-gold-400 shrink-0" />
+                                                                            <span className="truncate">{item}</span>
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        )}
+
+                                                        <div className="space-y-1 mt-auto pt-4 border-t border-navy-50">
+                                                            <p className="text-[10px] font-bold text-navy-300 uppercase tracking-widest">Total Venue Fee</p>
                                                             <p className="text-navy-900 font-bold text-xl">{formatPrice(deco.price)}</p>
                                                         </div>
                                                     </div>
+
                                                 </button>
                                             ))}
                                         </div>
@@ -558,11 +573,12 @@ const EventManagement = () => {
                                                 <button
                                                     key={food._id || food.id}
                                                     onClick={() => setFoodPackage(food._id || food.id)}
-                                                    className={`group relative flex bg-white rounded-[2rem] overflow-hidden text-left transition-all duration-500 shadow-lg hover:shadow-2xl border-2
+                                                    className={`group relative flex bg-white rounded-[2rem] overflow-hidden text-left transition-all duration-500 shadow-lg hover:shadow-2xl hover:-translate-y-2
                                                     ${foodPackage === (food._id || food.id)
-                                                            ? 'border-navy-900 bg-navy-50/10'
-                                                            : 'border-transparent hover:border-navy-100'
+                                                            ? 'ring-4 ring-gold-400 shadow-gold-200/50'
+                                                            : 'ring-1 ring-navy-100'
                                                         }`}
+
                                                 >
                                                     <div className="w-1/3 overflow-hidden">
                                                         <img
@@ -575,17 +591,24 @@ const EventManagement = () => {
                                                         <div>
                                                             <div className="flex justify-between items-start mb-2">
                                                                 <h4 className="text-xl font-serif font-bold text-navy-900 capitalize">{food.name}</h4>
-                                                                {foodPackage === (food._id || food.id) && <Check className="text-navy-900" size={20} strokeWidth={3} />}
+                                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${foodPackage === (food._id || food.id) ? 'bg-gold-500 text-navy-950 scale-110' : 'bg-navy-50 text-navy-200 border border-navy-100'}`}>
+                                                                    <Check size={16} strokeWidth={3} />
+                                                                </div>
                                                             </div>
+
                                                             <p className="text-navy-400 text-xs mb-4">{food.description}</p>
-                                                            <ul className="space-y-2 mb-6">
-                                                                {food.includes.slice(0, 3).map((item, i) => (
-                                                                    <li key={i} className="text-[10px] text-navy-500 font-bold uppercase tracking-widest flex items-center gap-2">
-                                                                        <div className="w-1 h-1 rounded-full bg-gold-400" />
-                                                                        {item}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
+                                                            <div className="space-y-2 mb-6">
+                                                                <p className="text-[10px] font-bold text-navy-300 uppercase tracking-widest">Included Items</p>
+                                                                <ul className="space-y-1.5">
+                                                                    {food.includes.map((item, i) => (
+                                                                        <li key={i} className="text-[10px] text-navy-500 font-bold uppercase tracking-tight flex items-center gap-2">
+                                                                            <div className="w-1.5 h-1.5 rounded-full bg-gold-400 shrink-0" />
+                                                                            <span className="truncate">{item}</span>
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+
                                                         </div>
                                                         <div className="flex items-baseline gap-1">
                                                             <span className="text-2xl font-bold text-navy-900">{formatPrice(food.pricePerHead)}</span>
@@ -600,7 +623,7 @@ const EventManagement = () => {
                                     {/* Add-ons Section */}
                                     <div className="bg-navy-950 rounded-[2.5rem] p-12 text-white shadow-2xl relative overflow-hidden">
                                         <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500/10 rounded-full blur-3xl -mr-32 -mt-32" />
-                                        
+
                                         <div className="relative z-10">
                                             <div className="flex items-center gap-4 mb-10">
                                                 <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center">
@@ -645,7 +668,7 @@ const EventManagement = () => {
                                     </div>
                                 </div>
 
-                                {/* Right Column: Summary Panel */}
+                                {/*Summary view*/}
                                 <div className="xl:col-span-1">
                                     <div className="sticky top-28 rounded-[2.5rem] shadow-2xl overflow-hidden glass-summary border border-navy-100">
                                         <div className="p-10">
@@ -657,7 +680,7 @@ const EventManagement = () => {
                                             </div>
 
                                             <div className="space-y-6">
-                                                {/* Details Table */}
+
                                                 <div className="space-y-4">
                                                     <div className="flex justify-between items-center">
                                                         <span className="text-navy-400 text-[10px] font-bold uppercase tracking-[0.2em]">Package</span>
@@ -681,7 +704,7 @@ const EventManagement = () => {
 
                                                 <div className="h-px bg-navy-100 w-full" />
 
-                                                {/* Price Breakdown */}
+
                                                 <div className="space-y-4">
                                                     <div className="flex justify-between text-sm">
                                                         <span className="text-navy-500 font-medium">Decoration Venue Fee</span>
@@ -722,10 +745,7 @@ const EventManagement = () => {
                                                     Reserve Event <ArrowRight size={20} />
                                                 </button>
 
-                                                <div className="flex items-center justify-center gap-2 text-navy-300 text-[10px] font-bold uppercase tracking-widest mt-6">
-                                                    <Sparkles size={12} className="text-gold-500" />
-                                                    Luxury Resort Standards Apply
-                                                </div>
+
                                             </div>
                                         </div>
                                     </div>
@@ -734,7 +754,7 @@ const EventManagement = () => {
                         </div>
                     )}
 
-                    <EventBookingModal 
+                    <EventBookingModal
                         isOpen={showModal}
                         onClose={() => setShowModal(false)}
                         eventData={{

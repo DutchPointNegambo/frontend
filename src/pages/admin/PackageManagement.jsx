@@ -14,6 +14,12 @@ const CATEGORIES = [
     { id: 'addon', name: 'Add-ons', icon: '🎁' }
 ];
 
+const PRESET_INCLUDES = {
+    decoration: ['Balloon clusters', 'Fresh flower centerpieces', 'Premium floral arches', 'Crystal candelabras', 'Thematic lighting', 'Table linens', 'Red carpet entrance', 'Chair covers & bows'],
+    food: ['Welcome drinks', 'Appetizers', 'Buffet lunch/dinner', 'Dessert station', 'Mineral water', 'Unlimited soft drinks', 'Live cooking station', 'Waitstaff service'],
+    addon: ['']
+};
+
 const EMPTY_FORM = {
     category: 'decoration',
     name: '',
@@ -21,7 +27,7 @@ const EMPTY_FORM = {
     pricePerHead: 0,
     image: '',
     description: '',
-    includes: '',
+    includes: [],
     icon: '',
     status: 'active'
 };
@@ -35,6 +41,7 @@ export default function PackageManagement() {
     const [editingFeature, setEditingFeature] = useState(null);
     const [form, setForm] = useState(EMPTY_FORM);
     const [saving, setSaving] = useState(false);
+    const [newItem, setNewItem] = useState('');
     const { toast, showToast, clearToast } = useToast();
 
     const load = useCallback(async () => {
@@ -61,7 +68,7 @@ export default function PackageManagement() {
         setEditingFeature(feature);
         setForm({
             ...feature,
-            includes: (feature.includes || []).join(', ')
+            includes: Array.isArray(feature.includes) ? feature.includes : []
         });
         setModalOpen(true);
     };
@@ -74,7 +81,7 @@ export default function PackageManagement() {
                 ...form,
                 price: Number(form.price),
                 pricePerHead: Number(form.pricePerHead),
-                includes: form.includes.split(',').map(i => i.trim()).filter(Boolean)
+                includes: Array.isArray(form.includes) ? form.includes : []
             };
 
             if (editingFeature) {
@@ -105,7 +112,7 @@ export default function PackageManagement() {
         }
     };
 
-    const filtered = features.filter(f => 
+    const filtered = features.filter(f =>
         f.name.toLowerCase().includes(search.toLowerCase())
     );
 
@@ -217,7 +224,7 @@ export default function PackageManagement() {
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
                             <div>
                                 <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Category</label>
-                                <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                 </select>
                             </div>
@@ -225,18 +232,18 @@ export default function PackageManagement() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="col-span-2 sm:col-span-1">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Package Name *</label>
-                                    <input required value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="e.g. Royal Decoration" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                    <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Royal Decoration" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
                                 <div className="col-span-2 sm:col-span-1">
                                     {form.category === 'food' ? (
                                         <>
                                             <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Price Per Head (Rs.) *</label>
-                                            <input required type="number" value={form.pricePerHead} onChange={e => setForm({...form, pricePerHead: e.target.value})} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                            <input required type="number" value={form.pricePerHead} onChange={e => setForm({ ...form, pricePerHead: e.target.value })} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                         </>
                                     ) : (
                                         <>
                                             <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Fixed Price (Rs.) *</label>
-                                            <input required type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                            <input required type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                         </>
                                     )}
                                 </div>
@@ -245,24 +252,76 @@ export default function PackageManagement() {
                             {form.category === 'addon' && (
                                 <div>
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Icon (Emoji)</label>
-                                    <input value={form.icon} onChange={e => setForm({...form, icon: e.target.value})} placeholder="e.g. 🍹" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                    <input value={form.icon} onChange={e => setForm({ ...form, icon: e.target.value })} placeholder="e.g. 🍹" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
                             )}
 
-                            <ImageUpload 
+                            <ImageUpload
                                 label="Package Photo *"
                                 currentImage={form.image}
-                                onUploadSuccess={(url) => setForm({...form, image: url})}
+                                onUploadSuccess={(url) => setForm({ ...form, image: url })}
                             />
 
                             <div>
                                 <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Description *</label>
-                                <textarea required rows={2} value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" />
+                                <textarea required rows={2} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Includes (Comma separated)</label>
-                                <textarea rows={3} value={form.includes} onChange={e => setForm({...form, includes: e.target.value})} placeholder="Item 1, Item 2, Item 3..." className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" />
+                                <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-3">Package Includes</label>
+
+                                <div className="bg-navy-50/50 border border-navy-100 rounded-2xl p-4 mb-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                                        {[...new Set([...(PRESET_INCLUDES[form.category] || []), ...form.includes])].map((item, idx) => (
+                                            <label key={idx} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white transition-colors cursor-pointer group border border-transparent hover:border-navy-100">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={form.includes.includes(item)}
+                                                    onChange={(e) => {
+                                                        const newIncludes = e.target.checked
+                                                            ? [...form.includes, item]
+                                                            : form.includes.filter(i => i !== item);
+                                                        setForm({ ...form, includes: newIncludes });
+                                                    }}
+                                                    className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 border-navy-200"
+                                                />
+                                                <span className="text-xs text-navy-700 font-medium group-hover:text-navy-900">{item}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Add New Item */}
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={newItem}
+                                        onChange={e => setNewItem(e.target.value)}
+                                        placeholder="Add custom item..."
+                                        className="flex-1 px-4 py-2 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                if (newItem.trim()) {
+                                                    setForm({ ...form, includes: [...new Set([...form.includes, newItem.trim()])] });
+                                                    setNewItem('');
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (newItem.trim()) {
+                                                setForm({ ...form, includes: [...new Set([...form.includes, newItem.trim()])] });
+                                                setNewItem('');
+                                            }
+                                        }}
+                                        className="px-4 py-2 bg-navy-100 text-navy-700 rounded-xl text-sm font-bold hover:bg-navy-200 transition-colors"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="flex gap-3 pt-2">
