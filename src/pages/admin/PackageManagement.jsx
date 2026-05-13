@@ -15,8 +15,8 @@ const CATEGORIES = [
 ];
 
 const PRESET_INCLUDES = {
-    decoration: ['Balloon clusters', 'Fresh flower centerpieces', 'Premium floral arches', 'Crystal candelabras', 'Thematic lighting', 'Table linens', 'Red carpet entrance', 'Chair covers & bows'],
-    food: ['Welcome drinks', 'Appetizers', 'Buffet lunch/dinner', 'Dessert station', 'Mineral water', 'Unlimited soft drinks', 'Live cooking station', 'Waitstaff service'],
+    decoration: ['Stage backdrop decoration', 'Balloon decorations', 'flower arrangements', 'dining table styling', 'welcome entrance', 'ceiling decorations', 'dance floor effects', 'Crystal chandeliers', 'lighting system', 'Customized name board', 'Cake table decoration', 'Sound system setup'],
+    food: ['VIP table service option', 'Chocolate fountain', 'Sushi/snack counter', 'Premium mocktail/welcome drinks', 'Multiple dessert varieties', 'BBQ/live grill station', 'Dessert counter', 'Salad bar', 'Soup starter', 'Fried rice or biryani', 'Welcome drink', 'Live cooking station',],
     addon: ['']
 };
 
@@ -136,7 +136,7 @@ export default function PackageManagement() {
                 </div>
             </div>
 
-            {/* Tabs */}
+
             <div className="flex gap-1.5 bg-white p-1.5 rounded-2xl border border-navy-100 shadow-sm w-fit">
                 {CATEGORIES.map(cat => (
                     <button
@@ -150,7 +150,7 @@ export default function PackageManagement() {
                 ))}
             </div>
 
-            {/* Search */}
+
             <div className="relative max-w-sm">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-400" />
                 <input
@@ -162,7 +162,7 @@ export default function PackageManagement() {
                 />
             </div>
 
-            {/* Grid */}
+
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[1, 2, 3].map(i => (
