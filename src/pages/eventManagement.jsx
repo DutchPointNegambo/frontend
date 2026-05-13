@@ -243,7 +243,7 @@ const EventManagement = () => {
                     <div className="relative z-10 max-w-5xl mx-auto px-4 text-center">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold uppercase tracking-[0.3em] mb-6 animate-fade-in">
                             <Sparkles size={14} className="text-gold-400" />
-                            Premier Event Hosting
+                            Plan you Event with Dutch Point Resort
                         </div>
                         <h1 className="text-5xl md:text-7xl font-serif font-bold text-white mb-6 animate-fade-in-up">
                             Celebrate Life's <span className="italic text-gold-200">Finest</span> Moments
