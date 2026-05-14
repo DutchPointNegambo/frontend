@@ -10,10 +10,11 @@ import ImageUpload from '../../components/admin_components/ImageUpload';
 
 const ROOM_TYPES = ['deluxe', 'luxury', 'semiluxury', 'dayOuting', 'couple'];
 const STATUS_OPTIONS = ['available', 'occupied', 'maintenance'];
+const COMMON_FEATURES = ['WiFi', 'AC', 'TV', 'Mini Bar', 'Safe', 'Bathtub', 'Ocean View', 'Balcony', 'Hair Dryer', 'Room Service', 'Mini Fridge', 'Coffee Maker'];
 
 const EMPTY_FORM = {
     name: '', roomNumber: '', type: 'deluxe', price: '', guests: '', description: '',
-    features: '', image: '', images: '', status: 'available', view: 'ocean',
+    features: [], image: '', images: '', status: 'available', view: 'ocean',
 };
 
 const statusConfig = {
@@ -54,7 +55,7 @@ export default function RoomManagement() {
         setForm({
             name: room.name, roomNumber: room.roomNumber || '', type: room.type, price: room.price,
             guests: room.guests, description: room.description,
-            features: (room.features || []).join(', '),
+            features: Array.isArray(room.features) ? room.features : [],
             image: room.image,
             status: room.status,
             view: room.view || 'ocean',
@@ -71,7 +72,7 @@ export default function RoomManagement() {
                 ...form,
                 price: Number(form.price),
                 guests: Number(form.guests),
-                features: form.features.split(',').map(f => f.trim()).filter(Boolean),
+                features: form.features,
                 images: form.images.split(',').map(f => f.trim()).filter(Boolean),
             };
             if (editingRoom) {
@@ -410,8 +411,43 @@ export default function RoomManagement() {
                                     <textarea required rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Room description..." className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" />
                                 </div>
                                 <div className="col-span-1 sm:col-span-2">
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Features <span className="text-navy-400 normal-case font-normal">(comma-separated)</span></label>
-                                    <input value={form.features} onChange={e => setForm({ ...form, features: e.target.value })} placeholder="WiFi, AC, Mini Bar, Ocean View..." className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-3">Room Features</label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 bg-navy-50/50 p-4 rounded-2xl border border-navy-100">
+                                        {COMMON_FEATURES.map(feature => (
+                                            <label key={feature} className="flex items-center gap-2 group cursor-pointer">
+                                                <div className="relative flex items-center">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={form.features.includes(feature)}
+                                                        onChange={(e) => {
+                                                            const newFeatures = e.target.checked 
+                                                                ? [...form.features, feature]
+                                                                : form.features.filter(f => f !== feature);
+                                                            setForm({ ...form, features: newFeatures });
+                                                        }}
+                                                        className="peer sr-only"
+                                                    />
+                                                    <div className="w-5 h-5 border-2 border-navy-200 rounded-lg transition-all peer-checked:border-teal-500 peer-checked:bg-teal-500 group-hover:border-teal-400">
+                                                        <CheckCircle className="w-full h-full text-white scale-0 transition-transform peer-checked:scale-75" />
+                                                    </div>
+                                                </div>
+                                                <span className="text-sm text-navy-700 font-medium group-hover:text-navy-900 transition-colors">{feature}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <div className="mt-3">
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase mb-1 ml-1">Custom Features (comma separated)</label>
+                                        <input 
+                                            value={form.features.filter(f => !COMMON_FEATURES.includes(f)).join(', ')} 
+                                            onChange={e => {
+                                                const common = form.features.filter(f => COMMON_FEATURES.includes(f));
+                                                const custom = e.target.value.split(',').map(f => f.trim()).filter(Boolean);
+                                                setForm({ ...form, features: [...new Set([...common, ...custom])] });
+                                            }} 
+                                            placeholder="e.g. Personal Butler, Private Pool..." 
+                                            className="w-full px-4 py-2 border border-navy-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-500" 
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex gap-3 pt-2">
