@@ -194,7 +194,7 @@ const EventManagement = () => {
                                         <span className="text-navy-400 text-[10px] font-bold uppercase tracking-widest">Total Amount</span>
                                         <span className="font-serif font-bold text-navy-900 text-xl">{formatPrice(bookingSuccess.totalAmount)}</span>
                                     </div>
-                                    
+
                                     <div className="flex justify-between items-center">
                                         <span className="text-emerald-600 text-[10px] font-bold uppercase tracking-widest">
                                             {bookingSuccess.paidAmount >= bookingSuccess.totalAmount ? 'Total Paid' : 'Paid Advance'}
@@ -243,7 +243,7 @@ const EventManagement = () => {
 
                     <div className="absolute inset-0 z-0">
                         <img
-                            src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1600&q=80"
+                            src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1778605527/wedding_dqzoby.jpg"
                             alt="Luxury Event"
                             className="w-full h-full object-cover animate-hero-zoom"
                         />

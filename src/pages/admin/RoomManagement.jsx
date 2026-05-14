@@ -55,8 +55,8 @@ export default function RoomManagement() {
             name: room.name, roomNumber: room.roomNumber || '', type: room.type, price: room.price,
             guests: room.guests, description: room.description,
             features: (room.features || []).join(', '),
-            image: room.image, 
-            status: room.status, 
+            image: room.image,
+            status: room.status,
             view: room.view || 'ocean',
             images: (room.images || []).join(', '),
         });
@@ -151,7 +151,7 @@ export default function RoomManagement() {
         <div className="space-y-6">
             {toast && <Toast message={toast.message} type={toast.type} onClose={clearToast} />}
 
-           
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-navy-900">Room Management</h1>
@@ -169,7 +169,7 @@ export default function RoomManagement() {
                 </div>
             </div>
 
-            
+
             <div className="grid grid-cols-3 gap-4">
                 {Object.entries(counts).map(([key, count]) => {
                     const cfg = statusConfig[key];
@@ -190,7 +190,7 @@ export default function RoomManagement() {
                 })}
             </div>
 
-           
+
             <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1 max-w-sm">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-400" />
@@ -208,7 +208,7 @@ export default function RoomManagement() {
                 </select>
             </div>
 
-            
+
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[1, 2, 3].map(i => (
@@ -259,7 +259,7 @@ export default function RoomManagement() {
                                 <div className="p-4">
                                     <div className="flex items-start justify-between gap-2 mb-1">
                                         <h3 className="font-bold text-navy-900 text-sm leading-tight">{room.name}</h3>
-                                        <span className="text-lg font-bold text-teal-600 flex-shrink-0">${room.price}<span className="text-xs font-normal text-navy-400">/night</span></span>
+                                        <span className="text-lg font-bold text-teal-600 flex-shrink-0">Rs. {room.price}<span className="text-xs font-normal text-navy-400">/night</span></span>
                                     </div>
                                     <p className="text-xs text-navy-600 font-bold mb-1">Room No: {room.roomNumber || 'N/A'}</p>
                                     <p className="text-xs text-navy-400 capitalize mb-1">{room.type} · {room.guests} guests · {room.view} view</p>
@@ -289,7 +289,7 @@ export default function RoomManagement() {
                                                     <p className="text-[10px] font-bold text-navy-800">{new Date(room.activeBooking.checkOut).toLocaleDateString()}</p>
                                                 </div>
                                             </div>
-                                            <button 
+                                            <button
                                                 onClick={() => handleCheckOut(room.activeBooking._id, room.roomNumber)}
                                                 className="w-full flex items-center justify-center gap-1.5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[11px] font-bold transition-all shadow-sm hover:shadow-md"
                                             >
@@ -303,17 +303,16 @@ export default function RoomManagement() {
                                         </div>
                                     )}
 
-                                    
+
                                     <div className="flex gap-1 mb-3">
                                         {STATUS_OPTIONS.map(s => (
                                             <button
                                                 key={s}
                                                 onClick={() => room.status !== s && handleStatusToggle(room, s)}
-                                                className={`flex-1 py-1 rounded-lg text-xs font-medium transition-colors capitalize ${
-                                                    room.status === s
-                                                        ? `${statusConfig[s].bg} ${statusConfig[s].text} border ${statusConfig[s].border}`
-                                                        : 'bg-navy-50 text-navy-400 hover:bg-navy-100'
-                                                }`}
+                                                className={`flex-1 py-1 rounded-lg text-xs font-medium transition-colors capitalize ${room.status === s
+                                                    ? `${statusConfig[s].bg} ${statusConfig[s].text} border ${statusConfig[s].border}`
+                                                    : 'bg-navy-50 text-navy-400 hover:bg-navy-100'
+                                                    }`}
                                             >
                                                 {s}
                                             </button>
@@ -335,7 +334,7 @@ export default function RoomManagement() {
                 </div>
             )}
 
-            
+
             {modalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -368,7 +367,7 @@ export default function RoomManagement() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Price / Night ($) *</label>
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Price / Night (Rs.) *</label>
                                     <input required type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="e.g. 250" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
                                 <div>
@@ -380,7 +379,7 @@ export default function RoomManagement() {
                                     <input value={form.view} onChange={e => setForm({ ...form, view: e.target.value })} placeholder="e.g. ocean, garden, pool" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
                                 <div className="col-span-1 sm:col-span-2">
-                                    <ImageUpload 
+                                    <ImageUpload
                                         label="Main Image *"
                                         currentImage={form.image}
                                         onUploadSuccess={(url) => setForm({ ...form, image: url })}
@@ -389,15 +388,15 @@ export default function RoomManagement() {
                                 <div className="col-span-1 sm:col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Additional Image URLs <span className="text-navy-400 normal-case font-normal">(comma-separated or upload more)</span></label>
                                     <div className="flex gap-2 mb-2">
-                                        <input 
-                                            value={form.images} 
-                                            onChange={e => setForm({ ...form, images: e.target.value })} 
-                                            placeholder="https://image1.jpg, https://image2.jpg..." 
-                                            className="flex-1 px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" 
+                                        <input
+                                            value={form.images}
+                                            onChange={e => setForm({ ...form, images: e.target.value })}
+                                            placeholder="https://image1.jpg, https://image2.jpg..."
+                                            className="flex-1 px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                                         />
                                     </div>
                                     <div className="flex flex-wrap gap-2">
-                                        <ImageUpload 
+                                        <ImageUpload
                                             label=""
                                             onUploadSuccess={(url) => {
                                                 const current = form.images ? form.images.split(',').map(i => i.trim()) : [];
