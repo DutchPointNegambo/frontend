@@ -445,7 +445,7 @@ const DeluxeRooms = () => {
 
                                         <div className="flex flex-wrap items-center justify-between gap-2 mt-4 pt-4 border-t border-navy-50">
                                             <div>
-                                                <span className="text-xs text-navy-400 block">Per Night</span>
+                                                {/* <span className="text-xs text-navy-400 block">Per Night</span> */}
                                                 <span className="text-xl sm:text-2xl font-extrabold text-navy-900 italic">{formatPrice(room.price)}/-</span>
                                             </div>
                                             <button
@@ -501,7 +501,7 @@ const DeluxeRooms = () => {
                                     <div className="p-6 space-y-5">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <span className="text-[10px] text-navy-400 block uppercase tracking-widest">Per Night</span>
+                                                {/* <span className="text-[10px] text-navy-400 block uppercase tracking-widest">Per Night</span> */}
                                                 <span className="text-2xl sm:text-3xl font-extrabold text-navy-900 italic">{formatPrice(selectedRoom.price)}/-</span>
                                             </div>
                                             <div className="text-right">

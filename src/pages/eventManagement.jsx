@@ -189,15 +189,25 @@ const EventManagement = () => {
                                         {new Date(bookingSuccess.eventDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                                     </span>
                                 </div>
-                                <div className="pt-4 border-t border-navy-100 flex justify-between items-end">
-                                    <div>
-                                        <span className="text-navy-400 text-[10px] font-bold uppercase tracking-widest block mb-1">Total Amount</span>
-                                        <span className="font-serif font-bold text-navy-900 text-2xl">{formatPrice(bookingSuccess.totalAmount)}</span>
+                                <div className="pt-4 border-t border-navy-100 space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-navy-400 text-[10px] font-bold uppercase tracking-widest">Total Amount</span>
+                                        <span className="font-serif font-bold text-navy-900 text-xl">{formatPrice(bookingSuccess.totalAmount)}</span>
                                     </div>
-                                    <div className="text-right">
-                                        <span className="text-emerald-600 text-xs font-bold block mb-1">Paid Advance</span>
-                                        <span className="font-bold text-emerald-600">{formatPrice(bookingSuccess.paidAmount)}</span>
+
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-emerald-600 text-[10px] font-bold uppercase tracking-widest">
+                                            {bookingSuccess.paidAmount >= bookingSuccess.totalAmount ? 'Total Paid' : 'Paid Advance'}
+                                        </span>
+                                        <span className="font-bold text-emerald-600 text-lg">{formatPrice(bookingSuccess.paidAmount)}</span>
                                     </div>
+
+                                    {bookingSuccess.paidAmount < bookingSuccess.totalAmount && (
+                                        <div className="flex justify-between items-center pt-2 border-t border-navy-100/50">
+                                            <span className="text-amber-600 text-[10px] font-bold uppercase tracking-widest">Remaining Balance (Due)</span>
+                                            <span className="font-bold text-amber-600 text-lg">{formatPrice(bookingSuccess.totalAmount - bookingSuccess.paidAmount)}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -233,7 +243,7 @@ const EventManagement = () => {
 
                     <div className="absolute inset-0 z-0">
                         <img
-                            src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1600&q=80"
+                            src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1778605527/wedding_dqzoby.jpg"
                             alt="Luxury Event"
                             className="w-full h-full object-cover animate-hero-zoom"
                         />

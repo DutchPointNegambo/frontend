@@ -40,83 +40,220 @@ export default function MyEvents() {
 
     const generateInvoice = (booking) => {
         const doc = new jsPDF()
+        const logoUrl = 'https://res.cloudinary.com/dtdgufs9u/image/upload/v1772345832/ChatGPT_Image_Feb_13_2026_02_11_36_PM_jgcxnu.png'
         
-        // Header
-        doc.setFillColor(15, 23, 42) // Navy 950
-        doc.rect(0, 0, 210, 40, 'F')
-        
-        doc.setTextColor(255, 255, 255)
-        doc.setFontSize(22)
-        doc.text('DUTCH POINT RESORT', 20, 25)
-        doc.setFontSize(10)
-        doc.text('NEGOMBO, SRI LANKA', 20, 32)
-        
-        doc.setFontSize(20)
-        doc.text('INVOICE', 150, 25)
-        doc.setFontSize(10)
-        doc.text(`Ref: ${booking.bookingRef}`, 150, 32)
-
-        // Guest Info
-        doc.setTextColor(15, 23, 42)
-        doc.setFontSize(12)
-        doc.setFont(undefined, 'bold')
-        doc.text('Billed To:', 20, 60)
-        doc.setFont(undefined, 'normal')
-        doc.text(`${booking.guestInfo.firstName} ${booking.guestInfo.lastName}`, 20, 67)
-        doc.text(booking.guestInfo.email, 20, 73)
-        if (booking.guestInfo.phone) doc.text(booking.guestInfo.phone, 20, 79)
-
-        // Booking Info
-        doc.setFont(undefined, 'bold')
-        doc.text('Event Details:', 120, 60)
-        doc.setFont(undefined, 'normal')
-        doc.text(`Type: ${booking.eventType.toUpperCase()}`, 120, 67)
-        doc.text(`Date: ${new Date(booking.eventDate).toLocaleDateString()}`, 120, 73)
-        doc.text(`Slot: ${booking.timeSlot.toUpperCase()}`, 120, 79)
-
-        // Table
-        const tableData = [
-            ['Description', 'Details', 'Amount'],
-            ['Event Decoration', (booking.decoration?.name || booking.decoration || 'Standard').toUpperCase(), `Rs. ${booking.totalAmount.toLocaleString()}`], // This is a simplification, in real apps we'd store base price
-            ['Food Package', (booking.foodPackage?.name || booking.foodPackage || 'Standard').toUpperCase(), 'Included'],
-            ...booking.addons.map(a => [a.name, 'Add-on', `Rs. ${a.price.toLocaleString()}`])
-        ]
-
-        autoTable(doc, {
-            startY: 95,
-            head: [['Description', 'Category', 'Amount']],
-            body: [
-                ['Event Decoration', 'Decoration', 'Base Price'],
-                ['Food Package', 'Catering', `Rs. ${booking.totalAmount.toLocaleString()}`], // Real logic would split this
-                ...booking.addons.map(a => [a.name, 'Add-on', `Rs. ${a.price.toLocaleString()}`])
-            ],
-            theme: 'striped',
-            headStyles: { fillColor: [15, 23, 42] }
-        })
-
-        const finalY = doc.lastAutoTable?.finalY || 150
-
-        // Totals
-        doc.setFont(undefined, 'bold')
-        doc.text('Total Amount:', 140, finalY + 20)
-        doc.text(`Rs. ${booking.totalAmount.toLocaleString()}`, 180, finalY + 20, { align: 'right' })
-        
-        doc.setTextColor(16, 185, 129) // Emerald 500
-        doc.text('Amount Paid:', 140, finalY + 30)
-        doc.text(`Rs. ${booking.paidAmount.toLocaleString()}`, 180, finalY + 30, { align: 'right' })
-
-        if (booking.totalAmount > booking.paidAmount) {
-            doc.setTextColor(245, 158, 11) // Amber 500
-            doc.text('Balance Due:', 140, finalY + 40)
-            doc.text(`Rs. ${(booking.totalAmount - booking.paidAmount).toLocaleString()}`, 180, finalY + 40, { align: 'right' })
+        // Helper for colors
+        const colors = {
+            navy: [15, 23, 42],
+            teal: [13, 148, 136],
+            gray: [100, 116, 139],
+            lightGray: [241, 245, 249]
         }
 
-        // Footer
-        doc.setTextColor(148, 163, 184)
-        doc.setFontSize(8)
-        doc.text('Thank you for choosing Dutch Point Resort. We look forward to hosting your event.', 105, 280, { align: 'center' })
+        const formatCurrency = (amount) => {
+            return `Rs. ${Number(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        }
 
-        doc.save(`Invoice_${booking.bookingRef}.pdf`)
+        const addContent = (imgData = null) => {
+            // Header Background
+            doc.setFillColor(...colors.navy)
+            doc.rect(0, 0, 210, 50, 'F')
+            
+            // Logo
+            if (imgData) {
+                doc.addImage(imgData, 'PNG', 20, 10, 30, 30)
+            } else {
+                doc.setTextColor(255, 255, 255)
+                doc.setFontSize(22)
+                doc.setFont(undefined, 'bold')
+                doc.text('DP', 25, 28)
+            }
+            
+            // Resort Info
+            doc.setTextColor(255, 255, 255)
+            doc.setFontSize(18)
+            doc.setFont(undefined, 'bold')
+            doc.text('DUTCH POINT RESORT', 60, 20)
+            
+            doc.setFontSize(9)
+            doc.setFont(undefined, 'normal')
+            doc.text([
+                '111/1c Pitipana St, Negombo 11500, Sri Lanka',
+                'Phone: 076 421 9211 | Email: dutchpointresort@gmail.com',
+                'Web: www.dutchpointresort.com'
+            ], 60, 28)
+
+            // Invoice Title & Ref
+            doc.setFontSize(24)
+            doc.setFont(undefined, 'bold')
+            doc.text('INVOICE', 190, 25, { align: 'right' })
+            doc.setFontSize(10)
+            doc.text(`REF: ${booking.bookingRef}`, 190, 32, { align: 'right' })
+            doc.setFont(undefined, 'normal')
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 190, 37, { align: 'right' })
+
+            // Bill To & Event Details Section
+            doc.setTextColor(...colors.navy)
+            doc.setFontSize(11)
+            doc.setFont(undefined, 'bold')
+            doc.text('BILLED TO:', 20, 65)
+            doc.text('EVENT DETAILS:', 110, 65)
+            
+            doc.setDrawColor(...colors.lightGray)
+            doc.line(20, 68, 90, 68)
+            doc.line(110, 68, 190, 68)
+
+            doc.setFont(undefined, 'normal')
+            doc.setFontSize(10)
+            // Guest Info
+            const guestName = `${booking.guestInfo?.firstName || ''} ${booking.guestInfo?.lastName || ''}`
+            doc.text([
+                guestName,
+                booking.guestInfo?.email || '',
+                booking.guestInfo?.phone || ''
+            ], 20, 75)
+
+            // Event Info
+            doc.text([
+                `Event Type: ${(booking.eventType || '').toUpperCase()}`,
+                `Date: ${new Date(booking.eventDate).toLocaleDateString()}`,
+                `Slot: ${(booking.timeSlot || '').toUpperCase()}`,
+                `Guests: ${booking.guests || 0} People`
+            ], 110, 75)
+
+            // Table Calculation
+            const decPrice = booking.decoration?.price || 0
+            const pph = booking.foodPackage?.pricePerHead || 0
+            const foodTotal = pph * (booking.guests || 0)
+            
+            const tableBody = [
+                [
+                    'Event Decoration', 
+                    (booking.decoration?.name || 'Standard').toUpperCase(), 
+                    '1', 
+                    decPrice > 0 ? formatCurrency(decPrice) : 'Base'
+                ],
+                [
+                    'Food Package', 
+                    `${(booking.foodPackage?.name || 'Standard').toUpperCase()}\n(${formatCurrency(pph)} per head)`, 
+                    (booking.guests || 0).toString(), 
+                    formatCurrency(foodTotal)
+                ],
+            ]
+
+            // Add addons
+            if (booking.addons && booking.addons.length > 0) {
+                booking.addons.forEach(addon => {
+                    tableBody.push([addon.name, 'Add-on', '1', formatCurrency(addon.price)])
+                })
+            }
+
+            autoTable(doc, {
+                startY: 100,
+                head: [['Description', 'Selection', 'Qty', 'Amount']],
+                body: tableBody,
+                theme: 'grid',
+                headStyles: { 
+                    fillColor: colors.navy,
+                    textColor: [255, 255, 255],
+                    fontSize: 10,
+                    fontStyle: 'bold',
+                    halign: 'center'
+                },
+                columnStyles: {
+                    0: { cellWidth: 60 },
+                    1: { cellWidth: 60 },
+                    2: { cellWidth: 20, halign: 'center' },
+                    3: { cellWidth: 40, halign: 'right' }
+                },
+                styles: { fontSize: 9, cellPadding: 5 }
+            })
+
+            const finalY = doc.lastAutoTable.finalY || 150
+
+            // Financial Summary
+            const summaryX = 130
+            doc.setFontSize(10)
+            doc.setFont(undefined, 'normal')
+            doc.setTextColor(...colors.gray)
+            
+            doc.text('Total Amount:', summaryX, finalY + 15)
+            doc.setTextColor(...colors.navy)
+            doc.setFont(undefined, 'bold')
+            doc.text(formatCurrency(booking.totalAmount), 190, finalY + 15, { align: 'right' })
+
+            doc.setFont(undefined, 'normal')
+            doc.setTextColor(...colors.gray)
+            doc.text('Paid Amount:', summaryX, finalY + 22)
+            doc.setTextColor(...colors.teal)
+            doc.setFont(undefined, 'bold')
+            doc.text(formatCurrency(booking.paidAmount), 190, finalY + 22, { align: 'right' })
+
+            if (Number(booking.totalAmount) > Number(booking.paidAmount)) {
+                doc.setDrawColor(...colors.navy)
+                doc.setLineWidth(0.5)
+                doc.line(summaryX, finalY + 26, 190, finalY + 26)
+                
+                doc.setFontSize(11)
+                doc.setTextColor(220, 38, 38) // Red 600
+                doc.text('Balance Due:', summaryX, finalY + 33)
+                doc.text(formatCurrency(booking.totalAmount - booking.paidAmount), 190, finalY + 33, { align: 'right' })
+            }
+
+
+            // Payment Metadata
+            doc.setFontSize(8)
+            doc.setTextColor(...colors.gray)
+            doc.setFont(undefined, 'normal')
+            const paymentDetails = [
+                `Payment Method: ${booking.paymentMethod?.toUpperCase() || 'CARD'}`,
+                booking.paymentDetails?.transactionId ? `Transaction ID: ${booking.paymentDetails.transactionId}` : null
+            ].filter(Boolean)
+            doc.text(paymentDetails, 20, finalY + 15)
+
+            // Terms & Conditions
+            const footerY = 250
+            doc.setDrawColor(...colors.lightGray)
+            doc.line(20, footerY, 190, footerY)
+            
+            doc.setFontSize(8)
+            doc.setTextColor(...colors.gray)
+            doc.setFont(undefined, 'bold')
+            doc.text('TERMS & CONDITIONS', 20, footerY + 8)
+            doc.setFont(undefined, 'normal')
+            const terms = [
+                '1. This invoice is generated electronically and does not require a physical signature.',
+                '2. All bookings are subject to availability and the resort\'s general terms and conditions.',
+                '3. Advance payments are non-refundable unless stated otherwise in the cancellation policy.',
+                '4. Please present a copy of this invoice (digital or print) upon arrival at the resort.'
+            ]
+            doc.text(terms, 20, footerY + 14)
+
+            // Final Footer
+            doc.setFontSize(10)
+            doc.setTextColor(...colors.navy)
+            doc.setFont(undefined, 'bold')
+            doc.text('THANK YOU FOR YOUR BUSINESS!', 105, 285, { align: 'center' })
+
+            doc.save(`Invoice_${booking.bookingRef}.pdf`)
+        }
+
+        // Try to load image first
+        const img = new Image()
+        img.crossOrigin = 'Anonymous'
+        img.onload = () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width
+            canvas.height = img.height
+            const ctx = canvas.getContext('2d')
+            ctx.drawImage(img, 0, 0)
+            const dataURL = canvas.toDataURL('image/png')
+            addContent(dataURL)
+        }
+        img.onerror = () => {
+            addContent(null)
+        }
+        img.src = logoUrl
     }
 
     return (
