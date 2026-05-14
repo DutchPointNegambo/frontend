@@ -25,7 +25,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
     });
     const [cardErrors, setCardErrors] = useState({});
 
-    // Pre-fill user info
+    // Pre-filling user data
     useEffect(() => {
         if (user) {
             setFormData(prev => ({
@@ -38,7 +38,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
         }
     }, [user, isOpen]);
 
-    // ── Card validation helpers ──────────────────────────────────────────────
+    //Card validation helpers
     const luhnCheck = (num) => {
         const digits = num.replace(/\s/g, '');
         let sum = 0, alt = false;
@@ -112,7 +112,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!validateCard()) return;
 
         setLoading(true);
@@ -161,20 +161,20 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                 {/* Header */}
                 <div className="relative h-32 bg-navy-900 flex items-center justify-between px-8">
                     <div className="absolute inset-0 overflow-hidden">
-                        <img 
-                            src={room.images?.[0] || room.image} 
-                            alt={room.name} 
+                        <img
+                            src={room.images?.[0] || room.image}
+                            alt={room.name}
                             className="w-full h-full object-cover opacity-50 transition-transform duration-700 hover:scale-110"
                         />
                         <div className="absolute inset-0 bg-gradient-to-r from-navy-900 via-navy-900/80 to-transparent" />
                     </div>
-                    
+
                     <div className="relative z-10">
                         <h2 className="text-2xl font-bold text-white italic">{room.name}</h2>
                         <p className="text-blue-300 text-sm font-medium uppercase tracking-wider">{selectedPackage.replace('-', ' ')} Package</p>
                     </div>
 
-                    <button 
+                    <button
                         onClick={onClose}
                         className="relative z-10 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-colors"
                     >
@@ -203,7 +203,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">First Name</label>
-                                    <input 
+                                    <input
                                         required
                                         type="text"
                                         name="firstName"
@@ -215,7 +215,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Last Name</label>
-                                    <input 
+                                    <input
                                         required
                                         type="text"
                                         name="lastName"
@@ -230,7 +230,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Email Address</label>
-                                    <input 
+                                    <input
                                         required
                                         type="email"
                                         name="email"
@@ -242,7 +242,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Phone Number</label>
-                                    <input 
+                                    <input
                                         required
                                         type="tel"
                                         name="phone"
@@ -256,7 +256,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
 
                             <div className="space-y-1">
                                 <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Special Requests (Optional)</label>
-                                <textarea 
+                                <textarea
                                     name="specialRequests"
                                     value={formData.specialRequests}
                                     onChange={handleInputChange}
@@ -265,7 +265,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                 />
                             </div>
 
-                            <button 
+                            <button
                                 type="submit"
                                 className="w-full bg-navy-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-navy-800 transition-all shadow-lg active:scale-[0.98]"
                             >
@@ -280,7 +280,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                 <h3 className="text-navy-900 font-bold flex items-center gap-2">
                                     <Calendar className="text-blue-500" size={18} /> Booking Summary
                                 </h3>
-                                
+
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-4 border-b border-navy-100">
                                     <div>
                                         <label className="text-[10px] text-navy-400 font-bold uppercase tracking-widest block mb-1">Check-In</label>
@@ -324,7 +324,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Card Number</label>
                                         <div className="relative">
-                                            <input 
+                                            <input
                                                 type="text"
                                                 placeholder="4242 4242 4242 4242"
                                                 value={cardDetails.number}
@@ -347,7 +347,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Expiry Date</label>
-                                            <input 
+                                            <input
                                                 type="text"
                                                 placeholder="MM/YY"
                                                 value={cardDetails.expiry}
@@ -362,7 +362,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">CVV</label>
-                                            <input 
+                                            <input
                                                 type="text"
                                                 placeholder="123"
                                                 value={cardDetails.cvv}
@@ -380,7 +380,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
 
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Cardholder Name</label>
-                                        <input 
+                                        <input
                                             type="text"
                                             placeholder="JANE SMITH"
                                             value={cardDetails.name}
@@ -393,9 +393,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                         {cardErrors.name && <p className="text-red-500 text-[10px] font-bold mt-1 px-1">{cardErrors.name}</p>}
                                     </div>
                                 </div>
-                                <p className="text-[10px] text-navy-400 flex items-center gap-1.5 px-1">
-                                    <Lock size={10} /> Card details are validated securely for simulation.
-                                </p>
+
                             </div>
 
                             {error && (
@@ -405,13 +403,13 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                             )}
 
                             <div className="flex gap-3">
-                                <button 
+                                <button
                                     onClick={() => setStep(1)}
                                     className="flex-1 border-2 border-navy-100 text-navy-600 py-4 rounded-2xl font-bold hover:bg-navy-50 transition-all active:scale-[0.98]"
                                 >
                                     Go Back
                                 </button>
-                                <button 
+                                <button
                                     onClick={handleSubmit}
                                     disabled={loading}
                                     className="flex-[2] bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98]"
@@ -431,7 +429,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                             <p className="text-navy-500 mb-8 max-w-sm mx-auto">
                                 Your stay at Dutch Point Resort has been reserved. You will receive a confirmation email shortly.
                             </p>
-                            <button 
+                            <button
                                 onClick={onClose}
                                 className="bg-navy-900 text-white px-10 py-4 rounded-2xl font-bold hover:bg-navy-800 transition-all shadow-lg active:scale-[0.98]"
                             >

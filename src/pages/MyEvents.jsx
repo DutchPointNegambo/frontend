@@ -14,7 +14,7 @@ const STATUS_ICONS = {
 
 const PAYMENT_STATUS = {
     pending: { label: 'Pending', color: 'text-amber-600', bg: 'bg-amber-100' },
-    deposit_paid: { label: 'Deposit Paid', color: 'text-orange-600', bg: 'bg-orange-100' },
+    deposit_paid: { label: 'Advance Paid', color: 'text-orange-600', bg: 'bg-orange-100' },
     fully_paid: { label: 'Fully Paid', color: 'text-emerald-600', bg: 'bg-emerald-100' },
     refunded: { label: 'Refunded', color: 'text-gray-600', bg: 'bg-gray-100' }
 }

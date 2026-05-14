@@ -97,7 +97,7 @@ const DeluxeRooms = () => {
             ? room.includes
             : ['Complimentary breakfast', 'Free Wi-Fi', 'Daily housekeeping'],
     })
-
+    //filter rooms based on user changes
     useEffect(() => {
         setLoading(true)
         setError(null)

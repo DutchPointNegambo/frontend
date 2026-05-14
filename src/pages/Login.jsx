@@ -44,6 +44,8 @@ const Login = () => {
       
       if (data.role === 'admin') {
         navigate('/admin')
+      } else if (data.role === 'receptionist') {
+        navigate('/receptionist/dashboard')
       } else if (data.role === 'staff') {
         navigate('/employee/dashboard')
       } else {
@@ -89,6 +91,8 @@ const Login = () => {
       // Role-based redirect
       if (data.role === 'admin') {
         navigate('/admin')
+      } else if (data.role === 'receptionist') {
+        navigate('/receptionist/dashboard')
       } else if (data.role === 'staff') {
         navigate('/employee/dashboard')
       } else {
