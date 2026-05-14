@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
-    User, Calendar, Clock, DollarSign, Save, RefreshCw, 
+    User, Calendar, Clock, Banknote, Save, RefreshCw, 
     TrendingUp, ShieldCheck, Mail, Phone,
     CheckCircle, Timer, QrCode, Download, Printer
 } from 'lucide-react';
@@ -392,7 +392,7 @@ const EmployeeDashboard = () => {
                                         <h2 className="text-5xl font-bold tracking-tight">Rs. {payroll?.netPay?.toLocaleString() || '0'}</h2>
                                     </div>
                                     <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10">
-                                        <DollarSign size={28} className="text-teal-400" />
+                                        <Banknote size={28} className="text-teal-400" />
                                     </div>
                                 </div>
                                 
