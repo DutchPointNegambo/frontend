@@ -103,7 +103,25 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
     };
 
     const nights = selectedPackage === 'day-use' ? 1 : calcNights();
-    const total = room.price * nights;
+    
+    // August Offe
+    // August Offer Calculation
+    const isAugust = checkIn && new Date(checkIn).getMonth() === 7;
+    const isDeluxe = room.type === 'deluxe';
+    
+    let currentUnitPrice = room.price;
+    let basePriceForDisplay = room.originalPrice || room.price;
+    let hasOffer = false;
+    
+    if (isAugust && isDeluxe) {
+        basePriceForDisplay = 15000;
+        currentUnitPrice = basePriceForDisplay * 0.75; // 25% OFF
+        hasOffer = true;
+    }
+
+    const subtotal = basePriceForDisplay * nights;
+    const total = currentUnitPrice * nights;
+    const discountAmount = subtotal - total;
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -171,7 +189,9 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
 
                     <div className="relative z-10">
                         <h2 className="text-2xl font-bold text-white italic">{room.name}</h2>
-                        <p className="text-blue-300 text-sm font-medium uppercase tracking-wider">{selectedPackage.replace('-', ' ')} Package</p>
+                        <div className="flex items-center gap-3">
+                            <p className="text-blue-300 text-sm font-medium uppercase tracking-wider">{selectedPackage.replace('-', ' ')} Package</p>
+                        </div>
                     </div>
 
                     <button
@@ -309,8 +329,26 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                 </div>
 
                                 <div className="flex items-center justify-between pt-2">
-                                    <span className="text-navy-900 font-bold text-lg italic">Total Amount to Pay</span>
-                                    <span className="text-blue-600 font-extrabold text-2xl italic">{formatPrice(total)}/-</span>
+                                    <div className="flex flex-col">
+                                        <span className="text-navy-900 font-bold text-lg italic">Total Amount to Pay</span>
+                                        {/* {hasOffer && (
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] text-red-500 font-bold uppercase tracking-wider animate-pulse">August Special Offer Applied</span>
+                                                <span className="text-[10px] text-navy-400 font-medium italic">
+                                                    {formatPrice(subtotal/nights)} - {formatPrice(discountAmount/nights)} = {formatPrice(total/nights)} per night
+                                                </span>
+                                            </div>
+                                        )} */}
+                                    </div>
+                                    <div className="text-right flex flex-col">
+                                        {hasOffer && (
+                                            <span className="text-sm text-navy-400 line-through opacity-70">{formatPrice(subtotal)}</span>
+                                        )}
+                                        <span className="text-blue-600 font-extrabold text-2xl italic">{formatPrice(total)}/-</span>
+                                        {hasOffer && (
+                                            <span className="text-[10px] text-green-600 font-bold uppercase tracking-tighter">Save {formatPrice(discountAmount)}</span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
