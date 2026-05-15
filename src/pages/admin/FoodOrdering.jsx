@@ -9,7 +9,17 @@ const FoodOrdering = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [currentId, setCurrentId] = useState(null);
-    const [newItem, setNewItem] = useState({ name: '', category: 'Signature Dishes & Global Cuisine', price: '', status: 'Available', image: '', description: '' });
+    const [newItem, setNewItem] = useState({ 
+        name: '', 
+        category: 'Signature Dishes & Global Cuisine', 
+        productionPrice: '',
+        price: '', // Regular Price
+        discount: '',
+        sellingPrice: '',
+        status: 'Available', 
+        image: '', 
+        description: '' 
+    });
 
     const categories = [
         'Signature Dishes & Global Cuisine', 
@@ -47,7 +57,10 @@ const FoodOrdering = () => {
         setNewItem({
             name: item.name,
             category: item.category,
-            price: item.price,
+            productionPrice: item.productionPrice || '',
+            price: item.price || '',
+            discount: item.discount || '',
+            sellingPrice: item.sellingPrice || item.price,
             status: item.status,
             image: item.image,
             description: item.description || ''
@@ -57,11 +70,26 @@ const FoodOrdering = () => {
         setIsModalOpen(true);
     };
 
+    // Auto-calculate selling price when price or discount changes
+    useEffect(() => {
+        const p = parseFloat(newItem.price) || 0;
+        const d = parseFloat(newItem.discount) || 0;
+        if (p > 0) {
+            const selling = p - (p * (d / 100));
+            if (selling !== parseFloat(newItem.sellingPrice)) {
+                setNewItem(prev => ({ ...prev, sellingPrice: selling.toFixed(2) }));
+            }
+        }
+    }, [newItem.price, newItem.discount]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const itemData = {
             ...newItem,
-            price: parseFloat(newItem.price),
+            productionPrice: parseFloat(newItem.productionPrice) || 0,
+            price: parseFloat(newItem.price) || 0,
+            discount: parseFloat(newItem.discount) || 0,
+            sellingPrice: parseFloat(newItem.sellingPrice) || 0,
             image: newItem.image || '🍽️'
         };
 
@@ -84,7 +112,16 @@ const FoodOrdering = () => {
         setIsModalOpen(false);
         setIsEditing(false);
         setCurrentId(null);
-        setNewItem({ name: '', category: 'Signature Dishes & Global Cuisine', price: '', status: 'Available', image: '', description: '' });
+        setNewItem({ 
+            name: '', 
+            category: 'Signature Dishes & Global Cuisine', 
+            productionPrice: '',
+            discount: '',
+            sellingPrice: '',
+            status: 'Available', 
+            image: '', 
+            description: '' 
+        });
     };
 
     return (
@@ -143,7 +180,17 @@ const FoodOrdering = () => {
                                 </span>
                             </div>
                             <h3 className="font-bold text-navy-900 text-lg">{item.name}</h3>
-                            <p className="text-2xl font-bold text-blue-600 mt-2">Rs. {item.price.toFixed(2)}</p>
+                            <div className="flex flex-col mt-2">
+                                <div className="flex items-center gap-2">
+                                    <p className="text-2xl font-bold text-blue-600">Rs. {item.sellingPrice ? item.sellingPrice.toFixed(2) : item.price.toFixed(2)}</p>
+                                    {item.discount > 0 && (
+                                        <span className="bg-red-100 text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                                            -{item.discount}%
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-[10px] text-navy-400 font-medium">Prod: Rs. {item.productionPrice?.toFixed(2) || '0.00'}</p>
+                            </div>
 
                             <div className="flex gap-2 mt-4 pt-4 border-t border-navy-50 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button 
@@ -183,20 +230,52 @@ const FoodOrdering = () => {
                                         className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                     <div>
-                                        <label className="block text-sm font-medium text-navy-700 mb-1">Price (Rs.)</label>
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Prod. Price</label>
+                                        <input
+                                            required
+                                            type="number"
+                                            step="0.01"
+                                            value={newItem.productionPrice}
+                                            onChange={e => setNewItem({ ...newItem, productionPrice: e.target.value })}
+                                            className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Reg. Price</label>
                                         <input
                                             required
                                             type="number"
                                             step="0.01"
                                             value={newItem.price}
                                             onChange={e => setNewItem({ ...newItem, price: e.target.value })}
-                                            className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-navy-700 mb-1">Category</label>
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Discount %</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={newItem.discount}
+                                            onChange={e => setNewItem({ ...newItem, discount: e.target.value })}
+                                            className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Selling Price</label>
+                                        <input
+                                            readOnly
+                                            type="number"
+                                            step="0.01"
+                                            value={newItem.sellingPrice}
+                                            className="w-full px-3 py-2 border border-navy-200 rounded-lg bg-navy-50 font-bold text-blue-600 text-sm"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-navy-700 mb-1">Category</label>
                                         <select
                                             value={newItem.category}
                                             onChange={e => setNewItem({ ...newItem, category: e.target.value })}
@@ -205,7 +284,6 @@ const FoodOrdering = () => {
                                             {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                         </select>
                                     </div>
-                                </div>
                                 <div>
                                     <label className="block text-sm font-medium text-navy-700 mb-1">Status</label>
                                     <select
