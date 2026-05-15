@@ -148,44 +148,69 @@ export async function deleteUser(id) {
 
 // Admin: Rooms 
 export async function fetchRooms(params = {}) {
-    const qs = new URLSearchParams(params).toString();
-    const res = await fetch(`${API_URL}/admin/rooms?${qs}`, { headers: authHeaders() });
-    return handleResponse(res);
+    try {
+        const qs = new URLSearchParams(params).toString();
+        const res = await fetch(`${API_URL}/admin/rooms?${qs}`, { headers: authHeaders() });
+        return await handleResponse(res);
+    } catch (error) {
+        console.error("Fetch Rooms API Error:", error);
+        throw error;
+    }
 }
 
 export async function createRoom(payload) {
-    const res = await fetch(`${API_URL}/admin/rooms`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify(payload),
-    });
-    return handleResponse(res);
+    try {
+        const res = await fetch(`${API_URL}/admin/rooms`, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify(payload),
+        });
+        return await handleResponse(res);
+    } catch (error) {
+        console.error("Create Room API Error:", error);
+        throw error;
+    }
 }
 
 export async function updateRoom(id, payload) {
-    const res = await fetch(`${API_URL}/admin/rooms/${id}`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify(payload),
-    });
-    return handleResponse(res);
+    try {
+        const res = await fetch(`${API_URL}/admin/rooms/${id}`, {
+            method: 'PUT',
+            headers: authHeaders(),
+            body: JSON.stringify(payload),
+        });
+        return await handleResponse(res);
+    } catch (error) {
+        console.error("Update Room API Error:", error);
+        throw error;
+    }
 }
 
 export async function updateRoomStatusByNumber(roomNumber, status) {
-    const res = await fetch(`${API_URL}/admin/rooms/number/${roomNumber}/status`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify({ status }),
-    });
-    return handleResponse(res);
+    try {
+        const res = await fetch(`${API_URL}/admin/rooms/number/${roomNumber}/status`, {
+            method: 'PUT',
+            headers: authHeaders(),
+            body: JSON.stringify({ status }),
+        });
+        return await handleResponse(res);
+    } catch (error) {
+        console.error("Update Room Status API Error:", error);
+        throw error;
+    }
 }
 
 export async function deleteRoom(id) {
-    const res = await fetch(`${API_URL}/admin/rooms/${id}`, {
-        method: 'DELETE',
-        headers: authHeaders(),
-    });
-    return handleResponse(res);
+    try {
+        const res = await fetch(`${API_URL}/admin/rooms/${id}`, {
+            method: 'DELETE',
+            headers: authHeaders(),
+        });
+        return await handleResponse(res);
+    } catch (error) {
+        console.error("Delete Room API Error:", error);
+        throw error;
+    }
 }
 
 export async function fetchRoomsByCategory(category, packageType, checkIn, checkOut) {
@@ -214,6 +239,31 @@ export async function checkRoomAvailability(roomId, checkIn, checkOut) {
 export async function fetchGalleryRooms() {
     const res = await fetch(`${API_URL}/rooms`);
     return handleResponse(res);
+}
+
+// Room Features
+export async function fetchRoomFeatures() {
+    try {
+        const res = await fetch(`${API_URL}/room-features`, { headers: authHeaders() });
+        return await handleResponse(res);
+    } catch (error) {
+        console.error("Fetch Room Features API Error:", error);
+        throw error;
+    }
+}
+
+export async function createRoomFeature(payload) {
+    try {
+        const res = await fetch(`${API_URL}/room-features`, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify(payload),
+        });
+        return await handleResponse(res);
+    } catch (error) {
+        console.error("Create Room Feature API Error:", error);
+        throw error;
+    }
 }
 
 // Packages

@@ -3,14 +3,18 @@ import {
     Plus, Search, Edit2, Trash2, X, BedDouble,
     CheckCircle, Wrench, XCircle, RefreshCw, Save, LogOut, UserCircle
 } from 'lucide-react';
-import { fetchRooms, createRoom, updateRoom, deleteRoom, updateRoomStatusByNumber, updateBookingStatus } from '../../utils/api';
+import { 
+    fetchRooms, createRoom, updateRoom, deleteRoom, 
+    updateRoomStatusByNumber, updateBookingStatus,
+    fetchRoomFeatures, createRoomFeature 
+} from '../../utils/api';
 import Toast from '../../components/admin_components/Toast';
 import { useToast } from '../../components/admin_components/useToast';
 import ImageUpload from '../../components/admin_components/ImageUpload';
 
 const ROOM_TYPES = ['deluxe', 'luxury', 'semiluxury', 'dayOuting', 'couple'];
 const STATUS_OPTIONS = ['available', 'occupied', 'maintenance'];
-const COMMON_FEATURES = ['WiFi', 'AC', 'TV', 'Mini Bar', 'Safe', 'Bathtub', 'Ocean View', 'Balcony', 'Hair Dryer', 'Room Service', 'Mini Fridge', 'Coffee Maker'];
+
 
 const EMPTY_FORM = {
     name: '', roomNumber: '', type: 'deluxe', price: '', guests: '', description: '',
@@ -33,13 +37,20 @@ export default function RoomManagement() {
     const [editingRoom, setEditingRoom] = useState(null);
     const [form, setForm] = useState(EMPTY_FORM);
     const [saving, setSaving] = useState(false);
+    const [dynamicFeatures, setDynamicFeatures] = useState([]);
+    const [newFeatureName, setNewFeatureName] = useState('');
+    const [creatingFeature, setCreatingFeature] = useState(false);
     const { toast, showToast, clearToast } = useToast();
 
     const load = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await fetchRooms({ limit: 100 });
-            setRooms(Array.isArray(data.rooms) ? data.rooms : (Array.isArray(data) ? data : []));
+            const [roomsData, featuresData] = await Promise.all([
+                fetchRooms({ limit: 100 }),
+                fetchRoomFeatures()
+            ]);
+            setRooms(Array.isArray(roomsData.rooms) ? roomsData.rooms : (Array.isArray(roomsData) ? roomsData : []));
+            setDynamicFeatures(Array.isArray(featuresData) ? featuresData : []);
         } catch (e) {
             showToast(e.message, 'error');
         } finally {
@@ -119,18 +130,23 @@ export default function RoomManagement() {
         }
     };
 
-    const handleCheckOut = async (bookingId, roomNumber) => {
-        if (!window.confirm('Are you sure you want to check out this guest? This will mark the booking as completed and make the room available.')) return;
+    const handleAddFeature = async () => {
+        if (!newFeatureName.trim()) return;
+        setCreatingFeature(true);
         try {
-            await updateBookingStatus(bookingId, 'completed');
-            // After marking booking as completed, we also mark the room as available in DB
-            if (roomNumber) {
-                await updateRoomStatusByNumber(roomNumber, 'available');
-            }
-            load();
-            showToast('Guest checked out successfully and room is now available');
+            const newFeat = await createRoomFeature({ name: newFeatureName.trim() });
+            setDynamicFeatures(prev => [...prev, newFeat]);
+            // Automatically select it
+            setForm(prev => ({
+                ...prev,
+                features: [...prev.features, newFeat.name]
+            }));
+            setNewFeatureName('');
+            showToast('New feature added to database');
         } catch (e) {
             showToast(e.message, 'error');
+        } finally {
+            setCreatingFeature(false);
         }
     };
 
@@ -413,16 +429,16 @@ export default function RoomManagement() {
                                 <div className="col-span-1 sm:col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-3">Room Features</label>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 bg-navy-50/50 p-4 rounded-2xl border border-navy-100">
-                                        {COMMON_FEATURES.map(feature => (
-                                            <label key={feature} className="flex items-center gap-2 group cursor-pointer">
+                                        {dynamicFeatures.map(feature => (
+                                            <label key={feature._id} className="flex items-center gap-2 group cursor-pointer">
                                                 <div className="relative flex items-center">
                                                     <input 
                                                         type="checkbox" 
-                                                        checked={form.features.includes(feature)}
+                                                        checked={form.features.includes(feature.name)}
                                                         onChange={(e) => {
                                                             const newFeatures = e.target.checked 
-                                                                ? [...form.features, feature]
-                                                                : form.features.filter(f => f !== feature);
+                                                                ? [...form.features, feature.name]
+                                                                : form.features.filter(f => f !== feature.name);
                                                             setForm({ ...form, features: newFeatures });
                                                         }}
                                                         className="peer sr-only"
@@ -431,22 +447,28 @@ export default function RoomManagement() {
                                                         <CheckCircle className="w-full h-full text-white scale-0 transition-transform peer-checked:scale-75" />
                                                     </div>
                                                 </div>
-                                                <span className="text-sm text-navy-700 font-medium group-hover:text-navy-900 transition-colors">{feature}</span>
+                                                <span className="text-sm text-navy-700 font-medium group-hover:text-navy-900 transition-colors">{feature.name}</span>
                                             </label>
                                         ))}
                                     </div>
                                     <div className="mt-3">
-                                        <label className="block text-[10px] font-bold text-navy-400 uppercase mb-1 ml-1">Custom Features (comma separated)</label>
-                                        <input 
-                                            value={form.features.filter(f => !COMMON_FEATURES.includes(f)).join(', ')} 
-                                            onChange={e => {
-                                                const common = form.features.filter(f => COMMON_FEATURES.includes(f));
-                                                const custom = e.target.value.split(',').map(f => f.trim()).filter(Boolean);
-                                                setForm({ ...form, features: [...new Set([...common, ...custom])] });
-                                            }} 
-                                            placeholder="e.g. Personal Butler, Private Pool..." 
-                                            className="w-full px-4 py-2 border border-navy-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-500" 
-                                        />
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase mb-1 ml-1">Add New Feature to Database</label>
+                                        <div className="flex gap-2">
+                                            <input 
+                                                value={newFeatureName} 
+                                                onChange={e => setNewFeatureName(e.target.value)} 
+                                                placeholder="e.g. Jacuzzi, Smart TV..." 
+                                                className="flex-1 px-4 py-2 border border-navy-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-500" 
+                                            />
+                                            <button 
+                                                type="button" 
+                                                onClick={handleAddFeature}
+                                                disabled={creatingFeature || !newFeatureName.trim()}
+                                                className="px-4 py-2 bg-teal-600 text-white rounded-xl text-xs font-bold hover:bg-teal-700 transition-colors disabled:opacity-50"
+                                            >
+                                                {creatingFeature ? 'Adding...' : 'Add Feature'}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
