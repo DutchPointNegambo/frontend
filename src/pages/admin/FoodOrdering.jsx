@@ -13,7 +13,7 @@ const FoodOrdering = () => {
         name: '', 
         category: 'Signature Dishes & Global Cuisine', 
         productionPrice: '',
-        price: '', // Regular Price
+        price: '', // Register Price
         discount: '',
         sellingPrice: '',
         status: 'Available', 
@@ -232,9 +232,8 @@ const FoodOrdering = () => {
                                 </div>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                     <div>
-                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Prod. Price</label>
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Prod. Price (Optional)</label>
                                         <input
-                                            required
                                             type="number"
                                             step="0.01"
                                             value={newItem.productionPrice}
@@ -243,7 +242,7 @@ const FoodOrdering = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Reg. Price</label>
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Register Price</label>
                                         <input
                                             required
                                             type="number"
@@ -264,7 +263,7 @@ const FoodOrdering = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Selling Price</label>
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Final Price</label>
                                         <input
                                             readOnly
                                             type="number"
