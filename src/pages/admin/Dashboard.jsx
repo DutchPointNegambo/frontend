@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import StatCard from '../../components/admin_components/StatCard';
 import {
     ClipboardList,
-    DollarSign,
+    Banknote,
     Users,
     BedDouble,
     Clock,
@@ -83,7 +83,7 @@ const Dashboard = () => {
         {
             title: 'Total Revenue',
             value: stats ? `Rs. ${Number(stats.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Rs. 0.00',
-            icon: DollarSign,
+            icon: Banknote,
             color: 'from-amber-500 to-amber-600',
             link: '/admin/reports',
         },
@@ -180,7 +180,7 @@ const Dashboard = () => {
                                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${chartMode === 'revenue' ? 'bg-white text-teal-600 shadow-sm' : 'text-navy-400 hover:text-navy-600'}`}
                             >
                                 <span className="flex items-center gap-1.5">
-                                    <DollarSign size={13} /> Revenue
+                                    <span className="text-[10px] font-bold">Rs.</span> Revenue
                                 </span>
                             </button>
                             <button

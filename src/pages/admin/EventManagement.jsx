@@ -198,7 +198,7 @@ export default function EventManagement() {
                                             <td className="px-5 py-4 capitalize text-sm text-navy-700">{b.eventType}</td>
                                             <td className="px-5 py-4">
                                                 <p className="text-sm text-navy-600">{formatDate(b.eventDate)}</p>
-                                                <p className="text-xs text-navy-400 capitalize">{b.timeSlot === 'day' ? '☀️ Day' : '🌙 Night'}</p>
+                                                <p className="text-xs text-navy-400 capitalize">{b.timeSlot === 'day' ? 'Day' : 'Night'}</p>
                                             </td>
                                             <td className="px-5 py-4 text-sm text-navy-600">{b.guests}</td>
                                             <td className="px-5 py-4 text-right font-bold text-navy-900 font-mono text-sm">{formatCurrency(b.totalAmount)}</td>
@@ -220,12 +220,11 @@ export default function EventManagement() {
                                                     </button>
                                                     {cfg.next.map(ns => (
                                                         <button key={ns} onClick={() => handleStatusChange(b._id, ns)} disabled={isUpdating}
-                                                            className={`px-2.5 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors disabled:opacity-50 ${
-                                                                ns === 'confirmed' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' :
-                                                                ns === 'completed' ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' :
-                                                                ns === 'pending' ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' :
-                                                                'bg-red-50 text-red-600 hover:bg-red-100'
-                                                            }`}>
+                                                            className={`px-2.5 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors disabled:opacity-50 ${ns === 'confirmed' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' :
+                                                                    ns === 'completed' ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' :
+                                                                        ns === 'pending' ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' :
+                                                                            'bg-red-50 text-red-600 hover:bg-red-100'
+                                                                }`}>
                                                             {ns}
                                                         </button>
                                                     ))}
@@ -327,12 +326,11 @@ export default function EventManagement() {
                                     <div className="flex gap-2 flex-wrap">
                                         {STATUS_FLOW[selectedBooking.status].next.map(ns => (
                                             <button key={ns} onClick={() => handleStatusChange(selectedBooking._id, ns)} disabled={updatingId === selectedBooking._id}
-                                                className={`flex-1 py-2 rounded-xl text-sm font-medium capitalize transition-colors disabled:opacity-50 ${
-                                                    ns === 'confirmed' ? 'bg-blue-600 text-white hover:bg-blue-700' :
-                                                    ns === 'completed' ? 'bg-emerald-600 text-white hover:bg-emerald-700' :
-                                                    ns === 'pending' ? 'bg-amber-500 text-white hover:bg-amber-600' :
-                                                    'bg-red-500 text-white hover:bg-red-600'
-                                                }`}>
+                                                className={`flex-1 py-2 rounded-xl text-sm font-medium capitalize transition-colors disabled:opacity-50 ${ns === 'confirmed' ? 'bg-blue-600 text-white hover:bg-blue-700' :
+                                                        ns === 'completed' ? 'bg-emerald-600 text-white hover:bg-emerald-700' :
+                                                            ns === 'pending' ? 'bg-amber-500 text-white hover:bg-amber-600' :
+                                                                'bg-red-500 text-white hover:bg-red-600'
+                                                    }`}>
                                                 Mark as {ns}
                                             </button>
                                         ))}
