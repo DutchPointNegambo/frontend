@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { fetchRoomsByCategory, checkRoomAvailability } from '../utils/api'
+import { fetchRoomsByCategory, checkRoomAvailability, fetchActiveOffers } from '../utils/api'
 import Footer from '../components/Footer'
 import BookingModal from '../components/BookingModal'
 
@@ -13,11 +13,7 @@ const FALLBACK_IMAGES = [
     'https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325411/unnamed_7_zt9tzo.webp'
 ]
 
-const isAugustOffer = (dateStr) => {
-    if (!dateStr) return false;
-    const date = new Date(dateStr);
-    return date.getMonth() === 7; // chec 7
-};
+
 
 const getGalleryImages = (room) => {
     const base = room.images?.length ? room.images : []
@@ -109,14 +105,31 @@ const DeluxeRooms = () => {
         setError(null)
         setSelectedRoom(null)
         setAvailability(null)
-        fetchRoomsByCategory('deluxe', selectedPackage, checkIn, checkOut)
-            .then(data => {
+        
+        Promise.all([
+            fetchRoomsByCategory('deluxe', selectedPackage, checkIn, checkOut),
+            fetchActiveOffers().catch(() => []) // fail gracefully if offers can't be fetched
+        ])
+            .then(([data, activeOffers]) => {
                 const normalized = data.map(room => {
                     const roomObj = normalizeRoom(room);
-                    if (isAugustOffer(checkIn)) {
-                        roomObj.originalPrice = roomObj.price;
-                        roomObj.price = 15000;
-                        roomObj.hasOffer = true;
+                    
+                    // Check if there's an applicable offer for this room type and checkIn date
+                    if (checkIn && activeOffers.length > 0) {
+                        const checkInDate = new Date(checkIn);
+                        const applicableOffer = activeOffers.find(offer => {
+                            const start = new Date(offer.startDate);
+                            const end = new Date(offer.endDate);
+                            return offer.applicableRoomTypes.includes('deluxe') &&
+                                   checkInDate >= start && checkInDate <= end;
+                        });
+
+                        if (applicableOffer) {
+                            roomObj.originalPrice = roomObj.price;
+                            roomObj.price = roomObj.price - (roomObj.price * (applicableOffer.discountPercentage / 100));
+                            roomObj.hasOffer = true;
+                            roomObj.offerTitle = `${applicableOffer.discountPercentage}% OFF - ${applicableOffer.title.toUpperCase()}`;
+                        }
                     }
                     return roomObj;
                 });
@@ -463,7 +476,7 @@ const DeluxeRooms = () => {
                                                     <div className="flex flex-col">
                                                         <span className="text-xs text-navy-400 line-through">{formatPrice(room.originalPrice)}</span>
                                                         <span className="text-xl sm:text-2xl font-extrabold text-blue-600 italic">{formatPrice(room.price)}/-</span>
-                                                        <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">25% OFF - AUGUST SPECIAL</span>
+                                                        <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">{room.offerTitle}</span>
                                                     </div>
                                                 )}
                                                 {!room.hasOffer && (
@@ -527,7 +540,7 @@ const DeluxeRooms = () => {
                                                     <div className="flex flex-col">
                                                         <span className="text-xs text-navy-400 line-through">{formatPrice(selectedRoom.originalPrice)}</span>
                                                         <span className="text-2xl sm:text-3xl font-extrabold text-blue-600 italic">{formatPrice(selectedRoom.price)}/-</span>
-                                                        <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">25% OFF AUGUST OFFER</span>
+                                                        <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">{selectedRoom.offerTitle}</span>
                                                     </div>
                                                 ) : (
                                                     <span className="text-2xl sm:text-3xl font-extrabold text-navy-900 italic">{formatPrice(selectedRoom.price)}/-</span>

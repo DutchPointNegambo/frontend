@@ -699,3 +699,40 @@ export async function fetchAllStockLogs() {
     });
     return handleResponse(res);
 }
+
+// Offers
+export async function fetchOffers() {
+    const res = await fetch(`${API_URL}/offers`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function fetchActiveOffers() {
+    const res = await fetch(`${API_URL}/offers/active`);
+    return handleResponse(res);
+}
+
+export async function createOffer(payload) {
+    const res = await fetch(`${API_URL}/offers`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function updateOffer(id, payload) {
+    const res = await fetch(`${API_URL}/offers/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+}
+
+export async function deleteOffer(id) {
+    const res = await fetch(`${API_URL}/offers/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+    });
+    return handleResponse(res);
+}

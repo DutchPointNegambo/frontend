@@ -104,20 +104,9 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
 
     const nights = selectedPackage === 'day-use' ? 1 : calcNights();
     
-    // August Offe
-    // August Offer Calculation
-    const isAugust = checkIn && new Date(checkIn).getMonth() === 7;
-    const isDeluxe = room.type === 'deluxe';
-    
     let currentUnitPrice = room.price;
     let basePriceForDisplay = room.originalPrice || room.price;
-    let hasOffer = false;
-    
-    if (isAugust && isDeluxe) {
-        basePriceForDisplay = 15000;
-        currentUnitPrice = basePriceForDisplay * 0.75; // 25% OFF
-        hasOffer = true;
-    }
+    let hasOffer = room.hasOffer || false;
 
     const subtotal = basePriceForDisplay * nights;
     const total = currentUnitPrice * nights;
@@ -331,14 +320,14 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                 <div className="flex items-center justify-between pt-2">
                                     <div className="flex flex-col">
                                         <span className="text-navy-900 font-bold text-lg italic">Total Amount to Pay</span>
-                                        {/* {hasOffer && (
+                                        {hasOffer && (
                                             <div className="flex flex-col">
-                                                <span className="text-[10px] text-red-500 font-bold uppercase tracking-wider animate-pulse">August Special Offer Applied</span>
+                                                <span className="text-[10px] text-red-500 font-bold uppercase tracking-wider animate-pulse">{room.offerTitle || 'Special Offer Applied'}</span>
                                                 <span className="text-[10px] text-navy-400 font-medium italic">
                                                     {formatPrice(subtotal/nights)} - {formatPrice(discountAmount/nights)} = {formatPrice(total/nights)} per night
                                                 </span>
                                             </div>
-                                        )} */}
+                                        )}
                                     </div>
                                     <div className="text-right flex flex-col">
                                         {hasOffer && (
