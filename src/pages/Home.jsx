@@ -134,118 +134,67 @@ const Home = () => {
     <div className="w-full">
 
 
-      {/* ===== HERO SECTION: VISION 1 - EDITORIAL BOUTIQUE ===== */}
-      <section className="relative min-h-[90vh] lg:min-h-screen flex items-center bg-white overflow-hidden pt-36 md:pt-48 lg:pt-20 pb-20 lg:pb-0">
+      {/* ===== HERO SECTION: BIG PICTURE ===== */}
+      <section className="relative min-h-[90vh] lg:min-h-screen flex items-center justify-center overflow-hidden">
 
-        {/* Background Accent Gradients */}
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-sand-50/50 -z-0 hidden lg:block"></div>
-        <div className="absolute top-0 left-0 w-64 h-64 bg-teal-500/5 rounded-full -ml-32 -mt-32 blur-3xl"></div>
+        {/* Full Background Image */}
+        <div className="absolute inset-0 z-0 bg-navy-950">
+          <img
+            src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325414/615939793_122116670343131125_2666782521558393514_n_pjxfqw.jpg"
+            alt="Dutch Point Resort"
+            className="w-full h-full object-cover opacity-80"
+          />
+          {/* Gradient Overlay for Text Readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-navy-950/60 via-navy-950/40 to-navy-950/90 mix-blend-multiply"></div>
+        </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 text-center pt-20">
+          <Reveal width="100%">
+            <div className="flex flex-col items-center justify-center mb-6">
+              <span className="text-sand-400 text-sm font-bold tracking-[0.4em] uppercase mb-4 drop-shadow-lg">
+                Boutique Luxury
+              </span>
+              <div className="w-16 h-[1px] bg-sand-400/70"></div>
+            </div>
 
-            {/* Left Column: Typography & Story */}
-            <div className="text-left order-2 lg:order-1">
-              <Reveal>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-[1px] bg-sand-500"></div>
-                  <span className="text-sand-600 text-xs font-bold tracking-[0.4em] uppercase">
-                    Boutique Luxury
-                  </span>
-                </div>
+            <h1 className="text-5xl md:text-7xl lg:text-[6.5rem] font-bold text-white mb-6 leading-[1.1] font-serif drop-shadow-2xl" style={{ fontFamily: 'var(--font-serif)' }}>
+              Dutch Point <br />
+              <span className="text-sand-300 italic block mt-2 font-light">Negombo</span>
+            </h1>
 
-                <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold text-navy-950 mb-8 leading-[1.1] font-serif" style={{ fontFamily: 'var(--font-serif)' }}>
-                  Dutch Point <br />
-                  <span className="text-sand-500 italic block mt-2">Negombo</span>
-                </h1>
+            <p className="text-lg md:text-xl text-white/90 mb-10 font-light leading-relaxed max-w-2xl mx-auto drop-shadow-md">
+              Where the golden shores of Sri Lanka meet the pinnacle of coastal elegance. Experience a sanctuary designed for the discerning traveler.
+            </p>
 
-                <p className="text-lg md:text-xl text-navy-600 mb-10 font-light leading-relaxed max-w-lg">
-                  Where the golden shores of Sri Lanka meet the pinnacle of coastal elegance. Experience a sanctuary designed for the discerning traveler.
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
+              <button
+                onClick={handleBookNow}
+                className="px-10 py-5 bg-sand-500 text-white font-bold rounded-full hover:bg-sand-400 transition-all duration-300 uppercase tracking-widest text-xs shadow-xl shadow-black/30 transform hover:-translate-y-1"
+              >
+                Experience Luxury
+              </button>
+
+            </div>
+
+            {/* Micro Highlights */}
+            {/* <div className="flex items-center justify-center gap-12 pt-8 border-t border-white/20 max-w-lg mx-auto backdrop-blur-sm rounded-3xl pb-2">
+              <div className="text-center">
+                <p className="text-3xl font-bold text-white mb-1 drop-shadow-md flex items-center justify-center gap-2">
+                  {placeData.rating} <span className="text-sand-400 text-xl">★</span>
                 </p>
-
-                <div className="flex flex-wrap items-center gap-6 mb-12">
-                  <button
-                    onClick={handleBookNow}
-                    className="px-10 py-5 bg-navy-950 text-white font-bold rounded-full hover:bg-navy-900 transition-all duration-300 uppercase tracking-widest text-xs shadow-xl shadow-navy-950/20 transform hover:-translate-y-1"
-                  >
-                    Experience Luxury
-                  </button>
-                  <div className="flex items-center gap-2 px-6 py-2 border border-navy-100 rounded-full text-navy-400">
-                    <span className="text-teal-500">🏖️</span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Beachfront Paradise</span>
-                  </div>
-                </div>
-
-                {/* Micro Highlights */}
-                <div className="grid grid-cols-2 gap-8 border-t border-navy-50 pt-8">
-                  <div>
-                    <p className="text-2xl font-bold text-navy-950 mb-1">{placeData.rating} <span className="text-teal-500 text-sm">★</span></p>
-                    <p className="text-[10px] text-navy-400 font-bold uppercase tracking-[0.2em]">Guest Rating</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-navy-950 mb-1">Direct</p>
-                    <p className="text-[10px] text-navy-400 font-bold uppercase tracking-[0.2em]">Beach Access</p>
-                  </div>
-                </div>
-              </Reveal>
-            </div>
-
-            {/* Right Column: Visual Composition */}
-            <div className="relative order-1 lg:order-2 mb-12 lg:mb-0">
-              <Reveal delay={0.3} width="100%">
-                <div className="relative">
-
-                  {/* Backdrop Decorative Card */}
-                  <div className="absolute -inset-4 lg:-inset-8 border-2 border-sand-100 rounded-[3rem] lg:rounded-[5rem] -z-10 transform rotate-3"></div>
-
-                  {/* Main Image Masked */}
-                  <div className="relative h-[450px] md:h-[600px] w-full rounded-[2.5rem] lg:rounded-[4.5rem] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)]">
-                    <img
-                      src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325414/615939793_122116670343131125_2666782521558393514_n_pjxfqw.jpg"
-                      alt="Dutch Point Resort"
-                      className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-[2000ms]"
-                    />
-                    <div className="absolute inset-0 bg-navy-950/10 mix-blend-overlay"></div>
-                  </div>
-
-                  {/* Floating Detail Image */}
-                  <div className="absolute -bottom-10 lg:-bottom-16 -left-10 lg:-left-20 w-40 h-56 lg:w-56 lg:h-72 rounded-3xl lg:rounded-[2.5rem] overflow-hidden shadow-2xl border-4 lg:border-8 border-white hidden sm:block transform -rotate-6 hover:rotate-0 transition-transform duration-700">
-                    <img
-                      src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325413/unnamed_6_lun1kc.webp"
-                      alt="Detail"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  {/* Floating Circular Badge */}
-                  <div className="absolute -top-6 -right-6 lg:-top-10 lg:-right-10 w-24 h-24 lg:w-32 lg:h-32 bg-white rounded-full flex items-center justify-center p-2 shadow-2xl border border-navy-50 animate-float">
-                    <div className="w-full h-full rounded-full border-2 border-dashed border-sand-200 flex items-center justify-center text-center p-2">
-                      <span className="text-[8px] lg:text-[10px] font-bold text-navy-900 uppercase tracking-widest">Negombo's Finest</span>
-                    </div>
-                  </div>
-
-                  {/* Secondary Context Image Tip */}
-                  <div className="absolute bottom-10 -right-12 w-32 h-32 lg:w-44 lg:h-44 rounded-full overflow-hidden shadow-2xl border-4 border-white hidden xl:block">
-                    <img
-                      src="https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325414/unnamed_avhkpc.webp"
-                      alt="Lobby Experience"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </Reveal>
-            </div>
-
-          </div>
+                <p className="text-[10px] text-white/70 font-bold uppercase tracking-[0.2em]">Guest Rating</p>
+              </div>
+              <div className="w-[1px] h-12 bg-white/20"></div>
+              <div className="text-center">
+                <p className="text-3xl font-bold text-white mb-1 drop-shadow-md">Direct</p>
+                <p className="text-[10px] text-white/70 font-bold uppercase tracking-[0.2em]">Beach Access</p>
+              </div>
+            </div> */}
+          </Reveal>
         </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-10 left-8 hidden lg:block">
-          <div className="flex flex-col items-center gap-12 w-6">
-            <span className="text-navy-300 text-[10px] font-bold uppercase tracking-[0.4em] rotate-90 whitespace-nowrap mb-8">Scroll Perspective</span>
-            <div className="w-[1px] h-24 bg-gradient-to-b from-navy-100 to-transparent"></div>
-          </div>
-        </div>
+
+
       </section>
 
       <section className="py-24 bg-white relative">

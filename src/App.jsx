@@ -19,6 +19,7 @@ import AddRoomForm from './components/admin_components/AddRoomForm'
 import useIdleTimeout from './hooks/useIdleTimeout'
 import Navbar from './components/Navbar'
 import ScrollToTop from './components/ScrollToTop'
+import FloatingWhatsApp from './components/FloatingWhatsApp'
 
 
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
@@ -46,6 +47,7 @@ function App() {
     <>
       <ScrollToTop />
       {shouldShowNavbar && <Navbar />}
+      {shouldShowNavbar && <FloatingWhatsApp />}
       <main className={mainPadding}>
       <Suspense fallback={<div className="h-screen flex items-center justify-center text-navy-500 font-bold">Loading...</div>}>
         <Routes>

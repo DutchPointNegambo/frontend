@@ -386,7 +386,7 @@ const LuxuryRooms = () => {
                                                 ))}
                                             </div>
                                             <div className="flex gap-4 text-sm text-navy-500">
-                                                <span className="flex items-center gap-1">{room.capacity}</span>
+                                                <span className="flex items-center gap-1">Capacity: {room.capacity}</span>
 
                                             </div>
                                         </div>

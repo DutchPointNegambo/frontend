@@ -19,7 +19,7 @@ const Navbar = () => {
   const roomCategories = [
     { name: 'Deluxe Rooms', path: '/deluxeRooms' },
     { name: 'Semi-Luxury Rooms', path: '/semiLuxuryRooms' },
-    { name: 'Luxury Rooms', path: '/luxuryRooms' },
+    { name: 'Luxury Suits', path: '/luxuryRooms' },
     { name: 'Day Outing', path: '/DayOutingRooms' },
   ]
 
@@ -42,13 +42,13 @@ const Navbar = () => {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signin'
   const isHomePage = location.pathname === '/' || location.pathname === '/home'
 
-  const shouldShowSolidNavbar = isAuthPage || !isHomePage || isScrolled
+  const shouldShowSolidNavbar = true
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${shouldShowSolidNavbar
-        ? 'bg-white shadow-xl border-b border-navy-100/50 py-1'
-        : 'bg-transparent py-2'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 bg-white ${isScrolled
+        ? 'shadow-xl py-1 border-b border-navy-100/50'
+        : 'shadow-sm py-4 border-b border-transparent'
         }`}
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
@@ -62,16 +62,16 @@ const Navbar = () => {
                 to={item.path}
                 className={`group relative px-2 py-1 text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-all duration-300 ${shouldShowSolidNavbar
                   ? isActive(item.path)
-                    ? 'text-navy-950'
-                    : 'text-navy-700 hover:text-navy-950'
+                    ? 'text-black'
+                    : 'text-navy-700 hover:text-black'
                   : isActive(item.path)
-                    ? (isHomePage ? 'text-navy-950' : 'text-white')
-                    : (isHomePage ? 'text-navy-700 hover:text-navy-950' : 'text-white/80 hover:text-white')
+                    ? (isHomePage ? 'text-black' : 'text-white')
+                    : (isHomePage ? 'text-navy-700 hover:text-black' : 'text-white/80 hover:text-white')
                   }`}
               >
                 {item.name}
                 <span
-                  className={`absolute bottom-0 left-0 w-full h-0.5 transition-all duration-300 transform origin-left ${shouldShowSolidNavbar ? 'bg-navy-950' : 'bg-teal-400'
+                  className={`absolute bottom-0 left-0 w-full h-0.5 transition-all duration-300 transform origin-left ${shouldShowSolidNavbar ? 'bg-black' : 'bg-teal-400'
                     } ${isActive(item.path) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}
                 />
               </Link>
@@ -86,14 +86,14 @@ const Navbar = () => {
               <button
                 className={`flex items-center space-x-1 px-2 py-1 text-xs font-bold uppercase tracking-widest transition-all duration-300 ${shouldShowSolidNavbar
                   ? roomCategories.some(cat => isActive(cat.path))
-                    ? 'text-navy-950'
-                    : 'text-navy-700 hover:text-navy-950'
+                    ? 'text-black'
+                    : 'text-navy-700 hover:text-black'
                   : roomCategories.some(cat => isActive(cat.path))
-                    ? (isHomePage ? 'text-navy-950' : 'text-white')
-                    : (isHomePage ? 'text-navy-700 hover:text-navy-950' : 'text-white/80 hover:text-white')
+                    ? (isHomePage ? 'text-black' : 'text-white')
+                    : (isHomePage ? 'text-navy-700 hover:text-black' : 'text-white/80 hover:text-white')
                   }`}
               >
-                <span>Rooms</span>
+                <span>Accommodation</span>
                 <svg
                   className={`w-3 h-3 transition-transform duration-300 ${isRoomsDropdownOpen ? 'rotate-180' : ''}`}
                   fill="none"
@@ -103,7 +103,7 @@ const Navbar = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
                 </svg>
                 <span
-                  className={`absolute bottom-0 left-0 w-full h-0.5 transition-all duration-300 transform origin-left ${shouldShowSolidNavbar ? 'bg-navy-950' : 'bg-teal-400'
+                  className={`absolute bottom-0 left-0 w-full h-0.5 transition-all duration-300 transform origin-left ${shouldShowSolidNavbar ? 'bg-black' : 'bg-teal-400'
                     } ${roomCategories.some(cat => isActive(cat.path)) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}
                 />
               </button>
@@ -115,7 +115,7 @@ const Navbar = () => {
                   : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
                   }`}
               >
-                <div className={`rounded-xl overflow-hidden shadow-2xl ${shouldShowSolidNavbar ? 'bg-white' : 'bg-navy-950/90 backdrop-blur-md border border-white/10'
+                <div className={`rounded-xl overflow-hidden shadow-2xl ${shouldShowSolidNavbar ? 'bg-white' : 'bg-black/90 backdrop-blur-md border border-white/10'
                   }`}>
                   <div className="py-2">
                     {roomCategories.map((category) => (
@@ -125,7 +125,7 @@ const Navbar = () => {
                         className={`block px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-center transition-all duration-300 ${shouldShowSolidNavbar
                           ? isActive(category.path)
                             ? 'bg-teal-50 text-teal-600'
-                            : 'text-navy-700 hover:bg-navy-50 hover:text-navy-950'
+                            : 'text-navy-700 hover:bg-navy-50 hover:text-black'
                           : isActive(category.path)
                             ? 'bg-teal-400/20 text-teal-400'
                             : 'text-white/80 hover:bg-white/10 hover:text-white'
@@ -163,16 +163,16 @@ const Navbar = () => {
                 to={item.path}
                 className={`group relative px-2 py-1 text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-all duration-300 ${shouldShowSolidNavbar
                   ? isActive(item.path)
-                    ? 'text-navy-950'
-                    : 'text-navy-700 hover:text-navy-950'
+                    ? 'text-black'
+                    : 'text-navy-700 hover:text-black'
                   : isActive(item.path)
-                    ? (isHomePage ? 'text-navy-950' : 'text-white')
-                    : (isHomePage ? 'text-navy-700 hover:text-navy-950' : 'text-white/80 hover:text-white')
+                    ? (isHomePage ? 'text-black' : 'text-white')
+                    : (isHomePage ? 'text-navy-700 hover:text-black' : 'text-white/80 hover:text-white')
                   }`}
               >
                 {item.name}
                 <span
-                  className={`absolute bottom-0 left-0 w-full h-0.5 transition-all duration-300 transform origin-left ${shouldShowSolidNavbar ? 'bg-navy-950' : 'bg-teal-400'
+                  className={`absolute bottom-0 left-0 w-full h-0.5 transition-all duration-300 transform origin-left ${shouldShowSolidNavbar ? 'bg-black' : 'bg-teal-400'
                     } ${isActive(item.path) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}
                 />
               </Link>
@@ -188,7 +188,7 @@ const Navbar = () => {
                       title="Admin Dashboard"
                       className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 border-2 ${shouldShowSolidNavbar
                         ? 'border-teal-600 bg-teal-600 text-white hover:bg-teal-700 shadow-lg shadow-teal-500/20'
-                        : 'border-teal-400 bg-teal-400/20 text-teal-400 hover:bg-teal-400 hover:text-navy-950'
+                        : 'border-teal-400 bg-teal-400/20 text-teal-400 hover:bg-teal-400 hover:text-black'
                         }`}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -199,9 +199,9 @@ const Navbar = () => {
                   <Link
                     to="/profile"
                     className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 border-2 whitespace-nowrap ${shouldShowSolidNavbar
-                      ? 'border-navy-950 text-navy-950 hover:bg-navy-950 hover:text-white'
+                      ? 'border-black text-black hover:bg-black hover:text-white'
                       : isHomePage
-                        ? 'border-navy-950/30 text-navy-950 hover:bg-navy-950 hover:text-white hover:border-navy-950'
+                        ? 'border-black/30 text-black hover:bg-black hover:text-white hover:border-black'
                         : 'border-white/30 text-white hover:bg-white/10 hover:border-white'
                       }`}
                   >
@@ -222,9 +222,9 @@ const Navbar = () => {
                   <Link
                     to="/signin"
                     className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 border-2 whitespace-nowrap ${shouldShowSolidNavbar
-                      ? 'border-navy-950 text-navy-950 hover:bg-navy-950 hover:text-white'
+                      ? 'border-black text-black hover:bg-black hover:text-white'
                       : isHomePage
-                        ? 'border-navy-950/30 text-navy-950 hover:bg-navy-950 hover:text-white hover:border-navy-950'
+                        ? 'border-black/30 text-black hover:bg-black hover:text-white hover:border-black'
                         : 'border-white/30 text-white hover:bg-white/10 hover:border-white'
                       }`}
                   >
@@ -233,10 +233,10 @@ const Navbar = () => {
                   <Link
                     to="/login"
                     className={`px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap ${shouldShowSolidNavbar
-                      ? 'bg-navy-950 text-white hover:bg-navy-900 shadow-navy-900/20'
+                      ? 'bg-black text-white hover:bg-navy-900 shadow-navy-900/20'
                       : isHomePage
-                        ? 'bg-navy-950 text-white hover:bg-navy-900 shadow-navy-900/20'
-                        : 'bg-white text-navy-950 hover:bg-teal-50 shadow-white/10'
+                        ? 'bg-black text-white hover:bg-navy-900 shadow-navy-900/20'
+                        : 'bg-white text-black hover:bg-teal-50 shadow-white/10'
                       }`}
                   >
                     Log In
@@ -251,14 +251,14 @@ const Navbar = () => {
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={`p-2 rounded-xl transition-all duration-300 ${shouldShowSolidNavbar
-                ? 'text-navy-950 hover:bg-navy-50'
-                : (isHomePage ? 'text-navy-950 hover:bg-navy-50' : 'text-white hover:bg-white/10')
+                ? 'text-black hover:bg-navy-50'
+                : (isHomePage ? 'text-black hover:bg-navy-50' : 'text-white hover:bg-white/10')
                 }`}
             >
               <div className="w-6 h-5 relative flex flex-col justify-between">
-                <span className={`w-full h-0.5 rounded-full transition-all duration-300 ${shouldShowSolidNavbar || isHomePage ? 'bg-navy-950' : 'bg-white'} ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
-                <span className={`w-full h-0.5 rounded-full transition-all duration-300 ${shouldShowSolidNavbar || isHomePage ? 'bg-navy-950' : 'bg-white'} ${isOpen ? 'opacity-0' : ''}`} />
-                <span className={`w-full h-0.5 rounded-full transition-all duration-300 ${shouldShowSolidNavbar || isHomePage ? 'bg-navy-950' : 'bg-white'} ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+                <span className={`w-full h-0.5 rounded-full transition-all duration-300 ${shouldShowSolidNavbar || isHomePage ? 'bg-black' : 'bg-white'} ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
+                <span className={`w-full h-0.5 rounded-full transition-all duration-300 ${shouldShowSolidNavbar || isHomePage ? 'bg-black' : 'bg-white'} ${isOpen ? 'opacity-0' : ''}`} />
+                <span className={`w-full h-0.5 rounded-full transition-all duration-300 ${shouldShowSolidNavbar || isHomePage ? 'bg-black' : 'bg-white'} ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
               </div>
             </button>
           </div>
@@ -272,7 +272,7 @@ const Navbar = () => {
       >
         {/* Backdrop */}
         <div
-          className={`absolute inset-0 bg-navy-950/60 backdrop-blur-sm transition-opacity duration-500 ${isOpen ? 'opacity-100' : 'opacity-0'
+          className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-500 ${isOpen ? 'opacity-100' : 'opacity-0'
             }`}
           onClick={() => setIsOpen(false)}
         />
@@ -290,7 +290,7 @@ const Navbar = () => {
             />
             <button
               onClick={() => setIsOpen(false)}
-              className="p-2 text-navy-400 hover:text-navy-950 transition-colors"
+              className="p-2 text-navy-400 hover:text-black transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -304,8 +304,8 @@ const Navbar = () => {
                 key={item.name}
                 to={item.path}
                 className={`block px-4 py-4 text-sm font-bold uppercase tracking-widest rounded-xl transition-all duration-300 ${isActive(item.path)
-                  ? 'bg-navy-50 text-navy-950'
-                  : 'text-navy-600 hover:bg-navy-50 hover:text-navy-950'
+                  ? 'bg-navy-50 text-black'
+                  : 'text-navy-600 hover:bg-navy-50 hover:text-black'
                   }`}
                 onClick={() => setIsOpen(false)}
               >
@@ -318,8 +318,8 @@ const Navbar = () => {
               <button
                 onClick={() => setIsRoomsDropdownOpen(!isRoomsDropdownOpen)}
                 className={`w-full flex justify-between items-center px-4 py-4 text-sm font-bold uppercase tracking-widest rounded-xl transition-all duration-300 ${roomCategories.some(cat => isActive(cat.path))
-                  ? 'bg-navy-50 text-navy-950'
-                  : 'text-navy-600 hover:bg-navy-50 hover:text-navy-950'
+                  ? 'bg-navy-50 text-black'
+                  : 'text-navy-600 hover:bg-navy-50 hover:text-black'
                   }`}
               >
                 <span>Rooms</span>
@@ -344,7 +344,7 @@ const Navbar = () => {
                       to={category.path}
                       className={`block px-4 py-3 text-xs font-bold uppercase tracking-widest rounded-lg transition-all duration-300 ${isActive(category.path)
                         ? 'bg-teal-50 text-teal-600'
-                        : 'text-navy-500 hover:bg-navy-50 hover:text-navy-950'
+                        : 'text-navy-500 hover:bg-navy-50 hover:text-black'
                         }`}
                       onClick={() => {
                         setIsOpen(false)
@@ -363,8 +363,8 @@ const Navbar = () => {
                 key={item.name}
                 to={item.path}
                 className={`block px-4 py-4 text-sm font-bold uppercase tracking-widest rounded-xl transition-all duration-300 ${isActive(item.path)
-                  ? 'bg-navy-50 text-navy-950'
-                  : 'text-navy-600 hover:bg-navy-50 hover:text-navy-950'
+                  ? 'bg-navy-50 text-black'
+                  : 'text-navy-600 hover:bg-navy-50 hover:text-black'
                   }`}
                 onClick={() => setIsOpen(false)}
               >
@@ -390,7 +390,7 @@ const Navbar = () => {
                 )}
                 <Link
                   to="/profile"
-                  className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center border-2 border-navy-950 text-navy-950 hover:bg-navy-50 transition-all duration-300"
+                  className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center border-2 border-black text-black hover:bg-navy-50 transition-all duration-300"
                   onClick={() => setIsOpen(false)}
                 >
                   Profile
@@ -409,14 +409,14 @@ const Navbar = () => {
               <>
                 <Link
                   to="/signin"
-                  className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center border-2 border-navy-950 text-navy-950 hover:bg-navy-50 transition-all duration-300"
+                  className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center border-2 border-black text-black hover:bg-navy-50 transition-all duration-300"
                   onClick={() => setIsOpen(false)}
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/login"
-                  className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center bg-navy-950 text-white shadow-lg shadow-navy-900/20 transition-all duration-300"
+                  className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center bg-black text-white shadow-lg shadow-navy-900/20 transition-all duration-300"
                   onClick={() => setIsOpen(false)}
                 >
                   Log In
