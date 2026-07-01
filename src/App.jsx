@@ -127,6 +127,7 @@ function App() {
           <Route path="/receptionist" element={<ReceptionistLayout />}>
             <Route path="dashboard" element={<ReceptionistDashboard />} />
             <Route path="bookings" element={<BookingManagement />} />
+            <Route path="rooms" element={<RoomManagement />} />
             <Route path="scanner" element={<ReceptionistScanner />} />
             <Route path="profile" element={<ReceptionistProfile />} />
           </Route>

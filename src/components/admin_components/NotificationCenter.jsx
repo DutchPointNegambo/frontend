@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Check, X, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead, deleteNotification, deleteReadNotifications } from '../../utils/api';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const NotificationCenter = () => {
+    const { user } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
@@ -167,7 +169,7 @@ const NotificationCenter = () => {
                                                     <div className="flex items-center gap-2">
                                                         {notif.link && (
                                                             <Link
-                                                                to={notif.link}
+                                                                to={user?.role === 'receptionist' && notif.link === '/admin/bookings' ? '/receptionist/bookings' : notif.link}
                                                                 onClick={() => setIsOpen(false)}
                                                                 className="text-[10px] bg-navy-50 text-navy-600 px-2 py-1 rounded-md hover:bg-navy-100 font-medium transition"
                                                             >

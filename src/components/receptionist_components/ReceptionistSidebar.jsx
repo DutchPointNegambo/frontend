@@ -9,6 +9,7 @@ import {
     ChevronRight,
     UserCircle,
     Hotel,
+    BedDouble,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -20,8 +21,8 @@ const ReceptionistSidebar = () => {
     const menuItems = [
         { name: 'Dashboard', icon: LayoutDashboard, path: '/receptionist/dashboard' },
         { name: 'Room Bookings', icon: Hotel, path: '/receptionist/bookings' },
+        { name: 'Room Management', icon: BedDouble, path: '/receptionist/rooms' },
         { name: 'Attendance Scanner', icon: ScanLine, path: '/receptionist/scanner' },
-        { name: 'My Profile', icon: UserCircle, path: '/receptionist/profile' },
     ];
 
     const handleLogout = () => {
