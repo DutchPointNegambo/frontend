@@ -15,7 +15,8 @@ import {
     ScanLine,
     Truck,
     PartyPopper,
-    Package as PackageIcon
+    Package as PackageIcon,
+    Tags
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -36,6 +37,7 @@ const Sidebar = () => {
             items: [
                 { name: 'Rooms', icon: BedDouble, path: '/admin/rooms' },
                 { name: 'Bookings', icon: CalendarCheck, path: '/admin/bookings' },
+                { name: 'Offers', icon: Tags, path: '/admin/offers' },
                 { name: 'Events', icon: PartyPopper, path: '/admin/events' },
                 { name: 'Event Packages', icon: PackageIcon, path: '/admin/package-management' },
             ],

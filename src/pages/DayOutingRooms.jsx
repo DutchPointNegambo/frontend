@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { fetchRoomsByCategory, checkRoomAvailability, fetchPackagesByType } from '../utils/api'
+import { fetchRoomsByCategory, checkRoomAvailability, fetchPackagesByType, fetchActiveOffers } from '../utils/api'
 import Footer from '../components/Footer'
 import BookingModal from '../components/BookingModal'
 
@@ -128,9 +128,31 @@ const DayOutingRooms = () => {
         setError(null)
         setSelectedRoom(null)
         setAvailability(null)
-        fetchRoomsByCategory('couple', null, outingDate, outingDate)
-            .then(data => {
-                const normalized = data.map(normalizeRoom);
+        
+        Promise.all([
+            fetchRoomsByCategory('couple', null, outingDate, outingDate),
+            fetchActiveOffers().catch(() => [])
+        ])
+            .then(([data, activeOffers]) => {
+                const normalized = data.map(room => {
+                    const roomObj = normalizeRoom(room);
+                    if (outingDate && activeOffers.length > 0) {
+                        const outDate = new Date(outingDate);
+                        const applicableOffer = activeOffers.find(offer => {
+                            const start = new Date(offer.startDate);
+                            const end = new Date(offer.endDate);
+                            return (offer.applicableRoomTypes.includes('dayOuting') || offer.applicableRoomTypes.includes('couple')) &&
+                                   outDate >= start && outDate <= end;
+                        });
+                        if (applicableOffer) {
+                            roomObj.originalPrice = roomObj.price;
+                            roomObj.price = roomObj.price - (roomObj.price * (applicableOffer.discountPercentage / 100));
+                            roomObj.hasOffer = true;
+                            roomObj.offerTitle = `${applicableOffer.discountPercentage}% OFF - ${applicableOffer.title.toUpperCase()}`;
+                        }
+                    }
+                    return roomObj;
+                });
                 const filtered = normalized.filter(room => room.guests >= parseInt(guests));
                 setRooms(filtered);
             })
@@ -471,7 +493,18 @@ const DayOutingRooms = () => {
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-wrap items-center justify-between gap-2 mt-4">
-                                                    <div><span className="text-xs text-navy-400 block">Package Price</span><span className="text-xl sm:text-2xl font-extrabold text-navy-900 italic">{formatPrice(room.price)}/-</span></div>
+                                                    <div>
+                                                        {room.hasOffer ? (
+                                                            <div className="flex flex-col">
+                                                                <span className="text-xs text-navy-400 block">Package Price</span>
+                                                                <span className="text-xs text-navy-400 line-through">{formatPrice(room.originalPrice)}</span>
+                                                                <span className="text-xl sm:text-2xl font-extrabold text-teal-600 italic">{formatPrice(room.price)}/-</span>
+                                                                <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">{room.offerTitle}</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div><span className="text-xs text-navy-400 block">Package Price</span><span className="text-xl sm:text-2xl font-extrabold text-navy-900 italic">{formatPrice(room.price)}/-</span></div>
+                                                        )}
+                                                    </div>
                                                     <button
                                                         disabled={room.isAvailable === false || room.status === 'maintenance'}
                                                         className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 ${(room.isAvailable === false || room.status === 'maintenance')
@@ -522,7 +555,15 @@ const DayOutingRooms = () => {
                                                 <div className="flex items-center justify-between">
                                                     <div>
                                                         <span className="text-[10px] text-navy-400 block uppercase tracking-widest">Package Price</span>
-                                                        <span className="text-2xl sm:text-3xl font-extrabold text-navy-900 italic">{formatPrice(selectedRoom.price)}/-</span>
+                                                        {selectedRoom.hasOffer ? (
+                                                            <div className="flex flex-col">
+                                                                <span className="text-xs text-navy-400 line-through">{formatPrice(selectedRoom.originalPrice)}</span>
+                                                                <span className="text-2xl sm:text-3xl font-extrabold text-teal-600 italic">{formatPrice(selectedRoom.price)}/-</span>
+                                                                <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">{selectedRoom.offerTitle}</span>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-2xl sm:text-3xl font-extrabold text-navy-900 italic">{formatPrice(selectedRoom.price)}/-</span>
+                                                        )}
                                                         <span className="text-[10px] text-red-500 font-bold uppercase tracking-wider block mt-1">Non-refundable</span>
                                                     </div>
                                                     <div className="text-right">
