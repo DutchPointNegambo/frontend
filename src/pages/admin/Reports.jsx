@@ -84,7 +84,7 @@ const Reports = () => {
 
     const topStats = [
         { title: 'Total Revenue', value: fmt(summary?.totalRevenue), icon: Banknote, color: 'from-amber-500 to-amber-600' },
-        { title: 'Operating Expenses', value: fmt(summary?.monthlyExpenses), icon: TrendingDown, color: 'from-red-500 to-red-600' },
+        { title: 'Operational Expenses', value: fmt(summary?.operationalExpenses), icon: TrendingDown, color: 'from-red-500 to-red-600' },
         { title: 'Net Profit', value: fmt(summary?.netProfit), icon: TrendingUp, color: 'from-teal-500 to-teal-600' },
         { title: 'Occupancy Rate', value: summary ? `${summary.occupancyRate ?? 0}%` : '—', icon: Calendar, color: 'from-navy-600 to-navy-700' },
     ];
@@ -143,6 +143,33 @@ const Reports = () => {
                     </div>
                 ))}
             </div>
+
+            {/* Revenue Breakdown */}
+            {!loading && summary && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white p-4 rounded-xl border border-navy-100 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p className="text-[10px] font-bold text-navy-400 uppercase">Room Bookings</p>
+                            <p className="text-lg font-bold text-navy-900">{fmt(summary.roomRevenue)}</p>
+                        </div>
+                        <div className="w-2 h-10 bg-teal-500 rounded-full" />
+                    </div>
+                    <div className="bg-white p-4 rounded-xl border border-navy-100 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p className="text-[10px] font-bold text-navy-400 uppercase">Food Orders</p>
+                            <p className="text-lg font-bold text-navy-900">{fmt(summary.foodRevenue)}</p>
+                        </div>
+                        <div className="w-2 h-10 bg-amber-500 rounded-full" />
+                    </div>
+                    <div className="bg-white p-4 rounded-xl border border-navy-100 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p className="text-[10px] font-bold text-navy-400 uppercase">Event Bookings</p>
+                            <p className="text-lg font-bold text-navy-900">{fmt(summary.eventRevenue)}</p>
+                        </div>
+                        <div className="w-2 h-10 bg-indigo-500 rounded-full" />
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 bg-white rounded-xl border border-navy-100 p-6 shadow-sm">
