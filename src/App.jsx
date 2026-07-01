@@ -32,6 +32,7 @@ import AddRoomForm from './components/admin_components/AddRoomForm'
 import useIdleTimeout from './hooks/useIdleTimeout'
 import Navbar from './components/Navbar'
 import ScrollToTop from './components/ScrollToTop'
+import WhatsAppButton from './components/WhatsAppButton'
 
 
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
@@ -73,6 +74,7 @@ function App() {
       <Toaster position="top-center" reverseOrder={false} />
       <ScrollToTop />
       {shouldShowNavbar && <Navbar />}
+      <WhatsAppButton />
       <main className={mainPadding}>
       <Suspense fallback={<div className="h-screen flex items-center justify-center text-navy-500 font-bold">Loading...</div>}>
         <Routes>
