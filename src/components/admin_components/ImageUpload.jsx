@@ -5,39 +5,41 @@ const ImageUpload = ({ onUploadSuccess, currentImage, label }) => {
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState(null);
 
-
-    const CLOUD_NAME = "dztzaoo6r";
-    const UPLOAD_PRESET = "hotel_main";
-
     const handleUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
+
+        console.log('Starting upload for:', file.name, file.size, file.type);
 
         setUploading(true);
         setError(null);
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', UPLOAD_PRESET);
 
         try {
+            // Calling our own backend instead of Cloudinary directly to bypass network blocks
             const response = await fetch(
-                `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+                'http://localhost:5000/api/upload/image',
                 {
                     method: 'POST',
                     body: formData,
+                    // No headers needed for FormData
                 }
             );
 
+            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error('Upload failed. Please check your Cloudinary settings.');
+                console.error('Backend Upload Error Details:', data);
+                throw new Error(data.message || 'Upload failed');
             }
 
-            const data = await response.json();
-            onUploadSuccess(data.secure_url);
+            console.log('Upload successful! URL:', data.url);
+            onUploadSuccess(data.url);
             setUploading(false);
         } catch (err) {
-            console.error('Cloudinary Upload Error:', err);
+            console.error('Final Upload Error:', err);
             setError(err.message);
             setUploading(false);
         }
@@ -50,7 +52,7 @@ const ImageUpload = ({ onUploadSuccess, currentImage, label }) => {
             </label>
             
             <div className="flex items-center gap-4">
-                {currentImage ? (
+                {currentImage && (currentImage.startsWith('http') || currentImage.startsWith('/')) ? (
                     <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-navy-100 shadow-sm group">
                         <img src={currentImage} alt="Preview" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
