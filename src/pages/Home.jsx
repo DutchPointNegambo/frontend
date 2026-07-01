@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Plus, Minus, Tag, Sprout, Sparkles, Waves } 
 import Reveal from '../components/Reveal';
 import Footer from '../components/Footer';
 import QuickBookingBar from "../components/QuickBookingBar";
+import { fetchFoods } from '../utils/api';
 import beach from "../assets/images/beach.jpeg";
 import room4 from "../assets/images/room4.jpeg";
 import beach2 from "../assets/images/beach2.jpeg";
@@ -124,6 +125,23 @@ const Home = () => {
     };
 
     fetchGoogleReviews();
+  }, []);
+  
+  const [featuredFoods, setFeaturedFoods] = useState([]);
+  useEffect(() => {
+    const loadFeaturedFoods = async () => {
+      try {
+        const data = await fetchFoods();
+        // Get top 3 discounted items or just top 3 items
+        const featured = data
+          .sort((a, b) => (b.discount || 0) - (a.discount || 0))
+          .slice(0, 3);
+        setFeaturedFoods(featured);
+      } catch (error) {
+        console.error("Error fetching featured foods:", error);
+      }
+    };
+    loadFeaturedFoods();
   }, []);
 
   const toggleFaq = (index) => {
@@ -422,6 +440,92 @@ const Home = () => {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== DINING HIGHLIGHTS SECTION ===== */}
+      <section className="py-24 bg-white relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-64 h-64 bg-teal-500/5 rounded-full -ml-32 -mt-32 blur-3xl"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-16 px-2">
+            <Reveal width="100%">
+              <div className="text-left">
+                <span className="text-sand-600 font-bold text-xs tracking-[0.3em] uppercase block mb-4">Culinary Excellence</span>
+                <h2 className="text-4xl md:text-5xl font-bold text-navy-950 mb-6 font-serif" style={{ fontFamily: 'var(--font-serif)' }}>
+                  Dining Highlights
+                </h2>
+                <div className="w-24 h-1 bg-sand-500 mb-6"></div>
+                <p className="text-lg text-navy-600 max-w-2xl">
+                  A symphony of local flavors and international expertise.
+                </p>
+              </div>
+            </Reveal>
+            <button
+              onClick={() => navigate('/foods')}
+              className="mt-8 md:mt-0 flex items-center gap-2 text-teal-600 font-bold text-xs uppercase tracking-[0.2em] group transition-all"
+            >
+              Explore Full Menu
+              <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {featuredFoods.map((item, idx) => (
+              <Reveal key={item._id} delay={idx * 0.1} width="100%">
+                <div className="group bg-white rounded-[2rem] overflow-hidden shadow-xl shadow-navy-950/5 border border-navy-50 hover:shadow-2xl transition-all duration-500 h-full flex flex-col">
+                  <div className="h-64 overflow-hidden relative bg-navy-50 flex items-center justify-center">
+                    {item.image && (item.image.startsWith('http') || item.image.startsWith('/')) ? (
+                      <img 
+                        src={item.image} 
+                        alt={item.name} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s]" 
+                      />
+                    ) : (
+                      <div className="text-7xl group-hover:scale-110 transition-transform duration-700">
+                        {item.image || '🍽️'}
+                      </div>
+                    )}
+                    {item.discount > 0 && (
+                      <div className="absolute top-6 left-6 bg-red-500 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg animate-pulse">
+                        {item.discount}% OFF
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-8 flex flex-col flex-grow">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-xl font-bold text-navy-950 leading-tight group-hover:text-sand-600 transition-colors">{item.name}</h3>
+                      <div className="text-right">
+                        <span className="text-teal-600 font-bold text-lg block">Rs. {(item.sellingPrice || item.price).toFixed(2)}</span>
+                        {(item.discount > 0 || (item.sellingPrice && item.sellingPrice < item.price)) && (
+                          <div className="flex items-center justify-end gap-2 mt-1">
+                            <span className="text-navy-300 text-xs line-through font-medium">Rs. {item.price.toFixed(2)}</span>
+                            <span className="bg-red-50 text-red-500 text-[9px] font-bold px-1.5 py-0.5 rounded border border-red-100 whitespace-nowrap">
+                              {item.discount}% OFF
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-navy-500 text-sm leading-relaxed mb-6 italic line-clamp-2">
+                      "{item.description}"
+                    </p>
+                    <div className="mt-auto pt-6 border-t border-navy-50 flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-navy-400 uppercase tracking-widest flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-teal-500"></span>
+                        {item.category}
+                      </span>
+                      <button 
+                        onClick={() => navigate('/foods')}
+                        className="text-[10px] font-bold text-navy-950 uppercase tracking-widest hover:text-teal-600 transition-colors"
+                      >
+                        Order Now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>

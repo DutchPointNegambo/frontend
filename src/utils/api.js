@@ -750,6 +750,61 @@ export async function fetchAllStockLogs() {
     return handleResponse(res);
 }
 
+// ─── Payroll ────────────────────────────────────────────────────────────────
+
+export async function fetchPayrollDashboard() {
+    const res = await fetch(`${API_URL}/payroll/dashboard`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function fetchPayrollSettings() {
+    const res = await fetch(`${API_URL}/payroll/settings`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function updatePayrollSettings(data) {
+    const res = await fetch(`${API_URL}/payroll/settings`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+}
+
+export async function fetchPayrolls(params = {}) {
+    const q = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/payroll${q ? `?${q}` : ''}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function previewPayrollAPI(data) {
+    const res = await fetch(`${API_URL}/payroll/preview`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+}
+
+export async function generatePayrollAPI(data) {
+    const res = await fetch(`${API_URL}/payroll/generate`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+}
+
+export async function fetchPayrollById(id) {
+    const res = await fetch(`${API_URL}/payroll/${id}`, { headers: authHeaders() });
+    return handleResponse(res);
+}
+
+export async function updatePayrollStatusAPI(id, status, notes) {
+    const res = await fetch(`${API_URL}/payroll/${id}/status`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ status, notes }),
 // Offers
 export async function fetchOffers() {
     const res = await fetch(`${API_URL}/offers`, { headers: authHeaders() });
@@ -770,6 +825,11 @@ export async function createOffer(payload) {
     return handleResponse(res);
 }
 
+export async function updatePayrollRecord(id, data) {
+    const res = await fetch(`${API_URL}/payroll/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(data),
 export async function updateOffer(id, payload) {
     const res = await fetch(`${API_URL}/offers/${id}`, {
         method: 'PUT',
@@ -779,10 +839,17 @@ export async function updateOffer(id, payload) {
     return handleResponse(res);
 }
 
+export async function deletePayrollRecord(id) {
+    const res = await fetch(`${API_URL}/payroll/${id}`, {
 export async function deleteOffer(id) {
     const res = await fetch(`${API_URL}/offers/${id}`, {
         method: 'DELETE',
         headers: authHeaders(),
     });
+    return handleResponse(res);
+}
+
+export async function fetchEmployeePayrollHistory(employeeId) {
+    const res = await fetch(`${API_URL}/payroll/employee/${employeeId}`, { headers: authHeaders() });
     return handleResponse(res);
 }
