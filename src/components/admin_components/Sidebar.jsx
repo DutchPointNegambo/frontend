@@ -12,10 +12,10 @@ import {
     LogOut,
     ExternalLink,
     ChevronRight,
-    ScanLine,
     Truck,
     PartyPopper,
     Package as PackageIcon,
+    Banknote,
     Tags
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -47,7 +47,7 @@ const Sidebar = () => {
             items: [
                 { name: 'Users', icon: UserCircle, path: '/admin/users' },
                 { name: 'Staff & HR', icon: Users, path: '/admin/staff' },
-                { name: 'QR Scanner', icon: ScanLine, path: '/admin/attendance-scanner' },
+                { name: 'Payroll', icon: Banknote, path: '/admin/payroll' },
             ],
         },
         {

@@ -87,14 +87,15 @@ const DeluxeRooms = () => {
     const normalizeRoom = (room) => ({
         ...room,
         tagline: room.tagline || room.description || '',
-        tags: room.tags?.length ? room.tags : (room.features?.length ? room.features.slice(0, 4) : []),
+        tags: [...new Set([...(room.tags || []), ...(room.features || [])])].slice(0, 4),
         capacity: room.capacity || `${room.guests || 2} Guests`,
         size: room.size || '',
         badge: room.badge || (room.view ? `${room.view} view` : 'Deluxe'),
         badgeColor: room.badgeColor || 'bg-blue-500',
-        facilities: room.facilities?.length
-            ? room.facilities
-            : (room.features || []).map(f => ({ icon: '✦', label: f })),
+        facilities: [
+            ...(room.facilities || []),
+            ...(room.features || []).filter(f => !(room.facilities || []).some(fac => fac.label === f)).map(f => ({ icon: '', label: f }))
+        ],
         includes: room.includes?.length
             ? room.includes
             : ['Complimentary breakfast', 'Free Wi-Fi', 'Daily housekeeping'],

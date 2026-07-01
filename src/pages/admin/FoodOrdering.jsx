@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, Filter } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Filter, AlertTriangle } from 'lucide-react';
 import { fetchFoods, createFood, deleteFood, updateFood } from '../../utils/api';
 import ImageUpload from '../../components/admin_components/ImageUpload';
 import toast from 'react-hot-toast';
@@ -9,7 +9,19 @@ const FoodOrdering = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [currentId, setCurrentId] = useState(null);
-    const [newItem, setNewItem] = useState({ name: '', category: 'Signature Dishes & Global Cuisine', price: '', status: 'Available', image: '', description: '' });
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
+    const [newItem, setNewItem] = useState({ 
+        name: '', 
+        category: 'Signature Dishes & Global Cuisine', 
+        productionPrice: '',
+        price: '', // Register Price
+        discount: '',
+        sellingPrice: '',
+        status: 'Available', 
+        image: '', 
+        description: '' 
+    });
 
     const categories = [
         'Signature Dishes & Global Cuisine', 
@@ -32,22 +44,38 @@ const FoodOrdering = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this item?')) {
-            try {
-                await deleteFood(id);
-                setMenuItems(menuItems.filter(item => item._id !== id));
-            } catch (error) {
-                console.error("Failed to delete food", error);
-            }
+    const handleDeleteClick = (item) => {
+        setItemToDelete(item);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!itemToDelete) return;
+        try {
+            await deleteFood(itemToDelete._id);
+            setMenuItems(menuItems.filter(item => item._id !== itemToDelete._id));
+            toast.success('Food item deleted successfully');
+            setIsDeleteModalOpen(false);
+            setItemToDelete(null);
+        } catch (error) {
+            console.error("Failed to delete food", error);
+            toast.error('Failed to delete food item');
         }
+    };
+
+    const cancelDelete = () => {
+        setIsDeleteModalOpen(false);
+        setItemToDelete(null);
     };
 
     const handleEdit = (item) => {
         setNewItem({
             name: item.name,
             category: item.category,
-            price: item.price,
+            productionPrice: item.productionPrice || '',
+            price: item.price || '',
+            discount: item.discount || '',
+            sellingPrice: item.sellingPrice || item.price,
             status: item.status,
             image: item.image,
             description: item.description || ''
@@ -57,11 +85,26 @@ const FoodOrdering = () => {
         setIsModalOpen(true);
     };
 
+    // Auto-calculate selling price when price or discount changes
+    useEffect(() => {
+        const p = parseFloat(newItem.price) || 0;
+        const d = parseFloat(newItem.discount) || 0;
+        if (p > 0) {
+            const selling = p - (p * (d / 100));
+            if (selling !== parseFloat(newItem.sellingPrice)) {
+                setNewItem(prev => ({ ...prev, sellingPrice: selling.toFixed(2) }));
+            }
+        }
+    }, [newItem.price, newItem.discount]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const itemData = {
             ...newItem,
-            price: parseFloat(newItem.price),
+            productionPrice: parseFloat(newItem.productionPrice) || 0,
+            price: parseFloat(newItem.price) || 0,
+            discount: parseFloat(newItem.discount) || 0,
+            sellingPrice: parseFloat(newItem.sellingPrice) || 0,
             image: newItem.image || '🍽️'
         };
 
@@ -69,9 +112,11 @@ const FoodOrdering = () => {
             if (isEditing) {
                 const updatedItem = await updateFood(currentId, itemData);
                 setMenuItems(menuItems.map(item => item._id === currentId ? updatedItem : item));
+                toast.success('Food item updated successfully');
             } else {
                 const addedItem = await createFood(itemData);
                 setMenuItems([...menuItems, addedItem]);
+                toast.success('Food item added successfully');
             }
             closeModal();
         } catch (error) {
@@ -84,7 +129,16 @@ const FoodOrdering = () => {
         setIsModalOpen(false);
         setIsEditing(false);
         setCurrentId(null);
-        setNewItem({ name: '', category: 'Signature Dishes & Global Cuisine', price: '', status: 'Available', image: '', description: '' });
+        setNewItem({ 
+            name: '', 
+            category: 'Signature Dishes & Global Cuisine', 
+            productionPrice: '',
+            discount: '',
+            sellingPrice: '',
+            status: 'Available', 
+            image: '', 
+            description: '' 
+        });
     };
 
     return (
@@ -143,7 +197,17 @@ const FoodOrdering = () => {
                                 </span>
                             </div>
                             <h3 className="font-bold text-navy-900 text-lg">{item.name}</h3>
-                            <p className="text-2xl font-bold text-blue-600 mt-2">Rs. {item.price.toFixed(2)}</p>
+                            <div className="flex flex-col mt-2">
+                                <div className="flex items-center gap-2">
+                                    <p className="text-2xl font-bold text-blue-600">Rs. {item.sellingPrice ? item.sellingPrice.toFixed(2) : item.price.toFixed(2)}</p>
+                                    {item.discount > 0 && (
+                                        <span className="bg-red-100 text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                                            -{item.discount}%
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-[10px] text-navy-400 font-medium">Prod: Rs. {item.productionPrice?.toFixed(2) || '0.00'}</p>
+                            </div>
 
                             <div className="flex gap-2 mt-4 pt-4 border-t border-navy-50 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button 
@@ -153,8 +217,9 @@ const FoodOrdering = () => {
                                     <Edit2 size={16} className="mr-2" /> Edit
                                 </button>
                                 <button
-                                    onClick={() => handleDelete(item._id)}
+                                    onClick={() => handleDeleteClick(item)}
                                     className="flex-none p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 hover:text-red-600"
+                                    title="Delete Item"
                                 >
                                     <Trash2 size={18} />
                                 </button>
@@ -183,20 +248,51 @@ const FoodOrdering = () => {
                                         className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                     <div>
-                                        <label className="block text-sm font-medium text-navy-700 mb-1">Price (Rs.)</label>
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Prod. Price (Optional)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            value={newItem.productionPrice}
+                                            onChange={e => setNewItem({ ...newItem, productionPrice: e.target.value })}
+                                            className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Register Price</label>
                                         <input
                                             required
                                             type="number"
                                             step="0.01"
                                             value={newItem.price}
                                             onChange={e => setNewItem({ ...newItem, price: e.target.value })}
-                                            className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-navy-700 mb-1">Category</label>
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Discount %</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={newItem.discount}
+                                            onChange={e => setNewItem({ ...newItem, discount: e.target.value })}
+                                            className="w-full px-3 py-2 border border-navy-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1">Final Price</label>
+                                        <input
+                                            readOnly
+                                            type="number"
+                                            step="0.01"
+                                            value={newItem.sellingPrice}
+                                            className="w-full px-3 py-2 border border-navy-200 rounded-lg bg-navy-50 font-bold text-blue-600 text-sm"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-navy-700 mb-1">Category</label>
                                         <select
                                             value={newItem.category}
                                             onChange={e => setNewItem({ ...newItem, category: e.target.value })}
@@ -205,7 +301,6 @@ const FoodOrdering = () => {
                                             {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                         </select>
                                     </div>
-                                </div>
                                 <div>
                                     <label className="block text-sm font-medium text-navy-700 mb-1">Status</label>
                                     <select
@@ -250,6 +345,39 @@ const FoodOrdering = () => {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 flex flex-col items-center text-center space-y-4 animate-in zoom-in duration-200">
+                        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+                            <AlertTriangle size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-navy-900">Delete Menu Item</h3>
+                            <p className="text-sm text-navy-500 mt-1">
+                                Are you sure you want to delete <span className="font-semibold text-navy-700">"{itemToDelete?.name}"</span>? This action cannot be undone.
+                            </p>
+                        </div>
+                        <div className="flex w-full gap-3 pt-2">
+                            <button
+                                type="button"
+                                onClick={cancelDelete}
+                                className="flex-1 px-4 py-2 border border-navy-200 rounded-lg text-navy-600 hover:bg-navy-50 font-medium transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={confirmDelete}
+                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition shadow-lg shadow-red-500/20"
+                            >
+                                Delete
+                            </button>
                         </div>
                     </div>
                 </div>

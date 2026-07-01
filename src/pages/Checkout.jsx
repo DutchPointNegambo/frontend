@@ -253,11 +253,17 @@ const Checkout = () => {
               <div className="divide-y divide-navy-50">
                 {cartItems.map((item) => (
                   <div key={item.id} className="px-6 py-5 flex items-center gap-5 hover:bg-navy-50/30 transition-colors">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-20 h-20 rounded-xl object-cover flex-shrink-0 shadow-sm"
-                    />
+                    <div className="w-20 h-20 rounded-xl bg-navy-50 flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden">
+                      {item.image && (item.image.startsWith('http') || item.image.startsWith('/')) ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-3xl">{item.image || '🍽️'}</span>
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-base font-bold text-navy-950 truncate">{item.name}</h3>
                       <p className="text-teal-600 font-bold text-sm mt-1">
