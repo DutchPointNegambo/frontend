@@ -36,9 +36,9 @@ const ReceptionistDashboard = () => {
             
             setStats({
                 totalBookings: bookings.length,
-                activeRooms: rooms.filter(r => r.status === 'Available').length,
-                pendingCheckins: bookings.filter(b => b.status === 'confirmed' && b.checkIn.startsWith(today)).length,
-                completedToday: bookings.filter(b => b.status === 'completed' && b.updatedAt.startsWith(today)).length
+                activeRooms: rooms.filter(r => r.status === 'available').length,
+                pendingCheckins: bookings.filter(b => b.status === 'reserved' && b.checkIn.startsWith(today)).length,
+                completedToday: bookings.filter(b => b.status === 'checked_out' && b.updatedAt.startsWith(today)).length
             });
         } catch (error) {
             console.error('Failed to load dashboard data:', error);
