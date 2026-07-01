@@ -23,6 +23,7 @@ const EMPTY_FORM = {
 
 const statusConfig = {
     available: { label: 'Available', icon: CheckCircle, bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+    reserved: { label: 'Reserved', icon: CheckCircle, bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
     occupied: { label: 'Occupied', icon: XCircle, bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
     maintenance: { label: 'Maintenance', icon: Wrench, bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
 };
@@ -296,7 +297,7 @@ export default function RoomManagement() {
                                                 <UserCircle size={14} className="text-navy-400" />
                                                 {room.activeBooking.user?.firstName || room.activeBooking.guestInfo?.firstName} {room.activeBooking.user?.lastName || room.activeBooking.guestInfo?.lastName}
                                             </p>
-                                            <div className="grid grid-cols-2 gap-2 mb-3 bg-white/50 p-2 rounded-lg border border-red-50">
+                                            <div className="grid grid-cols-2 gap-2 bg-white/50 p-2 rounded-lg border border-red-50">
                                                 <div>
                                                     <p className="text-[9px] text-navy-400 uppercase font-bold">Check-In</p>
                                                     <p className="text-[10px] font-bold text-navy-800">{new Date(room.activeBooking.checkIn).toLocaleDateString()}</p>
@@ -306,12 +307,6 @@ export default function RoomManagement() {
                                                     <p className="text-[10px] font-bold text-navy-800">{new Date(room.activeBooking.checkOut).toLocaleDateString()}</p>
                                                 </div>
                                             </div>
-                                            <button
-                                                onClick={() => handleCheckOut(room.activeBooking._id, room.roomNumber)}
-                                                className="w-full flex items-center justify-center gap-1.5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[11px] font-bold transition-all shadow-sm hover:shadow-md"
-                                            >
-                                                <LogOut size={13} /> Check Out Guest
-                                            </button>
                                         </div>
                                     ) : (
 
@@ -321,19 +316,27 @@ export default function RoomManagement() {
                                     )}
 
 
-                                    <div className="flex gap-1 mb-3">
-                                        {STATUS_OPTIONS.map(s => (
+                                    <div className="flex items-center justify-between mb-3 bg-navy-50/50 p-2 rounded-xl border border-navy-50">
+                                        <div className={`px-2.5 py-1 rounded-full text-xs font-bold border shadow-sm flex items-center gap-1.5 capitalize ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+                                            <StatusIcon size={13} />
+                                            {room.status}
+                                        </div>
+                                        {room.status === 'available' && (
                                             <button
-                                                key={s}
-                                                onClick={() => room.status !== s && handleStatusToggle(room, s)}
-                                                className={`flex-1 py-1 rounded-lg text-xs font-medium transition-colors capitalize ${room.status === s
-                                                    ? `${statusConfig[s].bg} ${statusConfig[s].text} border ${statusConfig[s].border}`
-                                                    : 'bg-navy-50 text-navy-400 hover:bg-navy-100'
-                                                    }`}
+                                                onClick={() => handleStatusToggle(room, 'maintenance')}
+                                                className="px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
                                             >
-                                                {s}
+                                                <Wrench size={12} /> Set Maintenance
                                             </button>
-                                        ))}
+                                        )}
+                                        {room.status === 'maintenance' && (
+                                            <button
+                                                onClick={() => handleStatusToggle(room, 'available')}
+                                                className="px-3 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
+                                            >
+                                                <CheckCircle size={12} /> Set Available
+                                            </button>
+                                        )}
                                     </div>
 
                                     <div className="flex gap-2">
@@ -378,10 +381,8 @@ export default function RoomManagement() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Status</label>
-                                    <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                        {STATUS_OPTIONS.map(s => <option key={s} value={s} className="capitalize">{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-                                    </select>
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Status (Managed Auto)</label>
+                                    <input value={form.status} readOnly className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm bg-navy-50 text-navy-500 capitalize cursor-not-allowed focus:outline-none" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Price / Night (Rs.) *</label>
