@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, Filter } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Filter, AlertTriangle } from 'lucide-react';
 import { fetchFoods, createFood, deleteFood, updateFood } from '../../utils/api';
 import ImageUpload from '../../components/admin_components/ImageUpload';
 import toast from 'react-hot-toast';
@@ -9,6 +9,8 @@ const FoodOrdering = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [currentId, setCurrentId] = useState(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
     const [newItem, setNewItem] = useState({ 
         name: '', 
         category: 'Signature Dishes & Global Cuisine', 
@@ -42,15 +44,28 @@ const FoodOrdering = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this item?')) {
-            try {
-                await deleteFood(id);
-                setMenuItems(menuItems.filter(item => item._id !== id));
-            } catch (error) {
-                console.error("Failed to delete food", error);
-            }
+    const handleDeleteClick = (item) => {
+        setItemToDelete(item);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!itemToDelete) return;
+        try {
+            await deleteFood(itemToDelete._id);
+            setMenuItems(menuItems.filter(item => item._id !== itemToDelete._id));
+            toast.success('Food item deleted successfully');
+            setIsDeleteModalOpen(false);
+            setItemToDelete(null);
+        } catch (error) {
+            console.error("Failed to delete food", error);
+            toast.error('Failed to delete food item');
         }
+    };
+
+    const cancelDelete = () => {
+        setIsDeleteModalOpen(false);
+        setItemToDelete(null);
     };
 
     const handleEdit = (item) => {
@@ -97,9 +112,11 @@ const FoodOrdering = () => {
             if (isEditing) {
                 const updatedItem = await updateFood(currentId, itemData);
                 setMenuItems(menuItems.map(item => item._id === currentId ? updatedItem : item));
+                toast.success('Food item updated successfully');
             } else {
                 const addedItem = await createFood(itemData);
                 setMenuItems([...menuItems, addedItem]);
+                toast.success('Food item added successfully');
             }
             closeModal();
         } catch (error) {
@@ -200,8 +217,9 @@ const FoodOrdering = () => {
                                     <Edit2 size={16} className="mr-2" /> Edit
                                 </button>
                                 <button
-                                    onClick={() => handleDelete(item._id)}
+                                    onClick={() => handleDeleteClick(item)}
                                     className="flex-none p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 hover:text-red-600"
+                                    title="Delete Item"
                                 >
                                     <Trash2 size={18} />
                                 </button>
@@ -327,6 +345,39 @@ const FoodOrdering = () => {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 flex flex-col items-center text-center space-y-4 animate-in zoom-in duration-200">
+                        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+                            <AlertTriangle size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-navy-900">Delete Menu Item</h3>
+                            <p className="text-sm text-navy-500 mt-1">
+                                Are you sure you want to delete <span className="font-semibold text-navy-700">"{itemToDelete?.name}"</span>? This action cannot be undone.
+                            </p>
+                        </div>
+                        <div className="flex w-full gap-3 pt-2">
+                            <button
+                                type="button"
+                                onClick={cancelDelete}
+                                className="flex-1 px-4 py-2 border border-navy-200 rounded-lg text-navy-600 hover:bg-navy-50 font-medium transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={confirmDelete}
+                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition shadow-lg shadow-red-500/20"
+                            >
+                                Delete
+                            </button>
                         </div>
                     </div>
                 </div>
