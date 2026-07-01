@@ -25,7 +25,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
     });
     const [cardErrors, setCardErrors] = useState({});
 
-    // Pre-fill user info
+    // Pre-filling user data
     useEffect(() => {
         if (user) {
             setFormData(prev => ({
@@ -38,7 +38,7 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
         }
     }, [user, isOpen]);
 
-    // ── Card validation helpers ──────────────────────────────────────────────
+    //Card validation helpers
     const luhnCheck = (num) => {
         const digits = num.replace(/\s/g, '');
         let sum = 0, alt = false;
@@ -284,11 +284,11 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-4 border-b border-navy-100">
                                     <div>
                                         <label className="text-[10px] text-navy-400 font-bold uppercase tracking-widest block mb-1">Check-In</label>
-                                        <p className="text-navy-800 font-bold">{new Date(checkIn).toLocaleDateString()} at 10:00 AM</p>
+                                        <p className="text-navy-800 font-bold">{new Date(checkIn).toLocaleDateString()} at 9:00 AM</p>
                                     </div>
                                     <div>
                                         <label className="text-[10px] text-navy-400 font-bold uppercase tracking-widest block mb-1">Check-Out</label>
-                                        <p className="text-navy-800 font-bold">{new Date(selectedPackage === 'day-use' ? checkIn : checkOut).toLocaleDateString()} at 11:00 AM</p>
+                                        <p className="text-navy-800 font-bold">{new Date(selectedPackage === 'day-use' ? checkIn : checkOut).toLocaleDateString()} at 7:00 PM</p>
                                     </div>
                                 </div>
 

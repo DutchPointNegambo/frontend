@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { UserPlus, Clock, DollarSign, Search, Shield, Trash2, Edit2, X, RefreshCw, Save, QrCode, ScanLine, Users, Calendar, Timer, AlertCircle } from 'lucide-react';
+import { UserPlus, Clock, Banknote, Search, Shield, Trash2, Edit2, X, RefreshCw, Save, QrCode, ScanLine, Users, Calendar, Timer, AlertCircle } from 'lucide-react';
 import { fetchStaff, createStaff, updateStaff, deleteStaff, fetchTodayAttendance, fetchAttendance, scanAttendance, fetchPayroll } from '../../utils/api';
 import Toast from '../../components/admin_components/Toast';
 import { useToast } from '../../components/admin_components/useToast';
@@ -235,7 +235,7 @@ const Staff = () => {
     const tabs = [
         { id: 'employees', label: 'Employee Management', icon: UserPlus },
         { id: 'attendance', label: 'Attendance', icon: Clock },
-        { id: 'payroll', label: 'Payroll', icon: DollarSign },
+        { id: 'payroll', label: 'Payroll', icon: Banknote },
     ];
 
     // ─── Render: Employees Tab ───────────────────────────────────────────
@@ -548,7 +548,7 @@ const Staff = () => {
                     </div>
                 ) : payrollData.payroll.length === 0 ? (
                     <div className="text-center py-12">
-                        <DollarSign size={40} className="mx-auto text-navy-200 mb-3" />
+                        <Banknote size={40} className="mx-auto text-navy-200 mb-3" />
                         <p className="text-navy-500 font-medium">No payroll data for this period</p>
                     </div>
                 ) : (

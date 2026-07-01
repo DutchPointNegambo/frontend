@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, Calendar, Download, RefreshCw, ClipboardList, Sparkles } from 'lucide-react';
+import { TrendingUp, TrendingDown, Banknote, Calendar, Download, RefreshCw, ClipboardList, Sparkles } from 'lucide-react';
 import AiExecutiveSummary from '../../components/admin_components/AiExecutiveSummary';
 import { fetchReportSummary, fetchMonthlyReport, fetchBookingReport, fetchOrderReport } from '../../utils/api';
 
@@ -83,7 +83,7 @@ const Reports = () => {
     const maxVal = Math.max(...monthly.map(m => m[chartMode] || 0), 1);
 
     const topStats = [
-        { title: 'Total Revenue', value: fmt(summary?.totalRevenue), icon: DollarSign, color: 'from-amber-500 to-amber-600' },
+        { title: 'Total Revenue', value: fmt(summary?.totalRevenue), icon: Banknote, color: 'from-amber-500 to-amber-600' },
         { title: 'Operating Expenses', value: fmt(summary?.monthlyExpenses), icon: TrendingDown, color: 'from-red-500 to-red-600' },
         { title: 'Net Profit', value: fmt(summary?.netProfit), icon: TrendingUp, color: 'from-teal-500 to-teal-600' },
         { title: 'Occupancy Rate', value: summary ? `${summary.occupancyRate ?? 0}%` : '—', icon: Calendar, color: 'from-navy-600 to-navy-700' },
@@ -157,7 +157,7 @@ const Reports = () => {
                                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${chartMode === 'revenue' ? 'bg-white text-teal-600 shadow-sm' : 'text-navy-400 hover:text-navy-600'}`}
                             >
                                 <span className="flex items-center gap-1.5">
-                                    <DollarSign size={13} /> Revenue
+                                    <span className="text-[10px] font-bold">Rs.</span> Revenue
                                 </span>
                             </button>
                             <button
