@@ -330,6 +330,15 @@ export async function createBooking(payload) {
     return handleResponse(res);
 }
 
+export async function confirmBookingPayment(bookingId, transactionId) {
+    const res = await fetch(`${API_URL}/bookings/${bookingId}/confirm-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactionId }),
+    });
+    return handleResponse(res);
+}
+
 // Admin: Staff
 export async function fetchStaff(params = {}) {
     const qs = new URLSearchParams(params).toString();

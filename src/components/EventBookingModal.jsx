@@ -31,6 +31,7 @@ const EventBookingModal = ({
     });
     const [cardErrors, setCardErrors] = useState({});
     const [specialRequests, setSpecialRequests] = useState('');
+    const paymentMethod = 'payhere';
 
     // Pre-fill user info
     useEffect(() => {
@@ -121,7 +122,7 @@ const EventBookingModal = ({
         setSubmitError('');
 
         if (!validateGuestInfo()) return;
-        if (!validateCard()) return;
+        if (paymentMethod === 'card' && !validateCard()) return;
 
         setSubmitting(true);
 
@@ -149,12 +150,13 @@ const EventBookingModal = ({
                     foodPackage: eventData.foodPackage,
                     totalAmount: eventData.totalAmount,
                     paymentType,
-                    cardDetails: {
+                    paymentMethod,
+                    cardDetails: paymentMethod === 'card' ? {
                         number: cardDetails.number.replace(/\s/g, ''),
                         expiry: cardDetails.expiry,
                         cvv: cardDetails.cvv,
                         name: cardDetails.name,
-                    },
+                    } : undefined,
                     specialRequests,
                     addons: eventData.selectedAddons.map(a => ({ name: a.name, price: a.price })),
                 }),
@@ -164,7 +166,49 @@ const EventBookingModal = ({
             if (!res.ok) {
                 setSubmitError(data.message || 'Booking failed. Please try again.');
             } else {
-                if (onSuccess) onSuccess(data);
+                if (paymentMethod === 'payhere' && data.payhere) {
+                    if (typeof window.payhere === 'undefined') {
+                        setSubmitError('PayHere secure checkout is currently unavailable. Please reload the page or disable adblockers.');
+                        setSubmitting(false);
+                        return;
+                    }
+
+                    window.payhere.onCompleted = async function onCompleted(orderId) {
+                        try {
+                            setSubmitting(true);
+                            const confirmRes = await fetch(`${API}/event-bookings/${data.booking._id}/confirm-payment`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: `Bearer ${token}`,
+                                },
+                                body: JSON.stringify({ transactionId: orderId })
+                            });
+                            const confirmData = await confirmRes.json();
+                            if (confirmRes.ok && confirmData.success) {
+                                if (onSuccess) onSuccess(confirmData.booking);
+                            } else {
+                                setSubmitError(confirmData.message || 'Payment completed but event booking confirmation failed.');
+                            }
+                        } catch (confirmErr) {
+                            setSubmitError('Error confirming event booking payment: ' + confirmErr.message);
+                        } finally {
+                            setSubmitting(false);
+                        }
+                    };
+
+                    window.payhere.onDismissed = function onDismissed() {
+                        setSubmitError('Payment was dismissed by the user.');
+                    };
+
+                    window.payhere.onError = function onError(err) {
+                        setSubmitError('PayHere Error: ' + err);
+                    };
+
+                    window.payhere.startPayment(data.payhere);
+                } else {
+                    if (onSuccess) onSuccess(data);
+                }
             }
         } catch (err) {
             setSubmitError('Network error. Please check your connection and try again.');
@@ -252,38 +296,12 @@ const EventBookingModal = ({
                                 </div>
                             </div>
 
-                            {/* Card Details */}
-                            <div className="bg-white rounded-3xl p-6 border-2 border-teal-100 space-y-4">
-                                <h3 className="text-lg font-bold text-navy-900 flex items-center gap-2">
-                                    <Lock size={18} className="text-teal-600" /> Secure Card Payment
-                                </h3>
-                                <div className="space-y-4">
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Card Number</label>
-                                        <div className="relative">
-                                            <input type="text" placeholder="4242 4242 4242 4242" value={cardDetails.number} onChange={e => { setCardDetails(c => ({ ...c, number: formatCardNumber(e.target.value) })); setCardErrors(e2 => ({ ...e2, number: undefined })) }} maxLength={19} className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 ${cardErrors.number ? 'border-red-300 focus:ring-red-400' : 'border-gray-200 focus:ring-teal-400'}`} />
-                                            {detectBrand(cardDetails.number) && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-teal-600 uppercase">{detectBrand(cardDetails.number)}</span>}
-                                        </div>
-                                        {cardErrors.number && <p className="text-red-500 text-[10px] font-bold mt-1">{cardErrors.number}</p>}
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Expiry</label>
-                                            <input type="text" placeholder="MM/YY" value={cardDetails.expiry} onChange={e => { setCardDetails(c => ({ ...c, expiry: formatExpiry(e.target.value) })); setCardErrors(e2 => ({ ...e2, expiry: undefined })) }} maxLength={5} className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 ${cardErrors.expiry ? 'border-red-300 focus:ring-red-400' : 'border-gray-200 focus:ring-teal-400'}`} />
-                                            {cardErrors.expiry && <p className="text-red-500 text-[10px] font-bold mt-1">{cardErrors.expiry}</p>}
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">CVV</label>
-                                            <input type="text" placeholder="123" value={cardDetails.cvv} onChange={e => { const v = e.target.value.replace(/\D/g, '').slice(0, 4); setCardDetails(c => ({ ...c, cvv: v })); setCardErrors(e2 => ({ ...e2, cvv: undefined })) }} maxLength={4} className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 ${cardErrors.cvv ? 'border-red-300 focus:ring-red-400' : 'border-gray-200 focus:ring-teal-400'}`} />
-                                            {cardErrors.cvv && <p className="text-red-500 text-[10px] font-bold mt-1">{cardErrors.cvv}</p>}
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Cardholder Name</label>
-                                        <input type="text" placeholder="JANE SMITH" value={cardDetails.name} onChange={e => { setCardDetails(c => ({ ...c, name: e.target.value })); setCardErrors(e2 => ({ ...e2, name: undefined })) }} className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 ${cardErrors.name ? 'border-red-300 focus:ring-red-400' : 'border-gray-200 focus:ring-teal-400'}`} />
-                                        {cardErrors.name && <p className="text-red-500 text-[10px] font-bold mt-1">{cardErrors.name}</p>}
-                                    </div>
-                                </div>
+                            <div className="bg-white rounded-3xl p-6 border-2 border-teal-100 flex flex-col items-center justify-center text-center py-10 space-y-3">
+                                <Lock size={40} className="text-teal-600 animate-pulse" />
+                                <h4 className="font-bold text-lg text-navy-900">PayHere Secure Payment Portal</h4>
+                                <p className="text-sm text-gray-500 max-w-sm">
+                                    Upon clicking "Confirm & Pay", you will open a secure checkout dialog managed by PayHere to complete your booking.
+                                </p>
                             </div>
                         </div>
 
