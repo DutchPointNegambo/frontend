@@ -49,6 +49,7 @@ const AdminEventManagement = lazy(() => import('./pages/admin/EventManagement'))
 const PackageManagement = lazy(() => import('./pages/admin/PackageManagement'))
 const InventoryManagement = lazy(() => import('./pages/admin/InventoryManagement'))
 const PayrollManagement = lazy(() => import('./pages/admin/PayrollManagement'))
+const OfferManagement = lazy(() => import('./pages/admin/OfferManagement'))
 
 const ReceptionistLayout = lazy(() => import('./pages/receptionist/ReceptionistLayout'))
 const ReceptionistDashboard = lazy(() => import('./pages/receptionist/ReceptionistDashboard'))
@@ -117,6 +118,7 @@ function App() {
             <Route path="package-management" element={<PackageManagement />} />
             <Route path="inventory" element={<InventoryManagement />} />
             <Route path="payroll" element={<PayrollManagement />} />
+            <Route path="offers" element={<OfferManagement />} />
           </Route>
 
           {/* Receptionist Routes */}
