@@ -805,6 +805,10 @@ export async function updatePayrollStatusAPI(id, status, notes) {
         method: 'PUT',
         headers: authHeaders(),
         body: JSON.stringify({ status, notes }),
+    });
+    return handleResponse(res);
+}
+
 // Offers
 export async function fetchOffers() {
     const res = await fetch(`${API_URL}/offers`, { headers: authHeaders() });
@@ -830,6 +834,10 @@ export async function updatePayrollRecord(id, data) {
         method: 'PUT',
         headers: authHeaders(),
         body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+}
+
 export async function updateOffer(id, payload) {
     const res = await fetch(`${API_URL}/offers/${id}`, {
         method: 'PUT',
@@ -841,6 +849,12 @@ export async function updateOffer(id, payload) {
 
 export async function deletePayrollRecord(id) {
     const res = await fetch(`${API_URL}/payroll/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+    });
+    return handleResponse(res);
+}
+
 export async function deleteOffer(id) {
     const res = await fetch(`${API_URL}/offers/${id}`, {
         method: 'DELETE',
