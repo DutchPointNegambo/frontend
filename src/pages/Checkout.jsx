@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, ArrowRight, CreditCard, CheckCircle, Lock } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { createOrder } from '../utils/api'
+import { createOrder, confirmOrderPayment } from '../utils/api'
 
 const Checkout = () => {
   const { cartItems, cartCount, cartTotal, removeFromCart, updateQuantity, clearCart } = useCart()
@@ -150,9 +150,9 @@ const Checkout = () => {
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault()
-    
-    if (!validateCard()) {
-      setError('Please check your card details.')
+
+    if (typeof window.payhere === 'undefined') {
+      setError('PayHere secure checkout is currently unavailable. Please reload the page or disable adblockers.')
       return
     }
 
@@ -172,17 +172,45 @@ const Checkout = () => {
         subtotal: cartTotal,
         serviceCharge: cartTotal * 0.1,
         total: cartTotal * 1.1,
-        cardDetails: {
-          ...cardDetails,
-          number: cardDetails.number.replace(/\s/g, '')
-        }
+        paymentMethod: 'payhere'
       }
 
       const response = await createOrder(payload)
       
-      if (response.success) {
-        clearCart()
-        navigate(`/payment-success/${response.orderId}`)
+      if (response.success && response.payhere) {
+        window.payhere.onCompleted = async function onCompleted(orderId) {
+          try {
+            setLoading(true)
+            const confirmRes = await confirmOrderPayment(response.orderId);
+            if (confirmRes.success) {
+              clearCart()
+              navigate(`/payment-success/${response.orderId}`)
+            } else {
+              setError('Payment completed but order confirmation failed.')
+            }
+          } catch (confirmErr) {
+            console.error('Confirm error:', confirmErr)
+            setError('Payment succeeded but failed to confirm order.')
+          } finally {
+            setLoading(false)
+          }
+        };
+
+        window.payhere.onDismissed = function onDismissed() {
+          setLoading(false)
+          setError('Payment was cancelled.')
+        };
+
+        window.payhere.onError = function onError(err) {
+          setLoading(false)
+          setError('Payment error: ' + err)
+        };
+
+        // Start PayHere
+        window.payhere.startPayment(response.payhere);
+      } else {
+        setError('Failed to initialize PayHere checkout.')
+        setLoading(false)
       }
     } catch (err) {
       console.error('Error placing order:', err)
@@ -443,78 +471,13 @@ const Checkout = () => {
                 ) : (
                   /* Step 2: Payment Details */
                   <form onSubmit={handlePlaceOrder} className="space-y-4 animate-fade-in">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">Card Number</label>
-                        <div className="relative">
-                          <input 
-                            type="text"
-                            placeholder="4242 4242 4242 4242"
-                            value={cardDetails.number}
-                            onChange={e => {
-                              setCardDetails(c => ({ ...c, number: formatCardNumber(e.target.value) }));
-                              setCardErrors(e2 => ({ ...e2, number: undefined }));
-                            }}
-                            maxLength={19}
-                            className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all text-sm ${cardErrors.number ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-teal-500/20'}`}
-                          />
-                          {detectBrand(cardDetails.number) && (
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-teal-600 uppercase">
-                              {detectBrand(cardDetails.number)}
-                            </span>
-                          )}
-                        </div>
-                        {cardErrors.number && <p className="text-red-500 text-[10px] font-bold mt-1 pl-1">{cardErrors.number}</p>}
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">Expiry</label>
-                          <input 
-                            type="text"
-                            placeholder="MM/YY"
-                            value={cardDetails.expiry}
-                            onChange={e => {
-                              setCardDetails(c => ({ ...c, expiry: formatExpiry(e.target.value) }));
-                              setCardErrors(e2 => ({ ...e2, expiry: undefined }));
-                            }}
-                            maxLength={5}
-                            className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all text-sm ${cardErrors.expiry ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-teal-500/20'}`}
-                          />
-                          {cardErrors.expiry && <p className="text-red-500 text-[10px] font-bold mt-1 pl-1">{cardErrors.expiry}</p>}
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">CVV</label>
-                          <input 
-                            type="password"
-                            placeholder="•••"
-                            value={cardDetails.cvv}
-                            onChange={e => {
-                              const v = e.target.value.replace(/\D/g, '').slice(0, 4);
-                              setCardDetails(c => ({ ...c, cvv: v }));
-                              setCardErrors(e2 => ({ ...e2, cvv: undefined }));
-                            }}
-                            maxLength={4}
-                            className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all text-sm ${cardErrors.cvv ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-teal-500/20'}`}
-                          />
-                          {cardErrors.cvv && <p className="text-red-500 text-[10px] font-bold mt-1 pl-1">{cardErrors.cvv}</p>}
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">Cardholder Name</label>
-                        <input 
-                          type="text"
-                          placeholder="JANE SMITH"
-                          value={cardDetails.name}
-                          onChange={e => {
-                            setCardDetails(c => ({ ...c, name: e.target.value.toUpperCase() }));
-                            setCardErrors(e2 => ({ ...e2, name: undefined }));
-                          }}
-                          className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all text-sm ${cardErrors.name ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-teal-500/20'}`}
-                        />
-                        {cardErrors.name && <p className="text-red-500 text-[10px] font-bold mt-1 pl-1">{cardErrors.name}</p>}
-                      </div>
+                    {/* PayHere Payment Summary Notice */}
+                    <div className="bg-white rounded-3xl p-6 border-2 border-teal-100 space-y-3 text-center">
+                      <Lock className="text-teal-500 mx-auto" size={28} />
+                      <h3 className="text-navy-950 font-bold text-base">Secure Gateway Payment</h3>
+                      <p className="text-navy-500 text-xs max-w-sm mx-auto leading-relaxed">
+                        You will be redirected to the secure PayHere payment gateway to complete your transaction in LKR.
+                      </p>
                     </div>
 
                     <div className="pt-2">

@@ -16,11 +16,12 @@ import {
     PartyPopper,
     Package as PackageIcon,
     Banknote,
-    Tags
+    Tags,
+    X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { logout } = useAuth();
@@ -80,10 +81,10 @@ const Sidebar = () => {
             : location.pathname.startsWith(path);
 
     return (
-        <div className="h-screen w-64 bg-navy-900 text-white fixed left-0 top-0 flex flex-col shadow-2xl z-40">
+        <div className={`h-screen w-64 bg-navy-900 text-white fixed left-0 top-0 flex flex-col shadow-2xl z-40 transform lg:translate-x-0 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
             {/* Logo */}
-            <div className="px-6 py-5 border-b border-white/10">
-                <Link to="/admin" className="block group">
+            <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between">
+                <Link to="/admin" className="block group" onClick={onClose}>
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-white/10 p-1 flex items-center justify-center shadow-lg flex-shrink-0">
                             <img 
@@ -98,6 +99,12 @@ const Sidebar = () => {
                         </div>
                     </div>
                 </Link>
+                <button 
+                    onClick={onClose}
+                    className="lg:hidden p-2 text-navy-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+                >
+                    <X size={18} />
+                </button>
             </div>
 
             {/* Navigation */}
@@ -114,6 +121,7 @@ const Sidebar = () => {
                                     <Link
                                         key={item.path}
                                         to={item.path}
+                                        onClick={onClose}
                                         className={`flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-200 group ${
                                             active
                                                 ? 'bg-teal-600/20 text-teal-300 border border-teal-500/30 shadow-sm'
