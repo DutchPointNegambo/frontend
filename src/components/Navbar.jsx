@@ -1,19 +1,32 @@
-import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { ShoppingCart, Trash2, X, Plus, Minus, User, LogOut, ChevronDown, Settings, TrendingUp } from 'lucide-react'
+import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext.jsx'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const cartRef = useRef(null)
+  const mobileCartRef = useRef(null)
   const [isRoomsDropdownOpen, setIsRoomsDropdownOpen] = useState(false)
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
+  const userMenuRef = useRef(null)
+
   const location = useLocation()
-  const { user, logout } = useAuth()
+  const { cartItems, cartCount, cartTotal, removeFromCart, updateQuantity, clearCart } = useCart()
+  const { user, logout, loading } = useAuth()
+  const navigate = useNavigate()
+
+  if (loading) return null;
 
   const leftNavItems = [
     { name: 'Home', path: '/' },
-    // { name: 'Offers', path: '#' },
+    { name: 'Dining', path: '/foods' },
     { name: 'Gallery', path: '/gallery' },
-    // { name: 'Events', path: '/event' },
+    { name: 'Events', path: '/event-management' },
+    ...(user ? [{ name: 'My Events', path: '/my-events' }] : [])
   ]
 
   const roomCategories = [
@@ -21,6 +34,7 @@ const Navbar = () => {
     { name: 'Semi-Luxury Rooms', path: '/semiLuxuryRooms' },
     { name: 'Luxury Rooms', path: '/luxuryRooms' },
     { name: 'Day Outing', path: '/DayOutingRooms' },
+
   ]
 
   const rightNavItems = [
@@ -35,6 +49,20 @@ const Navbar = () => {
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const isInsideCart = (cartRef.current && cartRef.current.contains(event.target)) || 
+                          (mobileCartRef.current && mobileCartRef.current.contains(event.target))
+      const isInsideUser = userMenuRef.current && userMenuRef.current.contains(event.target)
+      
+      if (!isInsideCart) setIsCartOpen(false)
+      if (!isInsideUser) setIsUserDropdownOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   const isActive = (path) => location.pathname === path
@@ -156,7 +184,7 @@ const Navbar = () => {
           </div>
 
           {/* Right Navigation - Desktop */}
-          <div className="hidden lg:flex items-center space-x-5 flex-1 pl-4">
+          <div className="hidden lg:flex items-center space-x-6 flex-1 pl-4 justify-start">
             {rightNavItems.map((item) => (
               <Link
                 key={item.name}
@@ -178,50 +206,210 @@ const Navbar = () => {
               </Link>
             ))}
 
-            {/* Auth Buttons */}
-            <div className="flex items-center space-x-3 ml-2">
-              {user ? (
-                <>
-                  {(user.role === 'admin' || user.role === 'staff') && (
-                    <Link
-                      to="/admin"
-                      title="Admin Dashboard"
-                      className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 border-2 ${shouldShowSolidNavbar
-                        ? 'border-teal-600 bg-teal-600 text-white hover:bg-teal-700 shadow-lg shadow-teal-500/20'
-                        : 'border-teal-400 bg-teal-400/20 text-teal-400 hover:bg-teal-400 hover:text-navy-950'
-                        }`}
+            {/* Cart Icon */}
+            <div className="relative" ref={cartRef}>
+              <button
+                onClick={() => setIsCartOpen(!isCartOpen)}
+                className={`relative h-9 w-9 flex items-center justify-center rounded-xl transition-all duration-300 ${shouldShowSolidNavbar
+                  ? 'text-navy-700 hover:text-navy-950 hover:bg-navy-50'
+                  : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+              >
+                <ShoppingCart size={20} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-teal-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-bounce shadow-lg shadow-teal-500/30">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Cart Dropdown */}
+              {isCartOpen && (
+                <div className="absolute right-0 top-full mt-3 w-96 bg-white rounded-2xl shadow-2xl border border-navy-100/50 overflow-hidden z-[100]"
+                  style={{ animation: 'slideDown 0.3s ease-out' }}
+                >
+                  {/* Cart Header */}
+                  <div className="flex items-center justify-between px-6 py-4 bg-navy-950">
+                    <h3 className="text-white font-bold text-sm uppercase tracking-widest flex items-center gap-2">
+                      <ShoppingCart size={16} />
+                      Your Cart ({cartCount})
+                    </h3>
+                    <button
+                      onClick={() => setIsCartOpen(false)}
+                      className="text-white/60 hover:text-white transition-colors"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                      </svg>
-                    </Link>
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  {/* Cart Items */}
+                  <div className="max-h-80 overflow-y-auto">
+                    {cartItems.length === 0 ? (
+                      <div className="py-12 text-center">
+                        <ShoppingCart size={40} className="text-navy-200 mx-auto mb-3" />
+                        <p className="text-navy-400 text-sm font-medium">Your cart is empty</p>
+                        <p className="text-navy-300 text-xs mt-1">Browse our menu and add delicious dishes!</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-navy-50">
+                        {cartItems.map((item) => (
+                          <div key={item.id} className="px-6 py-4 flex items-center gap-4 hover:bg-navy-50/50 transition-colors">
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-bold text-navy-950 truncate">{item.name}</h4>
+                              <p className="text-teal-600 font-bold text-xs mt-0.5">
+                                Rs. {(item.numericPrice * item.quantity).toFixed(2)}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                className="w-7 h-7 rounded-lg bg-navy-100 hover:bg-navy-200 flex items-center justify-center transition-colors"
+                              >
+                                <Minus size={12} className="text-navy-700" />
+                              </button>
+                              <span className="w-8 text-center text-sm font-bold text-navy-950">
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                className="w-7 h-7 rounded-lg bg-navy-100 hover:bg-navy-200 flex items-center justify-center transition-colors"
+                              >
+                                <Plus size={12} className="text-navy-700" />
+                              </button>
+                            </div>
+                            <button
+                              onClick={() => removeFromCart(item.id)}
+                              className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Cart Footer */}
+                  {cartItems.length > 0 && (
+                    <div className="border-t border-navy-100 px-6 py-4 bg-navy-50/30">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm font-bold text-navy-600 uppercase tracking-widest">Total</span>
+                        <span className="text-xl font-bold text-navy-950">Rs. {cartTotal.toFixed(2)}</span>
+                      </div>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => { clearCart(); setIsCartOpen(false); }}
+                          className="flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest border-2 border-navy-200 text-navy-600 hover:bg-navy-100 transition-all duration-300"
+                        >
+                          Clear Cart
+                        </button>
+                        <button
+                          onClick={() => { setIsCartOpen(false); navigate('/checkout'); }}
+                          className="flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest bg-teal-500 text-white hover:bg-teal-600 transition-all duration-300 shadow-lg shadow-teal-500/20"
+                        >
+                          Checkout
+                        </button>
+                      </div>
+                    </div>
                   )}
-                  <Link
-                    to="/profile"
-                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 border-2 whitespace-nowrap ${shouldShowSolidNavbar
+                </div>
+              )}
+            </div>
+
+            {/* Auth/User Dropdown */}
+            <div className="relative" ref={userMenuRef}>
+              {user ? (
+                <div className="relative group">
+                  <button
+                    onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                    className={`flex items-center gap-2 h-9 px-3 rounded-lg transition-all duration-300 border-2 ${shouldShowSolidNavbar
                       ? 'border-navy-950 text-navy-950 hover:bg-navy-950 hover:text-white'
                       : isHomePage
                         ? 'border-navy-950/30 text-navy-950 hover:bg-navy-950 hover:text-white hover:border-navy-950'
                         : 'border-white/30 text-white hover:bg-white/10 hover:border-white'
                       }`}
                   >
-                    Profile
-                  </Link>
-                  <button
-                    onClick={logout}
-                    className={`px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap ${shouldShowSolidNavbar
-                      ? 'bg-red-600 text-white hover:bg-red-700 shadow-red-900/20'
-                      : 'bg-red-500 text-white hover:bg-red-600 shadow-white/10'
-                      }`}
-                  >
-                    Logout
+                    <div className="w-5 h-5 rounded-full bg-teal-500/20 flex items-center justify-center">
+                      <User size={14} className="text-teal-500" />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest truncate max-w-[80px]">
+                      {user.name || 'Account'}
+                    </span>
+                    <ChevronDown size={14} className={`transition-transform duration-300 ${isUserDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
-                </>
+
+                  {/* Dropdown Menu */}
+                  {isUserDropdownOpen && (
+                    <div className={`absolute right-0 top-full mt-2 w-48 rounded-xl shadow-2xl border overflow-hidden z-[110] animate-in fade-in slide-in-from-top-2 duration-200 ${shouldShowSolidNavbar ? 'bg-white border-navy-100' : 'bg-navy-950/95 backdrop-blur-md border-white/10'}`}>
+                      <div className="p-2 space-y-1">
+                        {user.role === 'admin' && (
+                          <Link
+                            to="/admin"
+                            onClick={() => setIsUserDropdownOpen(false)}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${shouldShowSolidNavbar ? 'text-navy-700 hover:bg-teal-50 hover:text-teal-600' : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
+                          >
+                            <Settings size={14} />
+                            Admin Panel
+                          </Link>
+                        )}
+                        {user.role === 'receptionist' && (
+                          <Link
+                            to="/receptionist/dashboard"
+                            onClick={() => setIsUserDropdownOpen(false)}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${shouldShowSolidNavbar ? 'text-navy-700 hover:bg-teal-50 hover:text-teal-600' : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
+                          >
+                            <Settings size={14} />
+                            Dashboard
+                          </Link>
+                        )}
+                        {user.role === 'staff' && (
+                          <Link
+                            to="/employee/dashboard"
+                            onClick={() => setIsUserDropdownOpen(false)}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${shouldShowSolidNavbar ? 'text-navy-700 hover:bg-teal-50 hover:text-teal-600' : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
+                          >
+                            <TrendingUp size={14} />
+                            Staff Dashboard
+                          </Link>
+                        )}
+                        <Link
+                          to="/profile"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${shouldShowSolidNavbar ? 'text-navy-700 hover:bg-navy-50 hover:text-navy-950' : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
+                        >
+                          <User size={14} />
+                          My Profile
+                        </Link>
+                        <Link
+                          to="/my-events"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${shouldShowSolidNavbar ? 'text-navy-700 hover:bg-navy-50 hover:text-navy-950' : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
+                        >
+                          <TrendingUp size={14} />
+                          My Events
+                        </Link>
+                        <div className={`h-px my-1 ${shouldShowSolidNavbar ? 'bg-navy-100' : 'bg-white/10'}`} />
+                        <button
+                          onClick={() => { logout(); setIsUserDropdownOpen(false); }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                          <LogOut size={14} />
+                          Logout
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ) : (
-                <>
+                <div className="flex items-center gap-2">
                   <Link
                     to="/signin"
-                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 border-2 whitespace-nowrap ${shouldShowSolidNavbar
+                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 border-2 whitespace-nowrap flex items-center h-9 ${shouldShowSolidNavbar
                       ? 'border-navy-950 text-navy-950 hover:bg-navy-950 hover:text-white'
                       : isHomePage
                         ? 'border-navy-950/30 text-navy-950 hover:bg-navy-950 hover:text-white hover:border-navy-950'
@@ -232,7 +420,7 @@ const Navbar = () => {
                   </Link>
                   <Link
                     to="/login"
-                    className={`px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap ${shouldShowSolidNavbar
+                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap h-9 flex items-center ${shouldShowSolidNavbar
                       ? 'bg-navy-950 text-white hover:bg-navy-900 shadow-navy-900/20'
                       : isHomePage
                         ? 'bg-navy-950 text-white hover:bg-navy-900 shadow-navy-900/20'
@@ -241,13 +429,32 @@ const Navbar = () => {
                   >
                     Log In
                   </Link>
-                </>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="lg:hidden">
+          {/* Mobile: Cart + Menu button */}
+          <div className="lg:hidden flex items-center gap-2">
+            {/* Mobile Cart Icon */}
+            <div className="relative" ref={mobileCartRef}>
+              <button
+                onClick={() => setIsCartOpen(!isCartOpen)}
+                className={`relative p-2 rounded-xl transition-all duration-300 ${shouldShowSolidNavbar
+                  ? 'text-navy-950 hover:bg-navy-50'
+                  : 'text-white hover:bg-white/10'
+                  }`}
+              >
+                <ShoppingCart size={20} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-teal-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg shadow-teal-500/30">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* Mobile menu button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={`p-2 rounded-xl transition-all duration-300 ${shouldShowSolidNavbar
@@ -376,7 +583,7 @@ const Navbar = () => {
           <div className="p-6 border-t border-navy-50 space-y-3">
             {user ? (
               <>
-                {(user.role === 'admin' || user.role === 'staff') && (
+                {user.role === 'admin' && (
                   <Link
                     to="/admin"
                     className="flex items-center justify-between w-full px-5 py-4 rounded-2xl text-sm font-bold uppercase tracking-widest bg-teal-600 text-white shadow-xl shadow-teal-900/20 transition-all duration-300"
@@ -388,12 +595,41 @@ const Navbar = () => {
                     </svg>
                   </Link>
                 )}
+                {user.role === 'receptionist' && (
+                  <Link
+                    to="/receptionist/dashboard"
+                    className="flex items-center justify-between w-full px-5 py-4 rounded-2xl text-sm font-bold uppercase tracking-widest bg-teal-600 text-white shadow-xl shadow-teal-900/20 transition-all duration-300"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <span>Dashboard</span>
+                    <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                  </Link>
+                )}
+                {user.role === 'staff' && (
+                  <Link
+                    to="/employee/dashboard"
+                    className="flex items-center justify-between w-full px-5 py-4 rounded-2xl text-sm font-bold uppercase tracking-widest bg-navy-950 text-white shadow-xl shadow-navy-900/20 transition-all duration-300"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <span>Staff Dashboard</span>
+                    <TrendingUp size={20} className="opacity-70" />
+                  </Link>
+                )}
                 <Link
                   to="/profile"
                   className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center border-2 border-navy-950 text-navy-950 hover:bg-navy-50 transition-all duration-300"
                   onClick={() => setIsOpen(false)}
                 >
                   Profile
+                </Link>
+                <Link
+                  to="/my-events"
+                  className="block w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest text-center border-2 border-navy-950 text-navy-950 hover:bg-navy-50 transition-all duration-300"
+                  onClick={() => setIsOpen(false)}
+                >
+                  My Events
                 </Link>
                 <button
                   onClick={() => {
@@ -426,6 +662,14 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      {/* Slide-down animation keyframes */}
+      <style>{`
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </nav>
   )
 }

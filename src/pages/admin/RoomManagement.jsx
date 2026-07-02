@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     Plus, Search, Edit2, Trash2, X, BedDouble,
-    CheckCircle, WrenchIcon, XCircle, RefreshCw, Save, LogOut, UserCircle
+    CheckCircle, Wrench, XCircle, RefreshCw, Save, LogOut, UserCircle
 } from 'lucide-react';
-import { fetchRooms, createRoom, updateRoom, deleteRoom, updateRoomStatusByNumber, updateBookingStatus } from '../../utils/api';
+import { 
+    fetchRooms, createRoom, updateRoom, deleteRoom, 
+    updateRoomStatusByNumber, updateBookingStatus,
+    fetchRoomFeatures, createRoomFeature 
+} from '../../utils/api';
 import Toast from '../../components/admin_components/Toast';
 import { useToast } from '../../components/admin_components/useToast';
 import ImageUpload from '../../components/admin_components/ImageUpload';
@@ -11,18 +15,21 @@ import ImageUpload from '../../components/admin_components/ImageUpload';
 const ROOM_TYPES = ['deluxe', 'luxury', 'semiluxury', 'dayOuting', 'couple'];
 const STATUS_OPTIONS = ['available', 'occupied', 'maintenance'];
 
+
 const EMPTY_FORM = {
     name: '', roomNumber: '', type: 'deluxe', price: '', guests: '', description: '',
-    features: '', image: '', images: '', status: 'available', view: 'ocean',
+    features: [], image: '', images: '', status: 'available', view: 'ocean',
 };
 
 const statusConfig = {
     available: { label: 'Available', icon: CheckCircle, bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+    reserved: { label: 'Reserved', icon: CheckCircle, bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
     occupied: { label: 'Occupied', icon: XCircle, bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
-    maintenance: { label: 'Maintenance', icon: WrenchIcon, bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
+    maintenance: { label: 'Maintenance', icon: Wrench, bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
 };
 
 export default function RoomManagement() {
+    const { user } = useAuth();
     const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -32,13 +39,20 @@ export default function RoomManagement() {
     const [editingRoom, setEditingRoom] = useState(null);
     const [form, setForm] = useState(EMPTY_FORM);
     const [saving, setSaving] = useState(false);
+    const [dynamicFeatures, setDynamicFeatures] = useState([]);
+    const [newFeatureName, setNewFeatureName] = useState('');
+    const [creatingFeature, setCreatingFeature] = useState(false);
     const { toast, showToast, clearToast } = useToast();
 
     const load = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await fetchRooms({ limit: 100 });
-            setRooms(Array.isArray(data.rooms) ? data.rooms : (Array.isArray(data) ? data : []));
+            const [roomsData, featuresData] = await Promise.all([
+                fetchRooms({ limit: 100 }),
+                fetchRoomFeatures()
+            ]);
+            setRooms(Array.isArray(roomsData.rooms) ? roomsData.rooms : (Array.isArray(roomsData) ? roomsData : []));
+            setDynamicFeatures(Array.isArray(featuresData) ? featuresData : []);
         } catch (e) {
             showToast(e.message, 'error');
         } finally {
@@ -54,9 +68,9 @@ export default function RoomManagement() {
         setForm({
             name: room.name, roomNumber: room.roomNumber || '', type: room.type, price: room.price,
             guests: room.guests, description: room.description,
-            features: (room.features || []).join(', '),
-            image: room.image, 
-            status: room.status, 
+            features: Array.isArray(room.features) ? room.features : [],
+            image: room.image,
+            status: room.status,
             view: room.view || 'ocean',
             images: (room.images || []).join(', '),
         });
@@ -71,7 +85,7 @@ export default function RoomManagement() {
                 ...form,
                 price: Number(form.price),
                 guests: Number(form.guests),
-                features: form.features.split(',').map(f => f.trim()).filter(Boolean),
+                features: form.features,
                 images: form.images.split(',').map(f => f.trim()).filter(Boolean),
             };
             if (editingRoom) {
@@ -118,18 +132,23 @@ export default function RoomManagement() {
         }
     };
 
-    const handleCheckOut = async (bookingId, roomNumber) => {
-        if (!window.confirm('Are you sure you want to check out this guest? This will mark the booking as completed and make the room available.')) return;
+    const handleAddFeature = async () => {
+        if (!newFeatureName.trim()) return;
+        setCreatingFeature(true);
         try {
-            await updateBookingStatus(bookingId, 'completed');
-            // After marking booking as completed, we also mark the room as available in DB
-            if (roomNumber) {
-                await updateRoomStatusByNumber(roomNumber, 'available');
-            }
-            load();
-            showToast('Guest checked out successfully and room is now available');
+            const newFeat = await createRoomFeature({ name: newFeatureName.trim() });
+            setDynamicFeatures(prev => [...prev, newFeat]);
+            // Automatically select it
+            setForm(prev => ({
+                ...prev,
+                features: [...prev.features, newFeat.name]
+            }));
+            setNewFeatureName('');
+            showToast('New feature added to database');
         } catch (e) {
             showToast(e.message, 'error');
+        } finally {
+            setCreatingFeature(false);
         }
     };
 
@@ -142,16 +161,16 @@ export default function RoomManagement() {
     });
 
     const counts = {
-        available: rooms.filter(r => r.status === 'available' && !r.activeBooking).length,
-        occupied: rooms.filter(r => r.status === 'occupied' || r.activeBooking).length,
-        maintenance: rooms.filter(r => r.status === 'maintenance').length,
+        available: (rooms || []).filter(r => r && r.status === 'available' && !r.activeBooking).length,
+        occupied: (rooms || []).filter(r => r && (r.status === 'occupied' || r.activeBooking)).length,
+        maintenance: (rooms || []).filter(r => r && r.status === 'maintenance').length,
     };
 
     return (
         <div className="space-y-6">
             {toast && <Toast message={toast.message} type={toast.type} onClose={clearToast} />}
 
-           
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-navy-900">Room Management</h1>
@@ -162,14 +181,16 @@ export default function RoomManagement() {
                         <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
                         Refresh
                     </button>
-                    <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2 bg-navy-900 text-white rounded-xl hover:bg-teal-700 transition-colors text-sm font-medium shadow-sm">
-                        <Plus size={16} />
-                        Add Room
-                    </button>
+                    {user?.role !== 'receptionist' && (
+                        <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2 bg-navy-900 text-white rounded-xl hover:bg-teal-700 transition-colors text-sm font-medium shadow-sm">
+                            <Plus size={16} />
+                            Add Room
+                        </button>
+                    )}
                 </div>
             </div>
 
-            
+
             <div className="grid grid-cols-3 gap-4">
                 {Object.entries(counts).map(([key, count]) => {
                     const cfg = statusConfig[key];
@@ -190,7 +211,7 @@ export default function RoomManagement() {
                 })}
             </div>
 
-           
+
             <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1 max-w-sm">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-400" />
@@ -208,7 +229,7 @@ export default function RoomManagement() {
                 </select>
             </div>
 
-            
+
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[1, 2, 3].map(i => (
@@ -242,8 +263,8 @@ export default function RoomManagement() {
                         return (
                             <div key={room._id} className="bg-white rounded-2xl border border-navy-100 overflow-hidden hover:shadow-md transition-shadow group">
                                 <div className="relative h-44 bg-navy-100 overflow-hidden">
-                                    {room.image ? (
-                                        <img src={room.image} alt={room.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    {room.image || (room.images && room.images[0]) ? (
+                                        <img src={room.image || room.images[0]} alt={room.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
                                             <BedDouble size={40} className="text-navy-300" />
@@ -259,7 +280,7 @@ export default function RoomManagement() {
                                 <div className="p-4">
                                     <div className="flex items-start justify-between gap-2 mb-1">
                                         <h3 className="font-bold text-navy-900 text-sm leading-tight">{room.name}</h3>
-                                        <span className="text-lg font-bold text-teal-600 flex-shrink-0">${room.price}<span className="text-xs font-normal text-navy-400">/night</span></span>
+                                        <span className="text-lg font-bold text-teal-600 flex-shrink-0">Rs. {room.price}<span className="text-xs font-normal text-navy-400">/night</span></span>
                                     </div>
                                     <p className="text-xs text-navy-600 font-bold mb-1">Room No: {room.roomNumber || 'N/A'}</p>
                                     <p className="text-xs text-navy-400 capitalize mb-1">{room.type} · {room.guests} guests · {room.view} view</p>
@@ -279,7 +300,7 @@ export default function RoomManagement() {
                                                 <UserCircle size={14} className="text-navy-400" />
                                                 {room.activeBooking.user?.firstName || room.activeBooking.guestInfo?.firstName} {room.activeBooking.user?.lastName || room.activeBooking.guestInfo?.lastName}
                                             </p>
-                                            <div className="grid grid-cols-2 gap-2 mb-3 bg-white/50 p-2 rounded-lg border border-red-50">
+                                            <div className="grid grid-cols-2 gap-2 bg-white/50 p-2 rounded-lg border border-red-50">
                                                 <div>
                                                     <p className="text-[9px] text-navy-400 uppercase font-bold">Check-In</p>
                                                     <p className="text-[10px] font-bold text-navy-800">{new Date(room.activeBooking.checkIn).toLocaleDateString()}</p>
@@ -289,12 +310,6 @@ export default function RoomManagement() {
                                                     <p className="text-[10px] font-bold text-navy-800">{new Date(room.activeBooking.checkOut).toLocaleDateString()}</p>
                                                 </div>
                                             </div>
-                                            <button 
-                                                onClick={() => handleCheckOut(room.activeBooking._id, room.roomNumber)}
-                                                className="w-full flex items-center justify-center gap-1.5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[11px] font-bold transition-all shadow-sm hover:shadow-md"
-                                            >
-                                                <LogOut size={13} /> Check Out Guest
-                                            </button>
                                         </div>
                                     ) : (
 
@@ -303,31 +318,40 @@ export default function RoomManagement() {
                                         </div>
                                     )}
 
-                                    
-                                    <div className="flex gap-1 mb-3">
-                                        {STATUS_OPTIONS.map(s => (
+
+                                    <div className="flex items-center justify-between mb-3 bg-navy-50/50 p-2 rounded-xl border border-navy-50">
+                                        <div className={`px-2.5 py-1 rounded-full text-xs font-bold border shadow-sm flex items-center gap-1.5 capitalize ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+                                            <StatusIcon size={13} />
+                                            {room.status}
+                                        </div>
+                                        {room.status === 'available' && (
                                             <button
-                                                key={s}
-                                                onClick={() => room.status !== s && handleStatusToggle(room, s)}
-                                                className={`flex-1 py-1 rounded-lg text-xs font-medium transition-colors capitalize ${
-                                                    room.status === s
-                                                        ? `${statusConfig[s].bg} ${statusConfig[s].text} border ${statusConfig[s].border}`
-                                                        : 'bg-navy-50 text-navy-400 hover:bg-navy-100'
-                                                }`}
+                                                onClick={() => handleStatusToggle(room, 'maintenance')}
+                                                className="px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
                                             >
-                                                {s}
+                                                <Wrench size={12} /> Set Maintenance
                                             </button>
-                                        ))}
+                                        )}
+                                        {room.status === 'maintenance' && (
+                                            <button
+                                                onClick={() => handleStatusToggle(room, 'available')}
+                                                className="px-3 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
+                                            >
+                                                <CheckCircle size={12} /> Set Available
+                                            </button>
+                                        )}
                                     </div>
 
-                                    <div className="flex gap-2">
-                                        <button onClick={() => openEdit(room)} className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-navy-50 hover:bg-navy-100 text-navy-700 rounded-lg text-xs font-medium transition-colors">
-                                            <Edit2 size={13} /> Edit
-                                        </button>
-                                        <button onClick={() => handleDelete(room)} className="flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-medium transition-colors">
-                                            <Trash2 size={13} />
-                                        </button>
-                                    </div>
+                                    {user?.role !== 'receptionist' && (
+                                        <div className="flex gap-2">
+                                            <button onClick={() => openEdit(room)} className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-navy-50 hover:bg-navy-100 text-navy-700 rounded-lg text-xs font-medium transition-colors">
+                                                <Edit2 size={13} /> Edit
+                                            </button>
+                                            <button onClick={() => handleDelete(room)} className="flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-medium transition-colors">
+                                                <Trash2 size={13} />
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         );
@@ -335,7 +359,7 @@ export default function RoomManagement() {
                 </div>
             )}
 
-            
+
             {modalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -346,12 +370,12 @@ export default function RoomManagement() {
                             </button>
                         </div>
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="col-span-1">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="col-span-1 sm:col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Room Name *</label>
                                     <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Ocean Suite" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
-                                <div className="col-span-1">
+                                <div className="col-span-1 sm:col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Room Number *</label>
                                     <input required value={form.roomNumber} onChange={e => setForm({ ...form, roomNumber: e.target.value })} placeholder="e.g. 101" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
@@ -362,13 +386,11 @@ export default function RoomManagement() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Status</label>
-                                    <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                        {STATUS_OPTIONS.map(s => <option key={s} value={s} className="capitalize">{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-                                    </select>
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Status (Managed Auto)</label>
+                                    <input value={form.status} readOnly className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm bg-navy-50 text-navy-500 capitalize cursor-not-allowed focus:outline-none" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Price / Night ($) *</label>
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Price / Night (Rs.) *</label>
                                     <input required type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="e.g. 250" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
                                 <div>
@@ -406,13 +428,54 @@ export default function RoomManagement() {
                                         />
                                     </div>
                                 </div>
-                                <div className="col-span-2">
+                                <div className="col-span-1 sm:col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Description *</label>
                                     <textarea required rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Room description..." className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" />
                                 </div>
-                                <div className="col-span-2">
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Features <span className="text-navy-400 normal-case font-normal">(comma-separated)</span></label>
-                                    <input value={form.features} onChange={e => setForm({ ...form, features: e.target.value })} placeholder="WiFi, AC, Mini Bar, Ocean View..." className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                <div className="col-span-1 sm:col-span-2">
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-3">Room Features</label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 bg-navy-50/50 p-4 rounded-2xl border border-navy-100">
+                                        {dynamicFeatures.map(feature => (
+                                            <label key={feature._id} className="flex items-center gap-2 group cursor-pointer">
+                                                <div className="relative flex items-center">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={form.features.includes(feature.name)}
+                                                        onChange={(e) => {
+                                                            const newFeatures = e.target.checked 
+                                                                ? [...form.features, feature.name]
+                                                                : form.features.filter(f => f !== feature.name);
+                                                            setForm({ ...form, features: newFeatures });
+                                                        }}
+                                                        className="peer sr-only"
+                                                    />
+                                                    <div className="w-5 h-5 border-2 border-navy-200 rounded-lg transition-all peer-checked:border-teal-500 peer-checked:bg-teal-500 group-hover:border-teal-400">
+                                                        <CheckCircle className="w-full h-full text-white scale-0 transition-transform peer-checked:scale-75" />
+                                                    </div>
+                                                </div>
+                                                <span className="text-sm text-navy-700 font-medium group-hover:text-navy-900 transition-colors">{feature.name}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <div className="mt-3">
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase mb-1 ml-1">Add New Feature to Database</label>
+                                        <div className="flex gap-2">
+                                            <input 
+                                                value={newFeatureName} 
+                                                onChange={e => setNewFeatureName(e.target.value)} 
+                                                placeholder="e.g. Jacuzzi, Smart TV..." 
+                                                className="flex-1 px-4 py-2 border border-navy-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-500" 
+                                            />
+                                            <button 
+                                                type="button" 
+                                                onClick={handleAddFeature}
+                                                disabled={creatingFeature || !newFeatureName.trim()}
+                                                className="px-4 py-2 bg-teal-600 text-white rounded-xl text-xs font-bold hover:bg-teal-700 transition-colors disabled:opacity-50"
+                                            >
+                                                {creatingFeature ? 'Adding...' : 'Add Feature'}
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex gap-3 pt-2">

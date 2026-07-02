@@ -1,29 +1,37 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    Search, X, Eye, CheckCircle, XCircle, Clock,
-    RefreshCw, CalendarDays, BedDouble, User, Phone, Mail,
-    ChevronLeft, ChevronRight,
+    RefreshCw, Calendar, BedDouble, User, Phone, Mail,
+    ChevronLeft, ChevronRight, Plus, Eye, X, CheckCircle, XCircle, Clock, Search
 } from 'lucide-react';
-import { fetchBookings, updateBookingStatus } from '../../utils/api';
+import { fetchBookings, updateBookingStatus, fetchRooms, createBooking as apiCreateBooking } from '../../utils/api';
 import Toast from '../../components/admin_components/Toast';
 import { useToast } from '../../components/admin_components/useToast';
 
 const STATUS_FLOW = {
-    pending: { next: ['confirmed', 'cancelled'], color: 'bg-amber-50 text-amber-700 border-amber-200' },
-    confirmed: { next: ['pending', 'completed', 'cancelled'], color: 'bg-blue-50 text-blue-700 border-blue-200' },
-    completed: { next: [], color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    pending: { next: ['reserved', 'cancelled'], color: 'bg-amber-50 text-amber-700 border-amber-200' },
+    reserved: { next: ['checked_in', 'cancelled'], color: 'bg-blue-50 text-blue-700 border-blue-200' },
+    checked_in: { next: ['checked_out'], color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+    checked_out: { next: [], color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
     cancelled: { next: ['pending'], color: 'bg-red-50 text-red-700 border-red-200' },
 };
 
 const StatusIcon = ({ status }) => {
-    if (status === 'confirmed') return <CheckCircle size={12} />;
+    if (status === 'reserved') return <CheckCircle size={12} />;
     if (status === 'cancelled') return <XCircle size={12} />;
-    if (status === 'completed') return <CheckCircle size={12} />;
+    if (status === 'checked_out') return <CheckCircle size={12} />;
+    if (status === 'checked_in') return <Clock size={12} />;
     return <Clock size={12} />;
 };
 
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
-const formatCurrency = (n) => `$${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+const formatCurrency = (n) => `Rs. ${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+const canCheckIn = (booking) => {
+    if (!booking || !booking.checkIn) return false;
+    const today = new Date();
+    const checkInDate = new Date(booking.checkIn);
+    return today.toDateString() === checkInDate.toDateString();
+};
 
 export default function BookingManagement() {
     const [bookings, setBookings] = useState([]);
@@ -35,6 +43,16 @@ export default function BookingManagement() {
     const [filterStatus, setFilterStatus] = useState('all');
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [updatingId, setUpdatingId] = useState(null);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [rooms, setRooms] = useState([]);
+    const [creating, setCreating] = useState(false);
+    const [newBooking, setNewBooking] = useState({
+        roomId: '',
+        checkIn: '',
+        checkOut: '',
+        guests: 1,
+        guestInfo: { firstName: '', lastName: '', email: '', phone: '' }
+    });
     const { toast, showToast, clearToast } = useToast();
     const LIMIT = 15;
 
@@ -44,10 +62,11 @@ export default function BookingManagement() {
             const params = { page: p, limit: LIMIT };
             if (filterStatus !== 'all') params.status = filterStatus;
             const data = await fetchBookings(params);
-            setBookings(data.bookings);
-            setTotal(data.total);
-            setPage(data.page);
-            setPages(data.pages);
+            const bookingsArray = Array.isArray(data.bookings) ? data.bookings : [];
+            setBookings(bookingsArray);
+            setTotal(data.total || 0);
+            setPage(data.page || 1);
+            setPages(data.pages || 1);
         } catch (e) {
             showToast(e.message, 'error');
         } finally {
@@ -71,22 +90,67 @@ export default function BookingManagement() {
         }
     };
 
+    const handleCreateBooking = async (e) => {
+        e.preventDefault();
+        const checkInDate = new Date(newBooking.checkIn);
+        const checkOutDate = new Date(newBooking.checkOut);
+        
+        if (checkOutDate <= checkInDate) {
+            showToast('Check-out date must be after check-in date', 'error');
+            setCreating(false);
+            return;
+        }
+
+        try {
+            await apiCreateBooking({
+                ...newBooking,
+                paymentMethod: 'onsite'
+            });
+            showToast('Manual booking created successfully');
+            setIsCreateModalOpen(false);
+            load(1);
+            setNewBooking({
+                roomId: '',
+                checkIn: '',
+                checkOut: '',
+                guests: 1,
+                guestInfo: { firstName: '', lastName: '', email: '', phone: '' }
+            });
+        } catch (e) {
+            showToast(e.message, 'error');
+        } finally {
+            setCreating(false);
+        }
+    };
+
+    const openCreateModal = async () => {
+        setIsCreateModalOpen(true);
+        try {
+            const data = await fetchRooms({ limit: 100 });
+            setRooms(Array.isArray(data.rooms) ? data.rooms : (Array.isArray(data) ? data : []));
+        } catch (e) {
+            showToast('Failed to fetch rooms', 'error');
+        }
+    };
+
     const filtered = search
-        ? bookings.filter(b => {
-            const guestName = `${b.user?.firstName || ''} ${b.user?.lastName || ''}`.toLowerCase();
-            const email = b.user?.email?.toLowerCase() || '';
-            const bookingId = b.bookingId?.toLowerCase() || '';
+        ? (Array.isArray(bookings) ? bookings : []).filter(b => {
+            if (!b) return false;
+            const guestName = `${b.user?.firstName || b.guestInfo?.firstName || ''} ${b.user?.lastName || b.guestInfo?.lastName || ''}`.toLowerCase();
+            const email = b.user?.email?.toLowerCase() || b.guestInfo?.email?.toLowerCase() || '';
+            const bookingId = b.bookingId?.toLowerCase() || b._id?.toLowerCase() || '';
             const q = search.toLowerCase();
             return guestName.includes(q) || email.includes(q) || bookingId.includes(q);
         })
-        : bookings;
+        : (Array.isArray(bookings) ? bookings : []);
 
     const statusCounts = {
-        all: total,
-        pending: bookings.filter(b => b.status === 'pending').length,
-        confirmed: bookings.filter(b => b.status === 'confirmed').length,
-        completed: bookings.filter(b => b.status === 'completed').length,
-        cancelled: bookings.filter(b => b.status === 'cancelled').length,
+        all: total || 0,
+        pending: (Array.isArray(bookings) ? bookings : []).filter(b => b?.status === 'pending').length,
+        reserved: (Array.isArray(bookings) ? bookings : []).filter(b => b?.status === 'reserved').length,
+        checked_in: (Array.isArray(bookings) ? bookings : []).filter(b => b?.status === 'checked_in').length,
+        checked_out: (Array.isArray(bookings) ? bookings : []).filter(b => b?.status === 'checked_out').length,
+        cancelled: (Array.isArray(bookings) ? bookings : []).filter(b => b?.status === 'cancelled').length,
     };
 
     return (
@@ -99,14 +163,19 @@ export default function BookingManagement() {
                     <h1 className="text-2xl font-bold text-navy-900">Booking Management</h1>
                     <p className="text-navy-400 text-sm mt-0.5">{total} total bookings</p>
                 </div>
-                <button onClick={() => load(1)} disabled={loading} className="flex items-center gap-2 px-3 py-2 bg-white border border-navy-200 text-navy-600 rounded-xl hover:bg-navy-50 transition-colors text-sm font-medium shadow-sm disabled:opacity-50">
-                    <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh
-                </button>
+                <div className="flex gap-2">
+                    <button onClick={() => load(1)} disabled={loading} className="flex items-center gap-2 px-3 py-2 bg-white border border-navy-200 text-navy-600 rounded-xl hover:bg-navy-50 transition-colors text-sm font-medium shadow-sm disabled:opacity-50">
+                        <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh
+                    </button>
+                    <button onClick={openCreateModal} className="flex items-center gap-2 px-4 py-2 bg-navy-900 text-white rounded-xl hover:bg-teal-700 transition-all text-sm font-medium shadow-md">
+                        <Plus size={16} /> Create Booking
+                    </button>
+                </div>
             </div>
 
             
             <div className="flex gap-1.5 bg-white p-1.5 rounded-2xl border border-navy-100 shadow-sm w-fit flex-wrap">
-                {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(s => (
+                {['all', 'pending', 'reserved', 'checked_in', 'checked_out', 'cancelled'].map(s => (
                     <button
                         key={s}
                         onClick={() => { setFilterStatus(s); }}
@@ -141,10 +210,10 @@ export default function BookingManagement() {
                     </div>
                 ) : filtered.length === 0 ? (
                     <div className="text-center py-16">
-                        <CalendarDays size={48} className="mx-auto text-navy-200 mb-3" />
+                        <Calendar size={48} className="mx-auto text-navy-200 mb-3" />
                         <h3 className="text-lg font-semibold text-navy-700">No bookings found</h3>
                         <p className="text-navy-400 text-sm mt-1">
-                            {bookings.length === 0 ? 'Bookings will appear here once guests make reservations.' : 'Try adjusting your filters.'}
+                            {(bookings || []).length === 0 ? 'Bookings will appear here once guests make reservations.' : 'Try adjusting your filters.'}
                         </p>
                     </div>
                 ) : (
@@ -195,7 +264,7 @@ export default function BookingManagement() {
                                             <td className="px-5 py-4">
                                                 <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border capitalize ${cfg.color}`}>
                                                     {isUpdating ? <RefreshCw size={11} className="animate-spin" /> : <StatusIcon status={b.status} />}
-                                                    {b.status}
+                                                    {b.status.replace('_', ' ')}
                                                 </span>
                                             </td>
                                             <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
@@ -207,21 +276,27 @@ export default function BookingManagement() {
                                                     >
                                                         <Eye size={15} />
                                                     </button>
-                                                    {cfg.next.map(ns => (
-                                                        <button
-                                                            key={ns}
-                                                            onClick={(e) => { e.stopPropagation(); handleStatusChange(b._id, ns); }}
-                                                            disabled={isUpdating}
-                                                            className={`px-2.5 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors disabled:opacity-50 ${
-                                                                ns === 'confirmed' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' :
-                                                                ns === 'completed' ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' :
-                                                                ns === 'pending' ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' :
-                                                                'bg-red-50 text-red-600 hover:bg-red-100'
-                                                            }`}
-                                                        >
-                                                            {ns}
-                                                        </button>
-                                                    ))}
+                                                    {cfg.next.map(ns => {
+                                                        const isCheckInDisabled = ns === 'checked_in' && !canCheckIn(b);
+                                                        return (
+                                                            <button
+                                                                key={ns}
+                                                                onClick={(e) => { e.stopPropagation(); handleStatusChange(b._id, ns); }}
+                                                                disabled={isUpdating || isCheckInDisabled}
+                                                                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors disabled:opacity-50 ${
+                                                                    isCheckInDisabled ? 'bg-navy-100 text-navy-400 cursor-not-allowed border border-navy-200' :
+                                                                    ns === 'reserved' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' :
+                                                                    ns === 'checked_in' ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100' :
+                                                                    ns === 'checked_out' ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' :
+                                                                    ns === 'pending' ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' :
+                                                                    'bg-red-50 text-red-600 hover:bg-red-100'
+                                                                }`}
+                                                                title={isCheckInDisabled ? "Check-in is only available on the check-in date" : ""}
+                                                            >
+                                                                {ns.replace('_', ' ')}
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
                                             </td>
                                         </tr>
@@ -250,8 +325,8 @@ export default function BookingManagement() {
 
             
             {selectedBooking && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-end">
-                    <div className="w-full max-w-md bg-white h-full overflow-y-auto shadow-2xl flex flex-col">
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-end" onClick={() => setSelectedBooking(null)}>
+                    <div className="w-full max-w-md bg-white h-full overflow-y-auto shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-5 border-b border-navy-100 sticky top-0 bg-white z-10">
                             <div>
                                 <h3 className="font-bold text-navy-900">Booking Details</h3>
@@ -270,7 +345,7 @@ export default function BookingManagement() {
                                 <span className="text-xs font-semibold text-navy-500 uppercase tracking-wide">Current Status</span>
                                 <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border capitalize ${STATUS_FLOW[selectedBooking.status]?.color}`}>
                                     <StatusIcon status={selectedBooking.status} />
-                                    {selectedBooking.status}
+                                    {selectedBooking.status.replace('_', ' ')}
                                 </span>
                             </div>
 
@@ -350,25 +425,163 @@ export default function BookingManagement() {
                                 <div>
                                     <p className="text-xs font-semibold text-navy-500 uppercase tracking-wide mb-2">Update Status</p>
                                     <div className="flex gap-2 flex-wrap">
-                                        {STATUS_FLOW[selectedBooking.status].next.map(ns => (
-                                            <button
-                                                key={ns}
-                                                onClick={() => handleStatusChange(selectedBooking._id, ns)}
-                                                disabled={updatingId === selectedBooking._id}
-                                                className={`flex-1 py-2 rounded-xl text-sm font-medium capitalize transition-colors ${
-                                                    ns === 'confirmed' ? 'bg-blue-600 text-white hover:bg-blue-700' :
-                                                    ns === 'completed' ? 'bg-emerald-600 text-white hover:bg-emerald-700' :
-                                                    ns === 'pending' ? 'bg-amber-500 text-white hover:bg-amber-600' :
-                                                    'bg-red-500 text-white hover:bg-red-600'
-                                                } disabled:opacity-50`}
-                                            >
-                                                Mark as {ns}
-                                            </button>
-                                        ))}
+                                        {STATUS_FLOW[selectedBooking.status].next.map(ns => {
+                                             const isCheckInDisabled = ns === 'checked_in' && !canCheckIn(selectedBooking);
+                                             return (
+                                                 <button
+                                                     key={ns}
+                                                     onClick={() => handleStatusChange(selectedBooking._id, ns)}
+                                                     disabled={updatingId === selectedBooking._id || isCheckInDisabled}
+                                                     className={`flex-1 py-2 rounded-xl text-sm font-medium capitalize transition-colors ${
+                                                         isCheckInDisabled ? 'bg-navy-100 text-navy-400 cursor-not-allowed border border-navy-200' :
+                                                         ns === 'reserved' ? 'bg-blue-600 text-white hover:bg-blue-700' :
+                                                         ns === 'checked_in' ? 'bg-indigo-600 text-white hover:bg-indigo-700' :
+                                                         ns === 'checked_out' ? 'bg-emerald-600 text-white hover:bg-emerald-700' :
+                                                         ns === 'pending' ? 'bg-amber-500 text-white hover:bg-amber-600' :
+                                                         'bg-red-500 text-white hover:bg-red-600'
+                                                     } disabled:opacity-50`}
+                                                     title={isCheckInDisabled ? "Check-in is only available on the check-in date" : ""}
+                                                 >
+                                                     Mark as {ns.replace('_', ' ')}
+                                                 </button>
+                                             );
+                                         })}
                                     </div>
                                 </div>
                             )}
+
+                            <div className="pt-2 pb-4">
+                                <button onClick={() => setSelectedBooking(null)} className="w-full py-3 border border-navy-200 text-navy-600 rounded-xl hover:bg-navy-50 transition-colors font-semibold flex items-center justify-center gap-2">
+                                    <X size={16} /> Close Details
+                                </button>
+                            </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Create Manual Booking Modal */}
+            {isCreateModalOpen && (
+                <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md flex items-center justify-center z-[1000] p-4">
+                    <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-white/20 max-h-[90vh] overflow-y-auto custom-scrollbar">
+                        <div className="bg-navy-900 px-8 py-6 flex justify-between items-center text-white sticky top-0 z-10">
+                            <div>
+                                <h2 className="text-xl font-bold">Manual Room Booking</h2>
+                                <p className="text-navy-300 text-xs mt-1">Receptionist manual reservation entry</p>
+                            </div>
+                            <button onClick={() => setIsCreateModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={20} /></button>
+                        </div>
+                        
+                        <form onSubmit={handleCreateBooking} className="p-8 space-y-5">
+                            <div className="grid grid-cols-2 gap-5">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Guest First Name</label>
+                                    <input required type="text" value={newBooking.guestInfo.firstName} onChange={e => setNewBooking({ ...newBooking, guestInfo: { ...newBooking.guestInfo, firstName: e.target.value } })} className="w-full px-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" placeholder="John" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Guest Last Name</label>
+                                    <input required type="text" value={newBooking.guestInfo.lastName} onChange={e => setNewBooking({ ...newBooking, guestInfo: { ...newBooking.guestInfo, lastName: e.target.value } })} className="w-full px-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" placeholder="Doe" />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-5">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Email Address</label>
+                                    <input required type="email" value={newBooking.guestInfo.email} onChange={e => setNewBooking({ ...newBooking, guestInfo: { ...newBooking.guestInfo, email: e.target.value } })} className="w-full px-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" placeholder="guest@example.com" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Phone Number</label>
+                                    <input 
+                                        required 
+                                        type="tel" 
+                                        pattern="[0-9]{10}"
+                                        title="Please enter a valid 10-digit phone number"
+                                        value={newBooking.guestInfo.phone} 
+                                        onKeyPress={(e) => { if (!/[0-9]/.test(e.key)) e.preventDefault(); }}
+                                        onChange={e => {
+                                            const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                            setNewBooking({ ...newBooking, guestInfo: { ...newBooking.guestInfo, phone: val } });
+                                        }} 
+                                        className="w-full px-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" 
+                                        placeholder="0712345678" 
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5 relative">
+                                <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Select Room <span className="text-red-500">*</span></label>
+                                <input type="text" required value={newBooking.roomId} className="opacity-0 absolute w-0 h-0 bottom-0 left-1/2" readOnly tabIndex={-1} />
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-52 overflow-y-auto p-1.5 rounded-xl bg-navy-50/40 border border-navy-100">
+                                    {rooms.length === 0 ? (
+                                        <div className="col-span-full py-6 text-center text-navy-400 text-sm">No rooms available to book.</div>
+                                    ) : (
+                                        rooms.map(r => (
+                                            <div 
+                                                key={r._id} 
+                                                onClick={() => setNewBooking({ ...newBooking, roomId: r._id })}
+                                                className={`rounded-xl border-2 cursor-pointer transition-all overflow-hidden ${
+                                                    newBooking.roomId === r._id 
+                                                    ? 'border-teal-500 bg-teal-50 shadow-sm' 
+                                                    : 'border-white bg-white hover:border-navy-200 shadow-sm'
+                                                }`}
+                                            >
+                                                <div className="h-20 bg-navy-100 relative">
+                                                    {(r.image || (r.images && r.images[0])) ? (
+                                                        <img src={r.image || r.images[0]} alt={r.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-navy-300">
+                                                            <BedDouble size={20} />
+                                                        </div>
+                                                    )}
+                                                    {newBooking.roomId === r._id && (
+                                                        <div className="absolute inset-0 bg-teal-500/20 flex items-center justify-center">
+                                                            <CheckCircle size={20} className="text-white drop-shadow-md" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="p-2.5">
+                                                    <div className="flex justify-between items-start mb-0.5">
+                                                        <p className="font-bold text-navy-900 text-xs">Room {r.roomNumber}</p>
+                                                    </div>
+                                                    <p className="text-[10px] text-navy-500 truncate" title={r.name}>{r.name}</p>
+                                                    <p className="text-teal-600 font-bold text-xs mt-1">{formatCurrency(r.price)}<span className="text-navy-400 font-normal text-[9px]">/n</span></p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-5">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Check-in</label>
+                                    <input required type="date" value={newBooking.checkIn} onChange={e => setNewBooking({ ...newBooking, checkIn: e.target.value })} className="w-full px-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Check-out</label>
+                                    <input 
+                                        required 
+                                        type="date" 
+                                        min={newBooking.checkIn ? new Date(new Date(newBooking.checkIn).getTime() + 86400000).toISOString().split('T')[0] : ''}
+                                        value={newBooking.checkOut} 
+                                        onChange={e => setNewBooking({ ...newBooking, checkOut: e.target.value })} 
+                                        className="w-full px-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" 
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-navy-900 uppercase tracking-wider ml-1">Guests</label>
+                                    <input required type="number" min="1" max="10" value={newBooking.guests} onChange={e => setNewBooking({ ...newBooking, guests: parseInt(e.target.value) })} className="w-full px-4 py-2.5 bg-navy-50/50 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all" />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-4 pt-4">
+                                <button type="button" onClick={() => setIsCreateModalOpen(false)} className="flex-1 px-4 py-3 border border-navy-200 rounded-xl text-navy-600 font-semibold hover:bg-navy-50 transition-colors">Cancel</button>
+                                <button type="submit" disabled={creating} className="flex-[2] bg-navy-900 text-white rounded-xl py-3 font-semibold flex items-center justify-center gap-2 hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-900/20 active:scale-[0.98] transition-all disabled:opacity-50">
+                                    {creating ? <RefreshCw size={18} className="animate-spin" /> : <CheckCircle size={18} />}
+                                    Create Reservation
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { fetchRoomsByCategory, checkRoomAvailability } from '../utils/api'
+import { fetchRoomsByCategory, checkRoomAvailability, fetchActiveOffers } from '../utils/api'
 import Footer from '../components/Footer'
+import BookingModal from '../components/BookingModal'
 
 const today = new Date().toISOString().split('T')[0]
 const checkInTime = "12:00 PM - 2:00 PM";
@@ -11,6 +12,8 @@ const DaycheckInTime = "9:00 AM - 7:00 PM";
 const FALLBACK_IMAGES = [
     'https://res.cloudinary.com/dztzaoo6r/image/upload/v1775325411/unnamed_7_zt9tzo.webp'
 ]
+
+
 
 const getGalleryImages = (room) => {
     const base = room.images?.length ? room.images : []
@@ -61,6 +64,7 @@ const DeluxeRooms = () => {
     const [guests, setGuests] = useState(state?.guests || '1')
     const [availability, setAvailability] = useState(null)
     const [lightboxIndex, setLightboxIndex] = useState(null)
+    const [showBookingModal, setShowBookingModal] = useState(false)
     const navigate = useNavigate()
 
     const openLightbox = (idx) => setLightboxIndex(idx)
@@ -83,27 +87,53 @@ const DeluxeRooms = () => {
     const normalizeRoom = (room) => ({
         ...room,
         tagline: room.tagline || room.description || '',
-        tags: room.tags?.length ? room.tags : (room.features?.length ? room.features.slice(0, 4) : []),
+        tags: [...new Set([...(room.tags || []), ...(room.features || [])])].slice(0, 4),
         capacity: room.capacity || `${room.guests || 2} Guests`,
         size: room.size || '',
         badge: room.badge || (room.view ? `${room.view} view` : 'Deluxe'),
         badgeColor: room.badgeColor || 'bg-blue-500',
-        facilities: room.facilities?.length
-            ? room.facilities
-            : (room.features || []).map(f => ({ icon: '✦', label: f })),
+        facilities: [
+            ...(room.facilities || []),
+            ...(room.features || []).filter(f => !(room.facilities || []).some(fac => fac.label === f)).map(f => ({ icon: '', label: f }))
+        ],
         includes: room.includes?.length
             ? room.includes
             : ['Complimentary breakfast', 'Free Wi-Fi', 'Daily housekeeping'],
     })
-
+    
     useEffect(() => {
         setLoading(true)
         setError(null)
         setSelectedRoom(null)
         setAvailability(null)
-        fetchRoomsByCategory('deluxe', selectedPackage, checkIn, checkOut)
-            .then(data => {
-                const normalized = data.map(normalizeRoom);
+        
+        Promise.all([
+            fetchRoomsByCategory('deluxe', selectedPackage, checkIn, checkOut),
+            fetchActiveOffers().catch(() => []) // fail gracefully if offers can't be fetched
+        ])
+            .then(([data, activeOffers]) => {
+                const normalized = data.map(room => {
+                    const roomObj = normalizeRoom(room);
+                    
+                    // Check if there's an applicable offer for this room type and checkIn date
+                    if (checkIn && activeOffers.length > 0) {
+                        const checkInDate = new Date(checkIn);
+                        const applicableOffer = activeOffers.find(offer => {
+                            const start = new Date(offer.startDate);
+                            const end = new Date(offer.endDate);
+                            return offer.applicableRoomTypes.includes('deluxe') &&
+                                   checkInDate >= start && checkInDate <= end;
+                        });
+
+                        if (applicableOffer) {
+                            roomObj.originalPrice = roomObj.price;
+                            roomObj.price = roomObj.price - (roomObj.price * (applicableOffer.discountPercentage / 100));
+                            roomObj.hasOffer = true;
+                            roomObj.offerTitle = `${applicableOffer.discountPercentage}% OFF - ${applicableOffer.title.toUpperCase()}`;
+                        }
+                    }
+                    return roomObj;
+                });
                 const filtered = normalized.filter(room => room.guests >= parseInt(guests));
                 setRooms(filtered);
             })
@@ -139,7 +169,7 @@ const DeluxeRooms = () => {
 
     const handleConfirmBooking = () => {
         if (!selectedRoom || !checkIn || (selectedPackage !== 'day-use' && !checkOut)) return
-        navigate('/contact-us')
+        setShowBookingModal(true)
     }
 
 
@@ -152,7 +182,7 @@ const DeluxeRooms = () => {
 
 
 
-    const formatPrice = (price) => `LKR ${price.toLocaleString()}`
+    const formatPrice = (price) => `Rs. ${price.toLocaleString()}`
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-navy-50 via-white to-navy-50/30">
@@ -412,7 +442,7 @@ const DeluxeRooms = () => {
                                 {(room.isAvailable === false || room.status === 'maintenance') && (
                                     <div className="absolute inset-0 z-10 bg-navy-900/40 backdrop-blur-[2px] flex items-center justify-center pointer-events-none">
                                         <div className={`${room.status === 'maintenance' ? 'bg-amber-600' : 'bg-red-500'} text-white px-6 py-2 rounded-full font-bold text-lg shadow-2xl rotate-[-10deg] animate-pulse`}>
-                                            {room.status === 'maintenance' ? 'Maintenance' : 'Occupied'}
+                                            {room.status === 'maintenance' ? 'Maintenance' : room.status === 'occupied' ? 'Occupied' : 'Reserved'}
                                         </div>
                                     </div>
                                 )}
@@ -443,8 +473,16 @@ const DeluxeRooms = () => {
 
                                         <div className="flex flex-wrap items-center justify-between gap-2 mt-4 pt-4 border-t border-navy-50">
                                             <div>
-                                                <span className="text-xs text-navy-400 block">Per Night</span>
-                                                <span className="text-xl sm:text-2xl font-extrabold text-navy-900 italic">{formatPrice(room.price)}/-</span>
+                                                {room.hasOffer && (
+                                                    <div className="flex flex-col">
+                                                        <span className="text-xs text-navy-400 line-through">{formatPrice(room.originalPrice)}</span>
+                                                        <span className="text-xl sm:text-2xl font-extrabold text-blue-600 italic">{formatPrice(room.price)}/-</span>
+                                                        <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">{room.offerTitle}</span>
+                                                    </div>
+                                                )}
+                                                {!room.hasOffer && (
+                                                    <span className="text-xl sm:text-2xl font-extrabold text-navy-900 italic">{formatPrice(room.price)}/-</span>
+                                                )}
                                             </div>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleSelectRoom(room) }}
@@ -499,8 +537,15 @@ const DeluxeRooms = () => {
                                     <div className="p-6 space-y-5">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <span className="text-[10px] text-navy-400 block uppercase tracking-widest">Per Night</span>
-                                                <span className="text-2xl sm:text-3xl font-extrabold text-navy-900 italic">{formatPrice(selectedRoom.price)}/-</span>
+                                                {selectedRoom.hasOffer ? (
+                                                    <div className="flex flex-col">
+                                                        <span className="text-xs text-navy-400 line-through">{formatPrice(selectedRoom.originalPrice)}</span>
+                                                        <span className="text-2xl sm:text-3xl font-extrabold text-blue-600 italic">{formatPrice(selectedRoom.price)}/-</span>
+                                                        <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">{selectedRoom.offerTitle}</span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-2xl sm:text-3xl font-extrabold text-navy-900 italic">{formatPrice(selectedRoom.price)}/-</span>
+                                                )}
                                             </div>
                                             <div className="text-right">
                                                 <span className="text-[10px] text-navy-400 block uppercase tracking-widest">Capacity</span>
@@ -511,8 +556,8 @@ const DeluxeRooms = () => {
 
 
                                         {checkIn && (selectedPackage === 'day-use' || (checkOut && calcNights() > 0)) && (
-                                            <div className="grid grid-cols-2 gap-2 animate-fade-in">
-                                                <div className={`rounded-xl px-3 py-2 border ${selectedPackage === 'day-use' ? 'col-span-2 bg-blue-50 border-blue-100' : 'bg-blue-50 border-blue-100'}`}>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 animate-fade-in">
+                                                <div className={`rounded-xl px-3 py-2 border ${selectedPackage === 'day-use' ? 'col-span-1 sm:col-span-2 bg-blue-50 border-blue-100' : 'bg-blue-50 border-blue-100'}`}>
                                                     <span className="text-xs text-blue-600 font-bold block">{selectedPackage === 'day-use' ? 'Visit Date' : 'Check-In'}</span>
                                                     <span className="text-navy-800 font-semibold text-sm">{new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {selectedPackage === 'day-use' ? DaycheckInTime : checkInTime}</span>
                                                 </div>
@@ -522,7 +567,7 @@ const DeluxeRooms = () => {
                                                         <span className="text-navy-800 font-semibold text-sm">{new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | {checkOutTime}</span>
                                                     </div>
                                                 )}
-                                                <div className="col-span-2 bg-gradient-to-r from-navy-50 to-blue-50/50 rounded-xl px-3 py-2 flex justify-between items-center">
+                                                <div className="col-span-1 sm:col-span-2 bg-gradient-to-r from-navy-50 to-blue-50/50 rounded-xl px-3 py-2 flex justify-between items-center">
                                                     <span className="text-navy-500 text-sm">
                                                         {selectedPackage === 'day-use' ? 'Day Use' : `${calcNights()} Night${calcNights() > 1 ? 's' : ''}`}
                                                     </span>
@@ -585,7 +630,7 @@ const DeluxeRooms = () => {
                                             disabled={!checkIn || (selectedPackage !== 'day-use' && (!checkOut || calcNights() <= 0)) || availability === false || availability === 'checking' || selectedRoom?.isAvailable === false || selectedRoom?.status === 'maintenance'}
                                             className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow"
                                         >
-                                            {selectedRoom?.status === 'maintenance' ? 'Maintenance Mode' : selectedRoom?.isAvailable === false ? 'Room Occupied' : !checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
+                                            {selectedRoom?.status === 'maintenance' ? 'Maintenance Mode' : selectedRoom?.isAvailable === false ? (selectedRoom?.status === 'occupied' ? 'Room Occupied' : 'Room Reserved') : !checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
                                         </button>
 
                                         <p className="text-center text-navy-400 text-xs">Check dates & times before booking</p>
@@ -602,6 +647,16 @@ const DeluxeRooms = () => {
                     </div>
                 </div>
             </section>
+            <BookingModal
+                isOpen={showBookingModal}
+                onClose={() => { setShowBookingModal(false) }}
+                room={selectedRoom}
+                checkIn={checkIn}
+                checkOut={selectedPackage === 'day-use' ? checkIn : checkOut}
+                guests={guests}
+                selectedPackage={selectedPackage}
+                onSuccess={() => { setAvailability(null) }}
+            />
             <Footer />
         </div>
     )
