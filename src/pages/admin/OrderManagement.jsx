@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
     Search, 
-    Filter, 
     Eye, 
     CheckCircle, 
     Clock, 
@@ -22,7 +21,6 @@ const OrderManagement = () => {
     const { toast: toastState, showToast, clearToast } = useToast();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [statusFilter, setStatusFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -39,7 +37,7 @@ const OrderManagement = () => {
     const loadOrders = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await fetchAdminOrders({ status: statusFilter, search: searchTerm });
+            const data = await fetchAdminOrders({ search: searchTerm });
             setOrders(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Failed to fetch orders:', error);
@@ -47,7 +45,7 @@ const OrderManagement = () => {
         } finally {
             setLoading(false);
         }
-    }, [statusFilter, searchTerm, showToast]);
+    }, [searchTerm, showToast]);
 
     useEffect(() => {
         loadOrders();
@@ -215,20 +213,6 @@ const OrderManagement = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-10 pr-4 py-2.5 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 bg-navy-50/50 text-sm"
                     />
-                </div>
-                <div className="flex items-center gap-3 w-full md:w-auto">
-                    <Filter size={18} className="text-navy-400" />
-                    <select 
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="border border-navy-100 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-sm font-medium text-navy-700"
-                    >
-                        <option value="all">All Statuses</option>
-                        <option value="pending">Pending</option>
-                        <option value="preparing">Preparing</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
                 </div>
             </div>
 
