@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Users, CreditCard, ChevronRight, Loader2, CheckCircle2, Lock } from 'lucide-react';
-import { createBooking } from '../utils/api';
+import { createBooking, confirmBookingPayment } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 
 const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, selectedPackage, onSuccess }) => {
@@ -17,13 +17,37 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
         paymentMethod: 'card'
     });
 
-    const [cardDetails, setCardDetails] = useState({
-        number: '',
-        expiry: '',
-        cvv: '',
-        name: ''
-    });
-    const [cardErrors, setCardErrors] = useState({});
+    const [errors, setErrors] = useState({});
+
+    const validateStep1 = () => {
+        const errs = {};
+        if (!formData.firstName?.trim()) errs.firstName = 'First name is required';
+        if (!formData.lastName?.trim()) errs.lastName = 'Last name is required';
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!formData.email?.trim()) {
+            errs.email = 'Email address is required';
+        } else if (!emailRegex.test(formData.email)) {
+            errs.email = 'Please enter a valid email address';
+        }
+
+        const phoneClean = (formData.phone || '').replace(/[^0-9]/g, '');
+        if (!formData.phone?.trim()) {
+            errs.phone = 'Phone number is required';
+        } else if (phoneClean.length !== 10) {
+            errs.phone = 'Phone number must be exactly 10 digits';
+        }
+
+        setErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
+    const handleStep1Submit = (e) => {
+        e.preventDefault();
+        if (validateStep1()) {
+            setStep(2);
+        }
+    };
 
     // Pre-filling user data
     useEffect(() => {
@@ -103,17 +127,38 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
     };
 
     const nights = selectedPackage === 'day-use' ? 1 : calcNights();
-    const total = room.price * nights;
+    
+    let currentUnitPrice = room.price;
+    let basePriceForDisplay = room.originalPrice || room.price;
+    let hasOffer = room.hasOffer || false;
+
+    const subtotal = basePriceForDisplay * nights;
+    const total = currentUnitPrice * nights;
+    const discountAmount = subtotal - total;
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        if (name === 'phone') {
+            const sanitized = value.replace(/[^0-9]/g, '').slice(0, 10);
+            setFormData(prev => ({ ...prev, [name]: sanitized }));
+            if (errors[name]) {
+                setErrors(prev => ({ ...prev, [name]: undefined }));
+            }
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+            if (errors[name]) {
+                setErrors(prev => ({ ...prev, [name]: undefined }));
+            }
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!validateCard()) return;
+        if (typeof window.payhere === 'undefined') {
+            setError('PayHere secure checkout is currently unavailable. Please reload the page or disable adblockers.');
+            return;
+        }
 
         setLoading(true);
         setError(null);
@@ -135,20 +180,49 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                     phone: formData.phone,
                     specialRequests: formData.specialRequests
                 },
-                cardDetails: {
-                    number: cardDetails.number.replace(/\s/g, ''),
-                    expiry: cardDetails.expiry,
-                    cvv: cardDetails.cvv,
-                    name: cardDetails.name,
-                }
+                paymentMethod: 'payhere'
             };
 
-            await createBooking(payload);
-            setStep(3); // Success step
-            if (onSuccess) onSuccess();
+            const data = await createBooking(payload);
+            
+            if (data.payhere) {
+                // Register PayHere callbacks
+                window.payhere.onCompleted = async function onCompleted(orderId) {
+                    try {
+                        setLoading(true);
+                        const confirmRes = await confirmBookingPayment(data.booking._id, orderId);
+                        if (confirmRes.success) {
+                            setStep(3); // Success step
+                            if (onSuccess) onSuccess();
+                        } else {
+                            setError('Payment completed but booking confirmation failed.');
+                        }
+                    } catch (confirmErr) {
+                        console.error('Confirm error:', confirmErr);
+                        setError('Payment succeeded but failed to confirm booking.');
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+
+                window.payhere.onDismissed = function onDismissed() {
+                    setLoading(false);
+                    setError('Payment was cancelled.');
+                };
+
+                window.payhere.onError = function onError(err) {
+                    setLoading(false);
+                    setError('Payment error: ' + err);
+                };
+
+                // Start PayHere
+                window.payhere.startPayment(data.payhere);
+            } else {
+                setError('Failed to initialize PayHere checkout.');
+                setLoading(false);
+            }
         } catch (err) {
             setError(err.message || 'Failed to create booking. Please try again.');
-        } finally {
             setLoading(false);
         }
     };
@@ -171,7 +245,9 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
 
                     <div className="relative z-10">
                         <h2 className="text-2xl font-bold text-white italic">{room.name}</h2>
-                        <p className="text-blue-300 text-sm font-medium uppercase tracking-wider">{selectedPackage.replace('-', ' ')} Package</p>
+                        <div className="flex items-center gap-3">
+                            <p className="text-blue-300 text-sm font-medium uppercase tracking-wider">{selectedPackage.replace('-', ' ')} Package</p>
+                        </div>
                     </div>
 
                     <button
@@ -199,31 +275,31 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                     )}
 
                     {step === 1 && (
-                        <form onSubmit={(e) => { e.preventDefault(); setStep(2); }} className="space-y-4 animate-fade-in">
+                        <form onSubmit={handleStep1Submit} className="space-y-4 animate-fade-in">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">First Name</label>
                                     <input
-                                        required
                                         type="text"
                                         name="firstName"
                                         value={formData.firstName}
                                         onChange={handleInputChange}
-                                        className="w-full bg-navy-50 border border-navy-100 rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-all"
+                                        className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all ${errors.firstName ? 'border-red-500 focus:ring-red-400/50' : 'border-navy-100 focus:ring-blue-400/50'}`}
                                         placeholder="John"
                                     />
+                                    {errors.firstName && <p className="text-red-500 text-[10px] font-bold mt-0.5 pl-1">{errors.firstName}</p>}
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Last Name</label>
                                     <input
-                                        required
                                         type="text"
                                         name="lastName"
                                         value={formData.lastName}
                                         onChange={handleInputChange}
-                                        className="w-full bg-navy-50 border border-navy-100 rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-all"
+                                        className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all ${errors.lastName ? 'border-red-500 focus:ring-red-400/50' : 'border-navy-100 focus:ring-blue-400/50'}`}
                                         placeholder="Doe"
                                     />
+                                    {errors.lastName && <p className="text-red-500 text-[10px] font-bold mt-0.5 pl-1">{errors.lastName}</p>}
                                 </div>
                             </div>
 
@@ -231,26 +307,27 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Email Address</label>
                                     <input
-                                        required
                                         type="email"
                                         name="email"
                                         value={formData.email}
                                         onChange={handleInputChange}
-                                        className="w-full bg-navy-50 border border-navy-100 rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-all"
+                                        className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all ${errors.email ? 'border-red-500 focus:ring-red-400/50' : 'border-navy-100 focus:ring-blue-400/50'}`}
                                         placeholder="john@example.com"
                                     />
+                                    {errors.email && <p className="text-red-500 text-[10px] font-bold mt-0.5 pl-1">{errors.email}</p>}
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Phone Number</label>
                                     <input
-                                        required
                                         type="tel"
                                         name="phone"
+                                        maxLength={10}
                                         value={formData.phone}
                                         onChange={handleInputChange}
-                                        className="w-full bg-navy-50 border border-navy-100 rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-all"
-                                        placeholder="+94 77 123 4567"
+                                        className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all ${errors.phone ? 'border-red-500 focus:ring-red-400/50' : 'border-navy-100 focus:ring-blue-400/50'}`}
+                                        placeholder="0771234567"
                                     />
+                                    {errors.phone && <p className="text-red-500 text-[10px] font-bold mt-0.5 pl-1">{errors.phone}</p>}
                                 </div>
                             </div>
 
@@ -309,91 +386,36 @@ const BookingModal = ({ isOpen, onClose, room, checkIn, checkOut, guests, select
                                 </div>
 
                                 <div className="flex items-center justify-between pt-2">
-                                    <span className="text-navy-900 font-bold text-lg italic">Total Amount to Pay</span>
-                                    <span className="text-blue-600 font-extrabold text-2xl italic">{formatPrice(total)}/-</span>
+                                    <div className="flex flex-col">
+                                        <span className="text-navy-900 font-bold text-lg italic">Total Amount to Pay</span>
+                                        {hasOffer && (
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] text-red-500 font-bold uppercase tracking-wider animate-pulse">{room.offerTitle || 'Special Offer Applied'}</span>
+                                                <span className="text-[10px] text-navy-400 font-medium italic">
+                                                    {formatPrice(subtotal/nights)} - {formatPrice(discountAmount/nights)} = {formatPrice(total/nights)} per night
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="text-right flex flex-col">
+                                        {hasOffer && (
+                                            <span className="text-sm text-navy-400 line-through opacity-70">{formatPrice(subtotal)}</span>
+                                        )}
+                                        <span className="text-blue-600 font-extrabold text-2xl italic">{formatPrice(total)}/-</span>
+                                        {hasOffer && (
+                                            <span className="text-[10px] text-green-600 font-bold uppercase tracking-tighter">Save {formatPrice(discountAmount)}</span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Card Details Section */}
-                            <div className="bg-white rounded-3xl p-6 border-2 border-blue-100 space-y-5">
-                                <h3 className="text-navy-900 font-bold flex items-center gap-2">
-                                    <Lock className="text-blue-500" size={18} /> Secure Payment
-                                </h3>
-
-                                <div className="space-y-4">
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Card Number</label>
-                                        <div className="relative">
-                                            <input
-                                                type="text"
-                                                placeholder="4242 4242 4242 4242"
-                                                value={cardDetails.number}
-                                                onChange={e => {
-                                                    setCardDetails(c => ({ ...c, number: formatCardNumber(e.target.value) }));
-                                                    setCardErrors(e2 => ({ ...e2, number: undefined }));
-                                                }}
-                                                maxLength={19}
-                                                className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all ${cardErrors.number ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-blue-400/50'}`}
-                                            />
-                                            {detectBrand(cardDetails.number) && (
-                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-blue-500 uppercase">
-                                                    {detectBrand(cardDetails.number)}
-                                                </span>
-                                            )}
-                                        </div>
-                                        {cardErrors.number && <p className="text-red-500 text-[10px] font-bold mt-1 px-1">{cardErrors.number}</p>}
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Expiry Date</label>
-                                            <input
-                                                type="text"
-                                                placeholder="MM/YY"
-                                                value={cardDetails.expiry}
-                                                onChange={e => {
-                                                    setCardDetails(c => ({ ...c, expiry: formatExpiry(e.target.value) }));
-                                                    setCardErrors(e2 => ({ ...e2, expiry: undefined }));
-                                                }}
-                                                maxLength={5}
-                                                className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all ${cardErrors.expiry ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-blue-400/50'}`}
-                                            />
-                                            {cardErrors.expiry && <p className="text-red-500 text-[10px] font-bold mt-1 px-1">{cardErrors.expiry}</p>}
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">CVV</label>
-                                            <input
-                                                type="text"
-                                                placeholder="123"
-                                                value={cardDetails.cvv}
-                                                onChange={e => {
-                                                    const v = e.target.value.replace(/\D/g, '').slice(0, 4);
-                                                    setCardDetails(c => ({ ...c, cvv: v }));
-                                                    setCardErrors(e2 => ({ ...e2, cvv: undefined }));
-                                                }}
-                                                maxLength={4}
-                                                className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all ${cardErrors.cvv ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-blue-400/50'}`}
-                                            />
-                                            {cardErrors.cvv && <p className="text-red-500 text-[10px] font-bold mt-1 px-1">{cardErrors.cvv}</p>}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">Cardholder Name</label>
-                                        <input
-                                            type="text"
-                                            placeholder="JANE SMITH"
-                                            value={cardDetails.name}
-                                            onChange={e => {
-                                                setCardDetails(c => ({ ...c, name: e.target.value }));
-                                                setCardErrors(e2 => ({ ...e2, name: undefined }));
-                                            }}
-                                            className={`w-full bg-navy-50 border rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 transition-all ${cardErrors.name ? 'border-red-300 focus:ring-red-400' : 'border-navy-100 focus:ring-blue-400/50'}`}
-                                        />
-                                        {cardErrors.name && <p className="text-red-500 text-[10px] font-bold mt-1 px-1">{cardErrors.name}</p>}
-                                    </div>
-                                </div>
-
+                            {/* PayHere Payment Summary Notice */}
+                            <div className="bg-white rounded-3xl p-6 border-2 border-blue-100 space-y-3 text-center">
+                                <Lock className="text-blue-500 mx-auto" size={28} />
+                                <h3 className="text-navy-900 font-bold text-base">Secure Gateway Payment</h3>
+                                <p className="text-navy-500 text-xs max-w-sm mx-auto leading-relaxed">
+                                    You will be redirected to the secure PayHere payment gateway to complete your transaction in LKR.
+                                </p>
                             </div>
 
                             {error && (

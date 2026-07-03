@@ -3,14 +3,19 @@ import {
     Plus, Search, Edit2, Trash2, X, BedDouble,
     CheckCircle, Wrench, XCircle, RefreshCw, Save, LogOut, UserCircle
 } from 'lucide-react';
-import { fetchRooms, createRoom, updateRoom, deleteRoom, updateRoomStatusByNumber, updateBookingStatus } from '../../utils/api';
+import { 
+    fetchRooms, createRoom, updateRoom, deleteRoom, 
+    updateRoomStatusByNumber, updateBookingStatus,
+    fetchRoomFeatures, createRoomFeature 
+} from '../../utils/api';
 import Toast from '../../components/admin_components/Toast';
 import { useToast } from '../../components/admin_components/useToast';
 import ImageUpload from '../../components/admin_components/ImageUpload';
+import { useAuth } from '../../context/AuthContext';
 
 const ROOM_TYPES = ['deluxe', 'luxury', 'semiluxury', 'dayOuting', 'couple'];
 const STATUS_OPTIONS = ['available', 'occupied', 'maintenance'];
-const COMMON_FEATURES = ['WiFi', 'AC', 'TV', 'Mini Bar', 'Safe', 'Bathtub', 'Ocean View', 'Balcony', 'Hair Dryer', 'Room Service', 'Mini Fridge', 'Coffee Maker'];
+
 
 const EMPTY_FORM = {
     name: '', roomNumber: '', type: 'deluxe', price: '', guests: '', description: '',
@@ -19,11 +24,13 @@ const EMPTY_FORM = {
 
 const statusConfig = {
     available: { label: 'Available', icon: CheckCircle, bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+    reserved: { label: 'Reserved', icon: CheckCircle, bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
     occupied: { label: 'Occupied', icon: XCircle, bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
     maintenance: { label: 'Maintenance', icon: Wrench, bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
 };
 
 export default function RoomManagement() {
+    const { user } = useAuth();
     const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -33,13 +40,20 @@ export default function RoomManagement() {
     const [editingRoom, setEditingRoom] = useState(null);
     const [form, setForm] = useState(EMPTY_FORM);
     const [saving, setSaving] = useState(false);
+    const [dynamicFeatures, setDynamicFeatures] = useState([]);
+    const [newFeatureName, setNewFeatureName] = useState('');
+    const [creatingFeature, setCreatingFeature] = useState(false);
     const { toast, showToast, clearToast } = useToast();
 
     const load = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await fetchRooms({ limit: 100 });
-            setRooms(Array.isArray(data.rooms) ? data.rooms : (Array.isArray(data) ? data : []));
+            const [roomsData, featuresData] = await Promise.all([
+                fetchRooms({ limit: 100 }),
+                fetchRoomFeatures()
+            ]);
+            setRooms(Array.isArray(roomsData.rooms) ? roomsData.rooms : (Array.isArray(roomsData) ? roomsData : []));
+            setDynamicFeatures(Array.isArray(featuresData) ? featuresData : []);
         } catch (e) {
             showToast(e.message, 'error');
         } finally {
@@ -119,18 +133,23 @@ export default function RoomManagement() {
         }
     };
 
-    const handleCheckOut = async (bookingId, roomNumber) => {
-        if (!window.confirm('Are you sure you want to check out this guest? This will mark the booking as completed and make the room available.')) return;
+    const handleAddFeature = async () => {
+        if (!newFeatureName.trim()) return;
+        setCreatingFeature(true);
         try {
-            await updateBookingStatus(bookingId, 'completed');
-            // After marking booking as completed, we also mark the room as available in DB
-            if (roomNumber) {
-                await updateRoomStatusByNumber(roomNumber, 'available');
-            }
-            load();
-            showToast('Guest checked out successfully and room is now available');
+            const newFeat = await createRoomFeature({ name: newFeatureName.trim() });
+            setDynamicFeatures(prev => [...prev, newFeat]);
+            // Automatically select it
+            setForm(prev => ({
+                ...prev,
+                features: [...prev.features, newFeat.name]
+            }));
+            setNewFeatureName('');
+            showToast('New feature added to database');
         } catch (e) {
             showToast(e.message, 'error');
+        } finally {
+            setCreatingFeature(false);
         }
     };
 
@@ -163,10 +182,12 @@ export default function RoomManagement() {
                         <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
                         Refresh
                     </button>
-                    <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2 bg-navy-900 text-white rounded-xl hover:bg-teal-700 transition-colors text-sm font-medium shadow-sm">
-                        <Plus size={16} />
-                        Add Room
-                    </button>
+                    {user?.role !== 'receptionist' && (
+                        <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2 bg-navy-900 text-white rounded-xl hover:bg-teal-700 transition-colors text-sm font-medium shadow-sm">
+                            <Plus size={16} />
+                            Add Room
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -280,7 +301,7 @@ export default function RoomManagement() {
                                                 <UserCircle size={14} className="text-navy-400" />
                                                 {room.activeBooking.user?.firstName || room.activeBooking.guestInfo?.firstName} {room.activeBooking.user?.lastName || room.activeBooking.guestInfo?.lastName}
                                             </p>
-                                            <div className="grid grid-cols-2 gap-2 mb-3 bg-white/50 p-2 rounded-lg border border-red-50">
+                                            <div className="grid grid-cols-2 gap-2 bg-white/50 p-2 rounded-lg border border-red-50">
                                                 <div>
                                                     <p className="text-[9px] text-navy-400 uppercase font-bold">Check-In</p>
                                                     <p className="text-[10px] font-bold text-navy-800">{new Date(room.activeBooking.checkIn).toLocaleDateString()}</p>
@@ -290,12 +311,6 @@ export default function RoomManagement() {
                                                     <p className="text-[10px] font-bold text-navy-800">{new Date(room.activeBooking.checkOut).toLocaleDateString()}</p>
                                                 </div>
                                             </div>
-                                            <button
-                                                onClick={() => handleCheckOut(room.activeBooking._id, room.roomNumber)}
-                                                className="w-full flex items-center justify-center gap-1.5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[11px] font-bold transition-all shadow-sm hover:shadow-md"
-                                            >
-                                                <LogOut size={13} /> Check Out Guest
-                                            </button>
                                         </div>
                                     ) : (
 
@@ -305,29 +320,39 @@ export default function RoomManagement() {
                                     )}
 
 
-                                    <div className="flex gap-1 mb-3">
-                                        {STATUS_OPTIONS.map(s => (
+                                    <div className="flex items-center justify-between mb-3 bg-navy-50/50 p-2 rounded-xl border border-navy-50">
+                                        <div className={`px-2.5 py-1 rounded-full text-xs font-bold border shadow-sm flex items-center gap-1.5 capitalize ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+                                            <StatusIcon size={13} />
+                                            {room.status}
+                                        </div>
+                                        {room.status === 'available' && (
                                             <button
-                                                key={s}
-                                                onClick={() => room.status !== s && handleStatusToggle(room, s)}
-                                                className={`flex-1 py-1 rounded-lg text-xs font-medium transition-colors capitalize ${room.status === s
-                                                    ? `${statusConfig[s].bg} ${statusConfig[s].text} border ${statusConfig[s].border}`
-                                                    : 'bg-navy-50 text-navy-400 hover:bg-navy-100'
-                                                    }`}
+                                                onClick={() => handleStatusToggle(room, 'maintenance')}
+                                                className="px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
                                             >
-                                                {s}
+                                                <Wrench size={12} /> Set Maintenance
                                             </button>
-                                        ))}
+                                        )}
+                                        {room.status === 'maintenance' && (
+                                            <button
+                                                onClick={() => handleStatusToggle(room, 'available')}
+                                                className="px-3 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
+                                            >
+                                                <CheckCircle size={12} /> Set Available
+                                            </button>
+                                        )}
                                     </div>
 
-                                    <div className="flex gap-2">
-                                        <button onClick={() => openEdit(room)} className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-navy-50 hover:bg-navy-100 text-navy-700 rounded-lg text-xs font-medium transition-colors">
-                                            <Edit2 size={13} /> Edit
-                                        </button>
-                                        <button onClick={() => handleDelete(room)} className="flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-medium transition-colors">
-                                            <Trash2 size={13} />
-                                        </button>
-                                    </div>
+                                    {user?.role !== 'receptionist' && (
+                                        <div className="flex gap-2">
+                                            <button onClick={() => openEdit(room)} className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-navy-50 hover:bg-navy-100 text-navy-700 rounded-lg text-xs font-medium transition-colors">
+                                                <Edit2 size={13} /> Edit
+                                            </button>
+                                            <button onClick={() => handleDelete(room)} className="flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-medium transition-colors">
+                                                <Trash2 size={13} />
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         );
@@ -362,10 +387,8 @@ export default function RoomManagement() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Status</label>
-                                    <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                        {STATUS_OPTIONS.map(s => <option key={s} value={s} className="capitalize">{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-                                    </select>
+                                    <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Status (Managed Auto)</label>
+                                    <input value={form.status} readOnly className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm bg-navy-50 text-navy-500 capitalize cursor-not-allowed focus:outline-none" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Price / Night (Rs.) *</label>
@@ -379,25 +402,25 @@ export default function RoomManagement() {
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">View</label>
                                     <input value={form.view} onChange={e => setForm({ ...form, view: e.target.value })} placeholder="e.g. ocean, garden, pool" className="w-full px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 </div>
-                                <div className="col-span-1 sm:col-span-2">
-                                    <ImageUpload
+                                <div className="col-span-2">
+                                    <ImageUpload 
                                         label="Main Image *"
                                         currentImage={form.image}
                                         onUploadSuccess={(url) => setForm({ ...form, image: url })}
                                     />
                                 </div>
-                                <div className="col-span-1 sm:col-span-2">
+                                <div className="col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-1">Additional Image URLs <span className="text-navy-400 normal-case font-normal">(comma-separated or upload more)</span></label>
                                     <div className="flex gap-2 mb-2">
-                                        <input
-                                            value={form.images}
-                                            onChange={e => setForm({ ...form, images: e.target.value })}
-                                            placeholder="https://image1.jpg, https://image2.jpg..."
-                                            className="flex-1 px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                        <input 
+                                            value={form.images} 
+                                            onChange={e => setForm({ ...form, images: e.target.value })} 
+                                            placeholder="https://image1.jpg, https://image2.jpg..." 
+                                            className="flex-1 px-4 py-2.5 border border-navy-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" 
                                         />
                                     </div>
                                     <div className="flex flex-wrap gap-2">
-                                        <ImageUpload
+                                        <ImageUpload 
                                             label=""
                                             onUploadSuccess={(url) => {
                                                 const current = form.images ? form.images.split(',').map(i => i.trim()) : [];
@@ -413,16 +436,16 @@ export default function RoomManagement() {
                                 <div className="col-span-1 sm:col-span-2">
                                     <label className="block text-xs font-semibold text-navy-600 uppercase tracking-wide mb-3">Room Features</label>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 bg-navy-50/50 p-4 rounded-2xl border border-navy-100">
-                                        {COMMON_FEATURES.map(feature => (
-                                            <label key={feature} className="flex items-center gap-2 group cursor-pointer">
+                                        {dynamicFeatures.map(feature => (
+                                            <label key={feature._id} className="flex items-center gap-2 group cursor-pointer">
                                                 <div className="relative flex items-center">
                                                     <input 
                                                         type="checkbox" 
-                                                        checked={form.features.includes(feature)}
+                                                        checked={form.features.includes(feature.name)}
                                                         onChange={(e) => {
                                                             const newFeatures = e.target.checked 
-                                                                ? [...form.features, feature]
-                                                                : form.features.filter(f => f !== feature);
+                                                                ? [...form.features, feature.name]
+                                                                : form.features.filter(f => f !== feature.name);
                                                             setForm({ ...form, features: newFeatures });
                                                         }}
                                                         className="peer sr-only"
@@ -431,22 +454,28 @@ export default function RoomManagement() {
                                                         <CheckCircle className="w-full h-full text-white scale-0 transition-transform peer-checked:scale-75" />
                                                     </div>
                                                 </div>
-                                                <span className="text-sm text-navy-700 font-medium group-hover:text-navy-900 transition-colors">{feature}</span>
+                                                <span className="text-sm text-navy-700 font-medium group-hover:text-navy-900 transition-colors">{feature.name}</span>
                                             </label>
                                         ))}
                                     </div>
                                     <div className="mt-3">
-                                        <label className="block text-[10px] font-bold text-navy-400 uppercase mb-1 ml-1">Custom Features (comma separated)</label>
-                                        <input 
-                                            value={form.features.filter(f => !COMMON_FEATURES.includes(f)).join(', ')} 
-                                            onChange={e => {
-                                                const common = form.features.filter(f => COMMON_FEATURES.includes(f));
-                                                const custom = e.target.value.split(',').map(f => f.trim()).filter(Boolean);
-                                                setForm({ ...form, features: [...new Set([...common, ...custom])] });
-                                            }} 
-                                            placeholder="e.g. Personal Butler, Private Pool..." 
-                                            className="w-full px-4 py-2 border border-navy-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-500" 
-                                        />
+                                        <label className="block text-[10px] font-bold text-navy-400 uppercase mb-1 ml-1">Add New Feature to Database</label>
+                                        <div className="flex gap-2">
+                                            <input 
+                                                value={newFeatureName} 
+                                                onChange={e => setNewFeatureName(e.target.value)} 
+                                                placeholder="e.g. Jacuzzi, Smart TV..." 
+                                                className="flex-1 px-4 py-2 border border-navy-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-500" 
+                                            />
+                                            <button 
+                                                type="button" 
+                                                onClick={handleAddFeature}
+                                                disabled={creatingFeature || !newFeatureName.trim()}
+                                                className="px-4 py-2 bg-teal-600 text-white rounded-xl text-xs font-bold hover:bg-teal-700 transition-colors disabled:opacity-50"
+                                            >
+                                                {creatingFeature ? 'Adding...' : 'Add Feature'}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

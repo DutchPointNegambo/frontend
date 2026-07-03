@@ -43,8 +43,10 @@ const FoodItems = () => {
             id: food._id,
             name: food.name,
             description: food.description,
-            price: `Rs. ${food.price.toFixed(2)}`,
-            numericPrice: food.price,
+            price: `Rs. ${(food.sellingPrice || food.price).toFixed(2)}`,
+            numericPrice: food.sellingPrice || food.price,
+            originalPrice: food.sellingPrice < food.price || food.discount > 0 ? `Rs. ${food.price.toFixed(2)}` : null,
+            discount: food.discount,
             rating: food.rating || 5,
             prepTime: food.prepTime || '15-20 min',
             image: food.image
@@ -105,12 +107,23 @@ const FoodItems = () => {
               {category.items.map((item, itemIdx) => (
                 <Reveal key={item.id} delay={itemIdx * 0.1} width="100%">
                   <div className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-navy-50 flex flex-col h-full">
-                    <div className="h-64 overflow-hidden relative">
-                      <img 
-                        src={item.image} 
-                        alt={item.name} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
+                    <div className="h-64 overflow-hidden relative bg-navy-50 flex items-center justify-center">
+                      {item.image && (item.image.startsWith('http') || item.image.startsWith('/')) ? (
+                        <img 
+                          src={item.image} 
+                          alt={item.name} 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        />
+                      ) : (
+                        <div className="text-7xl group-hover:scale-110 transition-transform duration-700">
+                          {item.image || '🍽️'}
+                        </div>
+                      )}
+                      {item.discount > 0 && (
+                        <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg">
+                          {item.discount}% OFF
+                        </div>
+                      )}
                       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-navy-950 flex items-center gap-1">
                         <Star size={12} className="text-gold-500 fill-gold-500" />
                         {item.rating}
@@ -119,7 +132,17 @@ const FoodItems = () => {
                     <div className="p-8 flex flex-col flex-grow">
                       <div className="flex justify-between items-start mb-4 gap-2">
                         <h3 className="text-xl font-bold text-navy-950 leading-tight">{item.name}</h3>
-                        <span className="text-teal-600 font-bold text-lg whitespace-nowrap">{item.price}</span>
+                        <div className="text-right">
+                          <span className="text-teal-600 font-bold text-lg block whitespace-nowrap">{item.price}</span>
+                          {item.originalPrice && (
+                            <div className="flex items-center justify-end gap-2 mt-1">
+                              <span className="text-navy-300 text-xs line-through font-medium">{item.originalPrice}</span>
+                              <span className="bg-red-50 text-red-500 text-[9px] font-bold px-1.5 py-0.5 rounded border border-red-100 whitespace-nowrap">
+                                {item.discount}% OFF
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <p className="text-navy-500 text-sm leading-relaxed mb-6 flex-grow italic">
                         "{item.description}"
