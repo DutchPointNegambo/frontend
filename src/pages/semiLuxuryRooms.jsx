@@ -90,14 +90,15 @@ const SemiLuxuryRooms = () => {
     const normalizeRoom = (room) => ({
         ...room,
         tagline: room.tagline || room.description || '',
-        tags: room.tags?.length ? room.tags : (room.features?.length ? room.features.slice(0, 4) : []),
+        tags: [...new Set([...(room.tags || []), ...(room.features || [])])].slice(0, 4),
         capacity: room.capacity || `${room.guests || 2} Guests`,
         size: room.size || '',
         badge: room.badge || (room.view ? `${room.view} view` : 'Semi-Luxury'),
         badgeColor: room.badgeColor || 'bg-teal-500',
-        facilities: room.facilities?.length
-            ? room.facilities
-            : (room.features || []).map(f => ({ icon: '✦', label: f })),
+        facilities: [
+            ...(room.facilities || []),
+            ...(room.features || []).filter(f => !(room.facilities || []).some(fac => fac.label === f)).map(f => ({ icon: '', label: f }))
+        ],
         includes: room.includes?.length
             ? room.includes
             : ['Pool access', 'Free breakfast', 'Garden views'],
@@ -388,7 +389,7 @@ const SemiLuxuryRooms = () => {
                                 {(room.isAvailable === false || room.status === 'maintenance') && (
                                     <div className="absolute inset-0 z-10 bg-navy-900/40 backdrop-blur-[2px] flex items-center justify-center pointer-events-none">
                                         <div className={`${room.status === 'maintenance' ? 'bg-amber-600' : 'bg-red-500'} text-white px-6 py-2 rounded-full font-bold text-lg shadow-2xl rotate-[-10deg] animate-pulse`}>
-                                            {room.status === 'maintenance' ? 'Maintenance' : 'Occupied'}
+                                            {room.status === 'maintenance' ? 'Maintenance' : room.status === 'occupied' ? 'Occupied' : 'Reserved'}
                                         </div>
                                     </div>
                                 )}
@@ -552,7 +553,7 @@ const SemiLuxuryRooms = () => {
                                         <button onClick={handleConfirmBooking}
                                             disabled={!checkIn || (selectedPackage !== 'day-use' && (!checkOut || calcNights() <= 0)) || availability === false || availability === 'checking' || selectedRoom?.isAvailable === false || selectedRoom?.status === 'maintenance'}
                                             className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-teal-600 hover:to-teal-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none animate-cta-glow">
-                                            {selectedRoom?.status === 'maintenance' ? 'Maintenance Mode' : selectedRoom?.isAvailable === false ? 'Room Occupied' : !checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
+                                            {selectedRoom?.status === 'maintenance' ? 'Maintenance Mode' : selectedRoom?.isAvailable === false ? (selectedRoom?.status === 'occupied' ? 'Room Occupied' : 'Room Reserved') : !checkIn ? 'Select Date First' : (selectedPackage !== 'day-use' && !checkOut ? 'Select Check-Out' : 'Confirm Booking')}
                                         </button>
 
                                         <p className="text-center text-navy-400 text-xs">Check dates & times before booking</p>

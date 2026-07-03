@@ -357,6 +357,16 @@ const Navbar = () => {
                             Admin Panel
                           </Link>
                         )}
+                        {user.role === 'receptionist' && (
+                          <Link
+                            to="/receptionist/dashboard"
+                            onClick={() => setIsUserDropdownOpen(false)}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${shouldShowSolidNavbar ? 'text-navy-700 hover:bg-teal-50 hover:text-teal-600' : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
+                          >
+                            <Settings size={14} />
+                            Dashboard
+                          </Link>
+                        )}
                         {user.role === 'staff' && (
                           <Link
                             to="/employee/dashboard"
@@ -580,6 +590,18 @@ const Navbar = () => {
                     onClick={() => setIsOpen(false)}
                   >
                     <span>Admin Panel</span>
+                    <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                  </Link>
+                )}
+                {user.role === 'receptionist' && (
+                  <Link
+                    to="/receptionist/dashboard"
+                    className="flex items-center justify-between w-full px-5 py-4 rounded-2xl text-sm font-bold uppercase tracking-widest bg-teal-600 text-white shadow-xl shadow-teal-900/20 transition-all duration-300"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <span>Dashboard</span>
                     <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                     </svg>

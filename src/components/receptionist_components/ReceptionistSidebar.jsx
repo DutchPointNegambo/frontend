@@ -9,10 +9,12 @@ import {
     ChevronRight,
     UserCircle,
     Hotel,
+    BedDouble,
+    X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-const ReceptionistSidebar = () => {
+const ReceptionistSidebar = ({ isOpen, onClose }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { user, logout } = useAuth();
@@ -20,8 +22,8 @@ const ReceptionistSidebar = () => {
     const menuItems = [
         { name: 'Dashboard', icon: LayoutDashboard, path: '/receptionist/dashboard' },
         { name: 'Room Bookings', icon: Hotel, path: '/receptionist/bookings' },
+        { name: 'Room Management', icon: BedDouble, path: '/receptionist/rooms' },
         { name: 'Attendance Scanner', icon: ScanLine, path: '/receptionist/scanner' },
-        { name: 'My Profile', icon: UserCircle, path: '/receptionist/profile' },
     ];
 
     const handleLogout = () => {
@@ -34,10 +36,10 @@ const ReceptionistSidebar = () => {
     };
 
     return (
-        <div className="h-screen w-64 bg-navy-950 text-white fixed left-0 top-0 flex flex-col shadow-2xl z-40">
+        <div className={`h-screen w-64 bg-navy-950 text-white fixed left-0 top-0 flex flex-col shadow-2xl z-40 transform lg:translate-x-0 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
             {/* Logo */}
-            <div className="px-6 py-5 border-b border-white/10">
-                <Link to="/receptionist/dashboard" className="block group">
+            <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between">
+                <Link to="/receptionist/dashboard" className="block group" onClick={onClose}>
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center shadow-lg shadow-teal-500/30 flex-shrink-0">
                             <span className="text-white font-bold text-sm">DP</span>
@@ -48,6 +50,12 @@ const ReceptionistSidebar = () => {
                         </div>
                     </div>
                 </Link>
+                <button 
+                    onClick={onClose}
+                    className="lg:hidden p-2 text-navy-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+                >
+                    <X size={18} />
+                </button>
             </div>
 
             {/* Navigation */}
@@ -58,6 +66,7 @@ const ReceptionistSidebar = () => {
                         <Link
                             key={item.path}
                             to={item.path}
+                            onClick={onClose}
                             className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group ${
                                 active
                                     ? 'bg-teal-600/20 text-teal-300 border border-teal-500/30 shadow-sm'

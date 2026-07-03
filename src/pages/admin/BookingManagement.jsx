@@ -8,21 +8,30 @@ import Toast from '../../components/admin_components/Toast';
 import { useToast } from '../../components/admin_components/useToast';
 
 const STATUS_FLOW = {
-    pending: { next: ['confirmed', 'cancelled'], color: 'bg-amber-50 text-amber-700 border-amber-200' },
-    confirmed: { next: ['pending', 'completed', 'cancelled'], color: 'bg-blue-50 text-blue-700 border-blue-200' },
-    completed: { next: [], color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    pending: { next: ['reserved', 'cancelled'], color: 'bg-amber-50 text-amber-700 border-amber-200' },
+    reserved: { next: ['checked_in', 'cancelled'], color: 'bg-blue-50 text-blue-700 border-blue-200' },
+    checked_in: { next: ['checked_out'], color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+    checked_out: { next: [], color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
     cancelled: { next: ['pending'], color: 'bg-red-50 text-red-700 border-red-200' },
 };
 
 const StatusIcon = ({ status }) => {
-    if (status === 'confirmed') return <CheckCircle size={12} />;
+    if (status === 'reserved') return <CheckCircle size={12} />;
     if (status === 'cancelled') return <XCircle size={12} />;
-    if (status === 'completed') return <CheckCircle size={12} />;
+    if (status === 'checked_out') return <CheckCircle size={12} />;
+    if (status === 'checked_in') return <Clock size={12} />;
     return <Clock size={12} />;
 };
 
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 const formatCurrency = (n) => `Rs. ${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+const canCheckIn = (booking) => {
+    if (!booking || !booking.checkIn) return false;
+    const today = new Date();
+    const checkInDate = new Date(booking.checkIn);
+    return today.toDateString() === checkInDate.toDateString();
+};
 
 export default function BookingManagement() {
     const [bookings, setBookings] = useState([]);
@@ -138,8 +147,9 @@ export default function BookingManagement() {
     const statusCounts = {
         all: total || 0,
         pending: (Array.isArray(bookings) ? bookings : []).filter(b => b?.status === 'pending').length,
-        confirmed: (Array.isArray(bookings) ? bookings : []).filter(b => b?.status === 'confirmed').length,
-        completed: (Array.isArray(bookings) ? bookings : []).filter(b => b?.status === 'completed').length,
+        reserved: (Array.isArray(bookings) ? bookings : []).filter(b => b?.status === 'reserved').length,
+        checked_in: (Array.isArray(bookings) ? bookings : []).filter(b => b?.status === 'checked_in').length,
+        checked_out: (Array.isArray(bookings) ? bookings : []).filter(b => b?.status === 'checked_out').length,
         cancelled: (Array.isArray(bookings) ? bookings : []).filter(b => b?.status === 'cancelled').length,
     };
 
@@ -165,7 +175,7 @@ export default function BookingManagement() {
 
             
             <div className="flex gap-1.5 bg-white p-1.5 rounded-2xl border border-navy-100 shadow-sm w-fit flex-wrap">
-                {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(s => (
+                {['all', 'pending', 'reserved', 'checked_in', 'checked_out', 'cancelled'].map(s => (
                     <button
                         key={s}
                         onClick={() => { setFilterStatus(s); }}
@@ -254,7 +264,7 @@ export default function BookingManagement() {
                                             <td className="px-5 py-4">
                                                 <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border capitalize ${cfg.color}`}>
                                                     {isUpdating ? <RefreshCw size={11} className="animate-spin" /> : <StatusIcon status={b.status} />}
-                                                    {b.status}
+                                                    {b.status.replace('_', ' ')}
                                                 </span>
                                             </td>
                                             <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
@@ -266,21 +276,27 @@ export default function BookingManagement() {
                                                     >
                                                         <Eye size={15} />
                                                     </button>
-                                                    {cfg.next.map(ns => (
-                                                        <button
-                                                            key={ns}
-                                                            onClick={(e) => { e.stopPropagation(); handleStatusChange(b._id, ns); }}
-                                                            disabled={isUpdating}
-                                                            className={`px-2.5 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors disabled:opacity-50 ${
-                                                                ns === 'confirmed' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' :
-                                                                ns === 'completed' ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' :
-                                                                ns === 'pending' ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' :
-                                                                'bg-red-50 text-red-600 hover:bg-red-100'
-                                                            }`}
-                                                        >
-                                                            {ns}
-                                                        </button>
-                                                    ))}
+                                                    {cfg.next.map(ns => {
+                                                        const isCheckInDisabled = ns === 'checked_in' && !canCheckIn(b);
+                                                        return (
+                                                            <button
+                                                                key={ns}
+                                                                onClick={(e) => { e.stopPropagation(); handleStatusChange(b._id, ns); }}
+                                                                disabled={isUpdating || isCheckInDisabled}
+                                                                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors disabled:opacity-50 ${
+                                                                    isCheckInDisabled ? 'bg-navy-100 text-navy-400 cursor-not-allowed border border-navy-200' :
+                                                                    ns === 'reserved' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' :
+                                                                    ns === 'checked_in' ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100' :
+                                                                    ns === 'checked_out' ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' :
+                                                                    ns === 'pending' ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' :
+                                                                    'bg-red-50 text-red-600 hover:bg-red-100'
+                                                                }`}
+                                                                title={isCheckInDisabled ? "Check-in is only available on the check-in date" : ""}
+                                                            >
+                                                                {ns.replace('_', ' ')}
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
                                             </td>
                                         </tr>
@@ -329,7 +345,7 @@ export default function BookingManagement() {
                                 <span className="text-xs font-semibold text-navy-500 uppercase tracking-wide">Current Status</span>
                                 <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border capitalize ${STATUS_FLOW[selectedBooking.status]?.color}`}>
                                     <StatusIcon status={selectedBooking.status} />
-                                    {selectedBooking.status}
+                                    {selectedBooking.status.replace('_', ' ')}
                                 </span>
                             </div>
 
@@ -409,21 +425,27 @@ export default function BookingManagement() {
                                 <div>
                                     <p className="text-xs font-semibold text-navy-500 uppercase tracking-wide mb-2">Update Status</p>
                                     <div className="flex gap-2 flex-wrap">
-                                        {STATUS_FLOW[selectedBooking.status].next.map(ns => (
-                                            <button
-                                                key={ns}
-                                                onClick={() => handleStatusChange(selectedBooking._id, ns)}
-                                                disabled={updatingId === selectedBooking._id}
-                                                className={`flex-1 py-2 rounded-xl text-sm font-medium capitalize transition-colors ${
-                                                    ns === 'confirmed' ? 'bg-blue-600 text-white hover:bg-blue-700' :
-                                                    ns === 'completed' ? 'bg-emerald-600 text-white hover:bg-emerald-700' :
-                                                    ns === 'pending' ? 'bg-amber-500 text-white hover:bg-amber-600' :
-                                                    'bg-red-500 text-white hover:bg-red-600'
-                                                } disabled:opacity-50`}
-                                            >
-                                                Mark as {ns}
-                                            </button>
-                                        ))}
+                                        {STATUS_FLOW[selectedBooking.status].next.map(ns => {
+                                             const isCheckInDisabled = ns === 'checked_in' && !canCheckIn(selectedBooking);
+                                             return (
+                                                 <button
+                                                     key={ns}
+                                                     onClick={() => handleStatusChange(selectedBooking._id, ns)}
+                                                     disabled={updatingId === selectedBooking._id || isCheckInDisabled}
+                                                     className={`flex-1 py-2 rounded-xl text-sm font-medium capitalize transition-colors ${
+                                                         isCheckInDisabled ? 'bg-navy-100 text-navy-400 cursor-not-allowed border border-navy-200' :
+                                                         ns === 'reserved' ? 'bg-blue-600 text-white hover:bg-blue-700' :
+                                                         ns === 'checked_in' ? 'bg-indigo-600 text-white hover:bg-indigo-700' :
+                                                         ns === 'checked_out' ? 'bg-emerald-600 text-white hover:bg-emerald-700' :
+                                                         ns === 'pending' ? 'bg-amber-500 text-white hover:bg-amber-600' :
+                                                         'bg-red-500 text-white hover:bg-red-600'
+                                                     } disabled:opacity-50`}
+                                                     title={isCheckInDisabled ? "Check-in is only available on the check-in date" : ""}
+                                                 >
+                                                     Mark as {ns.replace('_', ' ')}
+                                                 </button>
+                                             );
+                                         })}
                                     </div>
                                 </div>
                             )}
