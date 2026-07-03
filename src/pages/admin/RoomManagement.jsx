@@ -11,6 +11,7 @@ import {
 import Toast from '../../components/admin_components/Toast';
 import { useToast } from '../../components/admin_components/useToast';
 import ImageUpload from '../../components/admin_components/ImageUpload';
+import { useAuth } from '../../context/AuthContext';
 
 const ROOM_TYPES = ['deluxe', 'luxury', 'semiluxury', 'dayOuting', 'couple'];
 const STATUS_OPTIONS = ['available', 'occupied', 'maintenance'];
