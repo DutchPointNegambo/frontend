@@ -281,7 +281,7 @@ const AssetRegistryModal = ({
                         </div>
 
                         {((inventoryCategories[itemCategory] || inventoryCategories['Housekeeping']).hasExpiry || 
-                         (itemCategory === 'Furniture & Equipment' && ['TVs', 'Refrigerators', 'Air conditioners', 'Beds'].includes(itemName))) && (
+                         (inventoryCategories[itemCategory] || {}).hasWarranty) && (
                             <div className="space-y-6 animate-in slide-in-from-top-4 duration-500">
                                 <div className="flex items-center gap-2 pb-2 border-b border-navy-50">
                                     <ShieldAlert size={16} className="text-teal-500" />
@@ -303,7 +303,9 @@ const AssetRegistryModal = ({
                                                 defaultValue={selectedItem?.expiryDate ? new Date(selectedItem.expiryDate).toISOString().split('T')[0] : ''}
                                                 className="w-full px-4 py-2.5 rounded-xl border border-orange-200 bg-white focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 text-sm transition-all" 
                                             />
-                                            <p className="text-[9px] text-orange-600 mt-2 font-medium">System will alert when approaching this date.</p>
+                                            <p className="text-[10px] text-orange-700 mt-2.5 font-bold bg-orange-100/40 p-2 rounded-lg leading-relaxed">
+                                                ⚠️ Notice: Expiry date is critical for perishable food ingredients and bar beverage stock.
+                                            </p>
                                         </div>
                                     )}
 
@@ -359,7 +361,9 @@ const AssetRegistryModal = ({
                                                 defaultValue={selectedItem?.warrantyInfo}
                                                 className="w-full px-4 py-3 rounded-xl border border-teal-200 bg-white focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 text-sm transition-all" 
                                             />
-                                            <p className="text-[9px] text-teal-600 mt-2 font-medium">Critical for high-value electrical assets.</p>
+                                            <p className="text-[10px] text-teal-700 mt-2.5 font-bold bg-teal-100/40 p-2 rounded-lg leading-relaxed">
+                                                ℹ️ Optional: Leave blank if this specific good does not have a warranty policy.
+                                            </p>
                                         </div>
                                     )}
                                 </div>

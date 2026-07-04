@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { UserPlus, Clock, Banknote, Search, Shield, Trash2, Edit2, X, RefreshCw, Save, QrCode, ScanLine, Users, Calendar, Timer, AlertCircle } from 'lucide-react';
+import { UserPlus, Clock, Banknote, Search, Shield, Trash2, Edit2, X, RefreshCw, Save, QrCode, ScanLine, Users, Calendar, Timer, AlertCircle, AlertTriangle } from 'lucide-react';
 import { fetchStaff, createStaff, updateStaff, deleteStaff, fetchTodayAttendance, fetchAttendance, scanAttendance, fetchPayroll } from '../../utils/api';
 import Toast from '../../components/admin_components/Toast';
 import { useToast } from '../../components/admin_components/useToast';
@@ -7,6 +7,18 @@ import QRCodeBadge from '../../components/admin_components/QRCodeBadge';
 import QRScanner from '../../components/admin_components/QRScanner';
 
 const DEPARTMENTS = ['Operations', 'Kitchen', 'Front Desk', 'Housekeeping', 'Dining', 'Security', 'Maintenance', 'Finance', 'HR'];
+const JOB_TITLES = [
+    'Hotel Manager',
+    'Receptionist',
+    'Housekeeper',
+    'Chef',
+    'Cook / Kitchen Assistant',
+    'Waiter / Waitress',
+    'Security Guard',
+    'Maintenance Technician',
+    'Accountant / Cashier',
+    'Storekeeper'
+];
 const EMPTY_FORM = { 
     name: '', email: '', phone: '', jobTitle: '', password: '', 
     department: 'Front Desk', status: 'Active', salary: '', hireDate: '',
@@ -26,6 +38,8 @@ const Staff = () => {
     const [form, setForm] = useState(EMPTY_FORM);
     const [formErrors, setFormErrors] = useState({});
     const [saving, setSaving] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [staffToDelete, setStaffToDelete] = useState(null);
 
     const validateField = (name, value) => {
         let error = '';
@@ -36,13 +50,12 @@ const Staff = () => {
         if (name === 'email') {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!value.trim()) error = 'Email is required';
-            else if (!emailRegex.test(value)) error = 'Invalid email format';
+            else if (!emailRegex.test(value)) error = 'Invalid email format (e.g., user@domain.com)';
         }
         if (name === 'phone') {
             const phoneRegex = /^[0-9]{10}$/;
-            if (value && !phoneRegex.test(value)) {
-                error = 'Enter a valid number';
-            }
+            if (!value.trim()) error = 'Phone number is required';
+            else if (!phoneRegex.test(value)) error = 'Phone must be exactly 10 digits (e.g., 0701234567)';
         }
         if (name === 'jobTitle') {
             if (!value.trim()) error = 'Job title is required';
@@ -56,9 +69,40 @@ const Staff = () => {
             else if (value.length < 6) error = 'Min 6 characters';
         }
         if (name === 'nic') {
-            if (!value.trim()) error = 'NIC is required';
-            // Simple NIC validation (could be more complex depending on country)
-            else if (value.trim().length < 10) error = 'Invalid NIC format';
+            const nicValue = value.trim();
+            if (!nicValue) error = 'NIC / ID Number is required';
+            // Sri Lankan NIC formats:
+            // Old format: 9 digits + 1 letter (e.g., 123456789V)
+            // New format: 12 digits (e.g., 199512345678)
+            else if (!/^([0-9]{9}[VvXx]|[0-9]{12})$/.test(nicValue)) {
+                error = 'Invalid NIC format. Use old format (9 digits + letter) or new format (12 digits)';
+            }
+        }
+        if (name === 'dateOfBirth') {
+            if (!value) error = 'Date of Birth is required';
+            else {
+                const dobDate = new Date(value);
+                const today = new Date();
+                
+                // Check if date is in the past
+                if (dobDate >= today) {
+                    error = 'Date of Birth must be a past date';
+                } else {
+                    // Calculate age
+                    let age = today.getFullYear() - dobDate.getFullYear();
+                    const monthDiff = today.getMonth() - dobDate.getMonth();
+                    
+                    // Adjust age if birthday hasn't occurred this year yet
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
+                        age--;
+                    }
+                    
+                    // Check if employee is at least 18 years old
+                    if (age < 18) {
+                        error = `Employee must be at least 18 years old (Current age: ${age} years)`;
+                    }
+                }
+            }
         }
 
         setFormErrors(prev => ({ ...prev, [name]: error }));
@@ -66,7 +110,7 @@ const Staff = () => {
     };
 
     const validateForm = () => {
-        const fields = ['name', 'email', 'phone', 'jobTitle', 'salary', 'password', 'nic'];
+        const fields = ['name', 'email', 'phone', 'jobTitle', 'salary', 'password', 'nic', 'dateOfBirth'];
         let isValid = true;
         fields.forEach(f => {
             if (!validateField(f, form[f])) isValid = false;
@@ -163,15 +207,27 @@ const Staff = () => {
         }
     };
 
-    const handleDelete = async (staff) => {
-        if (!window.confirm(`Remove ${staff.name} from staff?`)) return;
+    const handleDelete = (staff) => {
+        setStaffToDelete(staff);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!staffToDelete) return;
         try {
-            await deleteStaff(staff._id);
-            setEmployees(prev => prev.filter(s => s._id !== staff._id));
+            await deleteStaff(staffToDelete._id);
+            setEmployees(prev => prev.filter(s => s._id !== staffToDelete._id));
             showToast('Staff member removed');
+            setIsDeleteModalOpen(false);
+            setStaffToDelete(null);
         } catch (e) {
             showToast(e.message, 'error');
         }
+    };
+
+    const cancelDelete = () => {
+        setIsDeleteModalOpen(false);
+        setStaffToDelete(null);
     };
 
     const filteredEmployees = employees.filter(e =>
@@ -655,8 +711,8 @@ const Staff = () => {
                                     </h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <FormInput label="Full Name *" name="name" value={form.name} onChange={handleFormChange} error={formErrors.name} placeholder="Sarah Wilson" />
-                                        <FormInput label="Email Address *" name="email" type="email" value={form.email} onChange={handleFormChange} error={formErrors.email} placeholder="staff@hotel.com" />
-                                        <FormInput label="NIC / ID Number *" name="nic" value={form.nic} onChange={handleFormChange} error={formErrors.nic} placeholder="e.g. 199512345678" />
+                                        <FormInput label="Email Address *" name="email" type="email" value={form.email} onChange={handleFormChange} error={formErrors.email} placeholder="user@domain.com" />
+                                        <FormInput label="NIC / ID Number *" name="nic" value={form.nic} onChange={handleFormChange} error={formErrors.nic} placeholder="123456789V or 199512345678" />
                                         <FormInput label="Password *" name="password" type="password" value={form.password} onChange={handleFormChange} error={formErrors.password} placeholder={editingStaff ? "Leave blank to keep current" : "••••••••"} />
                                     </div>
                                 </div>
@@ -667,7 +723,7 @@ const Staff = () => {
                                         <Clock size={14} /> Professional Details
                                     </h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <FormInput label="Job Title *" name="jobTitle" value={form.jobTitle} onChange={handleFormChange} error={formErrors.jobTitle} placeholder="Senior Receptionist" />
+                                        <FormSelect label="Job Title *" name="jobTitle" value={form.jobTitle} onChange={handleFormChange} options={JOB_TITLES} />
                                         <FormSelect label="Department *" name="department" value={form.department} onChange={handleFormChange} options={DEPARTMENTS} />
                                         <FormInput label="Monthly Salary (Rs.) *" name="salary" type="number" value={form.salary} onChange={handleFormChange} error={formErrors.salary} placeholder="45000" />
                                         <FormInput label="Hire Date" name="hireDate" type="date" value={form.hireDate} onChange={handleFormChange} />
@@ -681,9 +737,9 @@ const Staff = () => {
                                         <UserPlus size={14} /> Personal & Sensitive Info
                                     </h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <FormInput label="Contact Phone" name="phone" value={form.phone} onChange={handleFormChange} error={formErrors.phone} placeholder="07XXXXXXXX" maxLength={10} />
+                                        <FormInput label="Contact Phone *" name="phone" value={form.phone} onChange={handleFormChange} error={formErrors.phone} placeholder="0701234567" maxLength={10} />
                                         <FormSelect label="Gender" name="gender" value={form.gender} onChange={handleFormChange} options={['Male', 'Female', 'Other']} />
-                                        <FormInput label="Date of Birth" name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={handleFormChange} />
+                                        <FormInput label="Date of Birth *" name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={handleFormChange} error={formErrors.dateOfBirth} />
                                         <FormInput label="Emergency Contact" name="emergencyContact" value={form.emergencyContact} onChange={handleFormChange} placeholder="Name - 07XXXXXXXX" />
                                         <div className="col-span-1 sm:col-span-2">
                                             <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1.5 ml-1">Permanent Address</label>
@@ -732,6 +788,39 @@ const Staff = () => {
                         </div>
                         <div className="p-5">
                             <QRScanner onScan={handleScan} onClose={() => setScannerOpen(false)} />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 flex flex-col items-center text-center space-y-4 animate-in zoom-in duration-200">
+                        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+                            <AlertTriangle size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-navy-900">Delete Employee</h3>
+                            <p className="text-sm text-navy-500 mt-1">
+                                Are you sure you want to delete <span className="font-semibold text-navy-700">"{staffToDelete?.name}"</span>? This action cannot be undone.
+                            </p>
+                        </div>
+                        <div className="flex w-full gap-3 pt-2">
+                            <button
+                                type="button"
+                                onClick={cancelDelete}
+                                className="flex-1 px-4 py-2 border border-navy-200 rounded-lg text-navy-600 hover:bg-navy-50 font-medium transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={confirmDelete}
+                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition shadow-lg shadow-red-500/20"
+                            >
+                                Delete
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -164,9 +164,15 @@ const SupplierModule = forwardRef(({
                                 const formData = new FormData(e.target);
                                 const data = Object.fromEntries(formData);
                                 
-                                // Phone validation
-                                if (!/^\+?[\d\s-]{8,}$/.test(data.phone)) {
-                                    return toast.error('Please enter a valid phone number');
+                                // Email validation
+                                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                                if (!emailRegex.test(data.email)) {
+                                    return toast.error('Please enter a valid email address');
+                                }
+
+                                // Phone validation (exactly 10 digits only)
+                                if (!/^\d{10}$/.test(data.phone)) {
+                                    return toast.error('Phone number must be exactly 10 digits');
                                 }
 
                                 try {
@@ -226,7 +232,11 @@ const SupplierModule = forwardRef(({
                                             type="tel"
                                             defaultValue={selectedSupplier?.phone} 
                                             required 
-                                            placeholder="+94 XX XXX XXXX"
+                                            placeholder="e.g. 0712345678"
+                                            maxLength={10}
+                                            onInput={(e) => {
+                                                e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+                                            }}
                                             className="w-full px-4 py-3 rounded-xl border border-navy-100 focus:outline-none focus:ring-4 focus:ring-navy-500/5 focus:border-navy-400 text-sm transition-all" 
                                         />
                                     </div>
