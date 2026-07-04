@@ -137,7 +137,7 @@ const InventoryManagement = () => {
 
     const generateSKU = (category) => {
         const prefix = INVENTORY_CATEGORIES[category]?.prefix || 'INV';
-        const random = Math.floor(1000 + Math.random() * 9000);
+        const random = Math.floor(100000 + Math.random() * 900000);
         return `${prefix}-${random}`;
     };
 
