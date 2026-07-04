@@ -25,14 +25,40 @@ const SignIn = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    if (name === 'phone') {
+      // Allow only numbers and cap at 10 digits
+      const sanitized = value.replace(/\D/g, '').slice(0, 10);
+      setFormData((prev) => ({ ...prev, [name]: sanitized }))
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }))
+    }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
-    // Basic validation
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address')
+      return;
+    }
+
+    // Validate phone number format (must be exactly 10 digits)
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      setError('Phone number must be exactly 10 digits')
+      return;
+    }
+
+    // Validate password length (at least 8 characters)
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long')
+      return;
+    }
+
+    // Confirm passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
       return
@@ -178,7 +204,7 @@ const SignIn = () => {
                 </div>
                 <div>
                   <label htmlFor="signup-phone" className="block text-xs font-bold text-navy-400 uppercase tracking-widest mb-1 pl-1">
-                    Phone Number
+                    Phone Number *
                   </label>
                   <input
                     type="tel"
@@ -186,8 +212,9 @@ const SignIn = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-2 bg-sand-50/50 border border-navy-100 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-navy-900 text-sm placeholder:text-navy-300"
-                    placeholder="+94 7X XXX XXXX"
+                    placeholder="e.g. 0764219211"
                   />
                 </div>
               </div>

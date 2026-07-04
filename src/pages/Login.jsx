@@ -31,9 +31,16 @@ const Login = () => {
   // Handle email/password login
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setIsSubmitting(true)
     setError('')
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address')
+      return;
+    }
+
+    setIsSubmitting(true)
     try {
       // Call backend API for login
       const data = await loginUser(formData)
