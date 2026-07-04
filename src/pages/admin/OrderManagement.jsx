@@ -27,6 +27,7 @@ const OrderManagement = () => {
     const [pages, setPages] = useState(1);
     const [limit, setLimit] = useState(15);
     const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [filterStatus, setFilterStatus] = useState('all');
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -52,6 +53,7 @@ const OrderManagement = () => {
         setLoading(true);
         try {
             const params = { page: p, limit: limit };
+            if (filterStatus && filterStatus !== 'all') params.status = filterStatus;
             if (debouncedSearch) params.search = debouncedSearch.trim();
             const data = await fetchAdminOrders(params);
             setOrders(Array.isArray(data.orders) ? data.orders : []);
@@ -64,7 +66,7 @@ const OrderManagement = () => {
         } finally {
             setLoading(false);
         }
-    }, [debouncedSearch, limit, showToast]);
+    }, [debouncedSearch, filterStatus, limit, showToast]);
 
     useEffect(() => {
         loadOrders(1);
@@ -97,7 +99,6 @@ const OrderManagement = () => {
     };
 
     const handleCancelOrder = async (id) => {
-        if (!window.confirm('Are you sure you want to cancel this order?')) return;
         try {
             const updated = await updateAdminOrderStatus(id, { status: 'cancelled' });
             showToast('Order cancelled successfully', 'success');
@@ -239,27 +240,29 @@ const OrderManagement = () => {
                         <Download size={18} className="mr-2" />
                         Export
                     </button>
-                    <button 
-                        onClick={() => setIsAddModalOpen(true)}
-                        className="bg-navy-900 text-white px-5 py-2.5 rounded-xl flex items-center hover:bg-teal-700 transition-all shadow-lg shadow-navy-900/10 font-medium text-sm"
-                    >
-                        <Plus size={18} className="mr-2" />
-                        Add Order
-                    </button>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-navy-100 flex flex-col md:flex-row gap-4 items-center">
-                <div className="relative flex-1 w-full">
-                    <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-navy-400" />
-                    <input
-                        type="text"
-                        placeholder="Search by Guest Name, Email or Order ID..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 bg-navy-50/50 text-sm"
-                    />
+            <div className="flex flex-col gap-4">
+                <div className="bg-white p-4 rounded-2xl shadow-sm border border-navy-100 flex flex-col md:flex-row gap-4 items-center">
+                    <div className="relative flex-1 w-full">
+                        <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-navy-400" />
+                        <input
+                            type="text"
+                            placeholder="Search by Guest Name, Order ID, Email or last 3 digits of Phone Number..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2.5 border border-navy-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 bg-navy-50/50 text-sm"
+                        />
+                    </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                    <button onClick={() => setFilterStatus('all')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'all' ? 'bg-navy-900 text-white shadow-lg' : 'bg-white text-navy-600 border border-navy-100 hover:bg-navy-50'}`}>All</button>
+                    <button onClick={() => setFilterStatus('pending')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'pending' ? 'bg-amber-500 text-white shadow-lg' : 'bg-white text-amber-600 border border-amber-100 hover:bg-amber-50'}`}>Pending</button>
+                    <button onClick={() => setFilterStatus('delivered')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'delivered' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white text-emerald-600 border border-emerald-100 hover:bg-emerald-50'}`}>Delivered</button>
+                    <button onClick={() => setFilterStatus('cancelled')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'cancelled' ? 'bg-rose-600 text-white shadow-lg' : 'bg-white text-rose-600 border border-rose-100 hover:bg-rose-50'}`}>Cancelled</button>
                 </div>
             </div>
 
@@ -272,26 +275,28 @@ const OrderManagement = () => {
                                 <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Order ID</th>
                                 <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Guest</th>
                                 <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Items</th>
+                                <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Order Status</th>
                                 <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider">Payment Status</th>
                                 <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider text-right">Total</th>
+                                <th className="px-6 py-4 text-xs font-bold text-navy-600 uppercase tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-navy-50">
                             {loading ? (
                                 Array(5).fill(0).map((_, i) => (
                                     <tr key={i} className="animate-pulse">
-                                        <td colSpan="4" className="px-6 py-4 h-16 bg-navy-50/10"></td>
+                                        <td colSpan="7" className="px-6 py-4 h-16 bg-navy-50/10"></td>
                                     </tr>
                                 ))
                             ) : orders.length === 0 ? (
                                 <tr>
-                                    <td colSpan="4" className="px-6 py-12 text-center text-navy-400 font-medium">
+                                    <td colSpan="7" className="px-6 py-12 text-center text-navy-400 font-medium">
                                         No orders found matching your criteria
                                     </td>
                                 </tr>
                             ) : (
                                 orders.map((order) => (
-                                    <tr key={order._id} onClick={() => { setSelectedOrder(order); setIsDetailModalOpen(true); }} className="hover:bg-navy-50/30 transition-colors group cursor-pointer">
+                                    <tr key={order._id} onClick={() => { setSelectedOrder(order); setIsDetailModalOpen(true); }} className={`hover:bg-navy-50/30 transition-colors group cursor-pointer ${order.status === 'cancelled' ? 'opacity-55 bg-rose-50/10' : order.status === 'delivered' ? 'bg-emerald-50/10 hover:bg-emerald-50/20' : ''}`}>
                                         <td className="px-6 py-4 font-mono text-xs text-navy-500">
                                             #{order._id?.slice(-6).toUpperCase() || 'N/A'}
                                         </td>
@@ -309,6 +314,19 @@ const OrderManagement = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                                                order.status === 'cancelled' 
+                                                    ? 'bg-red-50 text-red-700 border-red-100'
+                                                    : order.status === 'delivered'
+                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                                        : order.status === 'preparing'
+                                                            ? 'bg-indigo-50 text-indigo-700 border-indigo-100'
+                                                            : 'bg-amber-50 text-amber-700 border-amber-100'
+                                            }`}>
+                                                {order.status || 'pending'}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
                                                 order.paymentStatus === 'paid' 
                                                     ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
                                                     : 'bg-rose-50 text-rose-700 border-rose-100'
@@ -319,8 +337,46 @@ const OrderManagement = () => {
                                                 {order.paymentStatus === 'paid' ? 'Paid' : 'Unpaid'}
                                             </span>
                                          </td>
-                                         <td className="px-6 py-4 text-right">
-                                             <div className="font-bold text-navy-900">Rs. {order.total?.toLocaleString() || '0'}</div>
+                                         <td className="px-6 py-4 text-right font-bold text-navy-900">
+                                             Rs. {order.total?.toLocaleString() || '0'}
+                                         </td>
+                                         <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                                             <div className="flex items-center justify-end gap-1.5">
+                                                 <button 
+                                                     onClick={() => { setSelectedOrder(order); setIsDetailModalOpen(true); }} 
+                                                     className="p-1.5 hover:bg-navy-100 rounded-lg text-navy-600 transition-all"
+                                                     title="View Details"
+                                                 >
+                                                     <Eye size={15} />
+                                                 </button>
+                                                 {order.status !== 'cancelled' && order.status !== 'delivered' && (
+                                                     <>
+                                                         {order.paymentStatus !== 'paid' && (
+                                                             <button 
+                                                                 onClick={() => handlePaymentStatusUpdate(order._id, 'paid')}
+                                                                 className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all active:scale-95"
+                                                                 title="Mark as Paid"
+                                                             >
+                                                                 Pay
+                                                             </button>
+                                                         )}
+                                                         <button 
+                                                             onClick={() => handleStatusUpdate(order._id, 'delivered')}
+                                                             className="px-2.5 py-1 bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-700 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all active:scale-95"
+                                                             title="Complete Order"
+                                                         >
+                                                             Complete
+                                                         </button>
+                                                         <button 
+                                                             onClick={() => handleCancelOrder(order._id)}
+                                                             className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all active:scale-95"
+                                                             title="Cancel Order"
+                                                         >
+                                                             Cancel
+                                                         </button>
+                                                     </>
+                                                 )}
+                                             </div>
                                          </td>
                                     </tr>
                                 ))
@@ -510,25 +566,7 @@ const OrderManagement = () => {
                         </div>
 
                          {/* Modal Footer - Actions */}
-                        <div className="px-8 py-6 border-t border-navy-50 bg-white flex justify-end gap-3">
-                            {selectedOrder.status !== 'cancelled' && (
-                                <>
-                                    {selectedOrder.paymentStatus !== 'paid' && (
-                                        <button 
-                                            onClick={() => handlePaymentStatusUpdate(selectedOrder._id, 'paid')}
-                                            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-md shadow-emerald-600/10 active:scale-95 transition-all"
-                                        >
-                                            Mark as Paid
-                                        </button>
-                                    )}
-                                    <button 
-                                        onClick={() => handleCancelOrder(selectedOrder._id)}
-                                        className="px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-xl shadow-md shadow-rose-600/10 active:scale-95 transition-all"
-                                    >
-                                        Cancel Order
-                                    </button>
-                                </>
-                            )}
+                        <div className="px-8 py-6 border-t border-navy-50 bg-white flex justify-end">
                             <button 
                                 onClick={() => setIsDetailModalOpen(false)}
                                 className="px-8 py-3 bg-navy-900 text-white rounded-xl hover:bg-teal-700 transition-all font-bold text-sm"
