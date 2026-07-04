@@ -3,33 +3,7 @@ import { fetchGalleryRooms } from '../utils/api'
 
 const CATEGORIES = ['All', 'Rooms', 'Events', 'Resort', 'Dining']
 
-// const FALLBACK_ROOMS = [
-//     'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80',
-//     'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
-//     'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=800&q=80',
-//     'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
-// ]
 
-const EVENT_IMAGES = [
-    { url: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&q=80', title: 'Grand Wedding' },
-    { url: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=800&q=80', title: 'Beach Party' },
-    { url: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=800&q=80', title: 'Corporate Event' },
-    { url: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=800&q=80', title: 'Dinner Night' },
-]
-
-const RESORT_IMAGES = [
-    { url: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&w=800&q=80', title: 'Infinity Pool' },
-    { url: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=800&q=80', title: 'Ocean View' },
-    { url: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80', title: 'Luxury Spa' },
-    { url: 'https://images.unsplash.com/photo-1544124499-58d6263f3521?auto=format&fit=crop&w=800&q=80', title: 'Garden Walk' },
-]
-
-const DINING_IMAGES = [
-    { url: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80', title: 'Fine Dining' },
-    { url: 'https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=800&q=80', title: 'Seafood Platter' },
-    { url: 'https://images.unsplash.com/photo-1515516089376-88db1e26e9c0?auto=format&fit=crop&w=800&q=80', title: 'Tropical Bar' },
-    { url: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80', title: 'Chef Special' },
-]
 
 const Gallery = () => {
     const [selectedCategory, setSelectedCategory] = useState('All')
@@ -51,25 +25,10 @@ const Gallery = () => {
                     }))
                 )
 
-                // Combine with default images
-                const allImages = [
-                    ...roomImages,
-                    ...EVENT_IMAGES.map(img => ({ ...img, category: 'Events' })),
-                    ...RESORT_IMAGES.map(img => ({ ...img, category: 'Resort' })),
-                    ...DINING_IMAGES.map(img => ({ ...img, category: 'Dining' })),
-                ]
-
-                setImages(allImages)
+                setImages(roomImages)
             } catch (err) {
                 console.error('Error fetching gallery images:', err)
-                // Fallback images if API fails
-                const fallbackImages = [
-                    ...FALLBACK_ROOMS.map((url, i) => ({ url, title: `Room ${i + 1}`, category: 'Rooms' })),
-                    ...EVENT_IMAGES.map(img => ({ ...img, category: 'Events' })),
-                    ...RESORT_IMAGES.map(img => ({ ...img, category: 'Resort' })),
-                    ...DINING_IMAGES.map(img => ({ ...img, category: 'Dining' })),
-                ]
-                setImages(fallbackImages)
+                setImages([])
             } finally {
                 setLoading(false)
             }
