@@ -54,13 +54,22 @@ export default function BookingManagement() {
         guestInfo: { firstName: '', lastName: '', email: '', phone: '' }
     });
     const { toast, showToast, clearToast } = useToast();
-    const LIMIT = 15;
+    const [limit, setLimit] = useState(15);
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 400);
+        return () => clearTimeout(handler);
+    }, [search]);
 
     const load = useCallback(async (p = 1) => {
         setLoading(true);
         try {
-            const params = { page: p, limit: LIMIT };
+            const params = { page: p, limit: limit };
             if (filterStatus !== 'all') params.status = filterStatus;
+            if (debouncedSearch) params.search = debouncedSearch.trim();
             const data = await fetchBookings(params);
             const bookingsArray = Array.isArray(data.bookings) ? data.bookings : [];
             setBookings(bookingsArray);
@@ -72,7 +81,7 @@ export default function BookingManagement() {
         } finally {
             setLoading(false);
         }
-    }, [filterStatus, showToast]);
+    }, [filterStatus, debouncedSearch, limit, showToast]);
 
     useEffect(() => { load(1); }, [load]);
 
@@ -133,16 +142,7 @@ export default function BookingManagement() {
         }
     };
 
-    const filtered = search
-        ? (Array.isArray(bookings) ? bookings : []).filter(b => {
-            if (!b) return false;
-            const guestName = `${b.user?.firstName || b.guestInfo?.firstName || ''} ${b.user?.lastName || b.guestInfo?.lastName || ''}`.toLowerCase();
-            const email = b.user?.email?.toLowerCase() || b.guestInfo?.email?.toLowerCase() || '';
-            const bookingId = b.bookingId?.toLowerCase() || b._id?.toLowerCase() || '';
-            const q = search.toLowerCase();
-            return guestName.includes(q) || email.includes(q) || bookingId.includes(q);
-        })
-        : (Array.isArray(bookings) ? bookings : []);
+    const filtered = bookings || [];
 
     const statusCounts = {
         all: total || 0,
@@ -308,15 +308,80 @@ export default function BookingManagement() {
                 )}
 
                 
-                {pages > 1 && (
-                    <div className="flex items-center justify-between px-5 py-3 border-t border-navy-50 bg-navy-50/30">
-                        <p className="text-xs text-navy-500">Page {page} of {pages}</p>
-                        <div className="flex gap-1">
-                            <button onClick={() => load(page - 1)} disabled={page <= 1} className="p-1.5 rounded-lg hover:bg-navy-100 text-navy-500 disabled:opacity-30 transition-colors">
+                {total > 0 && (
+                    <div className="flex flex-col sm:flex-row items-center justify-between px-5 py-3 border-t border-navy-50 bg-navy-50/30 gap-4">
+                        <div className="flex items-center gap-4">
+                            <p className="text-xs text-navy-500">Page {page} of {pages} ({total} items)</p>
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-xs text-navy-400">Show:</span>
+                                <select 
+                                    value={limit} 
+                                    onChange={(e) => setLimit(Number(e.target.value))} 
+                                    className="bg-white border border-navy-200 rounded-lg text-xs px-2 py-1 text-navy-600 focus:outline-none"
+                                >
+                                    {[10, 15, 30, 50].map(sz => (
+                                        <option key={sz} value={sz}>{sz}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-1 flex-wrap">
+                            <button 
+                                onClick={() => load(1)} 
+                                disabled={page <= 1} 
+                                className="px-2 py-1.5 rounded-lg hover:bg-navy-100 text-navy-500 disabled:opacity-30 transition-all text-xs font-semibold"
+                            >
+                                First
+                            </button>
+                            <button 
+                                onClick={() => load(page - 1)} 
+                                disabled={page <= 1} 
+                                className="p-1.5 rounded-lg hover:bg-navy-100 text-navy-500 disabled:opacity-30 transition-colors"
+                            >
                                 <ChevronLeft size={16} />
                             </button>
-                            <button onClick={() => load(page + 1)} disabled={page >= pages} className="p-1.5 rounded-lg hover:bg-navy-100 text-navy-500 disabled:opacity-30 transition-colors">
+                            
+                            {(() => {
+                                const pageNumbers = [];
+                                const maxVisiblePages = 5;
+                                let startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
+                                let endPage = Math.min(pages, startPage + maxVisiblePages - 1);
+
+                                if (endPage - startPage + 1 < maxVisiblePages) {
+                                    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                                }
+
+                                for (let i = startPage; i <= endPage; i++) {
+                                    pageNumbers.push(i);
+                                }
+                                return pageNumbers;
+                            })().map(p => (
+                                <button
+                                    key={p}
+                                    onClick={() => load(p)}
+                                    className={`w-7 h-7 rounded-lg text-xs font-bold transition-all ${
+                                        page === p
+                                            ? 'bg-navy-900 text-white shadow-sm'
+                                            : 'text-navy-500 hover:bg-navy-50'
+                                    }`}
+                                >
+                                    {p}
+                                </button>
+                            ))}
+
+                            <button 
+                                onClick={() => load(page + 1)} 
+                                disabled={page >= pages} 
+                                className="p-1.5 rounded-lg hover:bg-navy-100 text-navy-500 disabled:opacity-30 transition-colors"
+                            >
                                 <ChevronRight size={16} />
+                            </button>
+                            <button 
+                                onClick={() => load(pages)} 
+                                disabled={page >= pages} 
+                                className="px-2 py-1.5 rounded-lg hover:bg-navy-100 text-navy-500 disabled:opacity-30 transition-all text-xs font-semibold"
+                            >
+                                Last
                             </button>
                         </div>
                     </div>
