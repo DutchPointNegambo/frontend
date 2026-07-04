@@ -104,13 +104,23 @@ const Staff = () => {
                 }
             }
         }
+        if (name === 'emergencyContact') {
+            const contactValue = value.trim();
+            const contactRegex = /^(?:[A-Za-z][A-Za-z\s.'-]{1,}\s*-\s*)?0\d{9}$/;
+
+            if (!editingStaff && !contactValue) {
+                error = 'Emergency contact is required';
+            } else if (contactValue && !contactRegex.test(contactValue)) {
+                error = 'Use a name + 10-digit phone number, e.g. John Doe - 0712345678';
+            }
+        }
 
         setFormErrors(prev => ({ ...prev, [name]: error }));
         return !error;
     };
 
     const validateForm = () => {
-        const fields = ['name', 'email', 'phone', 'jobTitle', 'salary', 'password', 'nic', 'dateOfBirth'];
+        const fields = ['name', 'email', 'phone', 'jobTitle', 'salary', 'password', 'nic', 'dateOfBirth', 'emergencyContact'];
         let isValid = true;
         fields.forEach(f => {
             if (!validateField(f, form[f])) isValid = false;
@@ -123,6 +133,9 @@ const Staff = () => {
         let finalValue = value;
         if (name === 'phone') {
             finalValue = value.replace(/[^0-9]/g, '').slice(0, 10);
+        }
+        if (name === 'emergencyContact') {
+            finalValue = value;
         }
         setForm(prev => ({ ...prev, [name]: finalValue }));
         validateField(name, finalValue);
@@ -740,7 +753,7 @@ const Staff = () => {
                                         <FormInput label="Contact Phone *" name="phone" value={form.phone} onChange={handleFormChange} error={formErrors.phone} placeholder="0701234567" maxLength={10} />
                                         <FormSelect label="Gender" name="gender" value={form.gender} onChange={handleFormChange} options={['Male', 'Female', 'Other']} />
                                         <FormInput label="Date of Birth *" name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={handleFormChange} error={formErrors.dateOfBirth} />
-                                        <FormInput label="Emergency Contact" name="emergencyContact" value={form.emergencyContact} onChange={handleFormChange} placeholder="Name - 07XXXXXXXX" />
+                                        <FormInput label="Emergency Contact *" name="emergencyContact" value={form.emergencyContact} onChange={handleFormChange} error={formErrors.emergencyContact} placeholder="John Doe - 0712345678" />
                                         <div className="col-span-1 sm:col-span-2">
                                             <label className="block text-[10px] font-bold text-navy-400 uppercase tracking-widest mb-1.5 ml-1">Permanent Address</label>
                                             <textarea 
