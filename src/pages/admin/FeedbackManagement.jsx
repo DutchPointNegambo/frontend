@@ -68,7 +68,6 @@ export default function FeedbackManagement() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Delete this message?')) return;
         try {
             await deleteFeedback(id);
             showToast('Message deleted', 'success');
@@ -105,7 +104,6 @@ export default function FeedbackManagement() {
                 <button onClick={() => setFilterStatus('all')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'all' ? 'bg-navy-900 text-white shadow-lg' : 'bg-white text-navy-600 border border-navy-100 hover:bg-navy-50'}`}>All ({counts.all})</button>
                 <button onClick={() => setFilterStatus('new')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'new' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white text-blue-600 border border-blue-100 hover:bg-blue-50'}`}>New ({counts.new})</button>
                 <button onClick={() => setFilterStatus('read')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'read' ? 'bg-navy-500 text-white shadow-lg' : 'bg-white text-navy-600 border border-navy-100 hover:bg-navy-50'}`}>Read ({counts.read})</button>
-                <button onClick={() => setFilterStatus('responded')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'responded' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white text-emerald-600 border border-emerald-100 hover:bg-emerald-50'}`}>Responded ({counts.responded})</button>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
@@ -171,11 +169,6 @@ export default function FeedbackManagement() {
                                     {f.status === 'new' && (
                                         <button onClick={() => handleStatusUpdate(f._id, 'read')} className="w-full flex items-center justify-center gap-2 py-2.5 bg-navy-900 text-white rounded-xl text-xs font-bold hover:bg-navy-800 transition-colors">
                                             <CheckCircle size={14} /> Mark as Read
-                                        </button>
-                                    )}
-                                    {f.status !== 'responded' && (
-                                        <button onClick={() => handleStatusUpdate(f._id, 'responded')} className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-colors">
-                                            <Clock size={14} /> Responded
                                         </button>
                                     )}
                                     <button onClick={() => handleDelete(f._id)} className="w-full flex items-center justify-center gap-2 py-2.5 bg-red-50 text-red-600 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors">
