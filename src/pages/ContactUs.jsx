@@ -18,11 +18,32 @@ const ContactUs = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
+    if (name === 'phone') {
+      // Allow only numbers and cap at 10 digits
+      const sanitized = value.replace(/\D/g, '').slice(0, 10);
+      setFormData({ ...formData, [name]: sanitized });
+    } else {
+      setFormData({ ...formData, [name]: value })
+    }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error('Please enter a valid email address.');
+      return;
+    }
+
+    // Validate phone number format (must be exactly 10 digits)
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      toast.error('Phone number must be exactly 10 digits.');
+      return;
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -179,7 +200,7 @@ const ContactUs = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                       <label htmlFor="contact-phone" className="block text-sm font-semibold text-navy-800 mb-2">
-                        Phone Number
+                        Phone Number *
                       </label>
                       <input
                         type="tel"
@@ -187,8 +208,9 @@ const ContactUs = () => {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
+                        required
                         className="w-full px-4 py-3.5 bg-navy-50/50 border border-navy-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 outline-none"
-                        placeholder="+94 76 421 9211"
+                        placeholder="e.g. 0764219211"
                       />
                     </div>
                     <div>
