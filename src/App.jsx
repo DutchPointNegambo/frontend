@@ -70,7 +70,10 @@ function App() {
   const shouldShowWhatsApp = !hideWhatsAppRoutes.some(route => location.pathname.startsWith(route));
 
   const isHomePage = location.pathname === '/';
-  const mainPadding = shouldShowNavbar && !isHomePage ? 'pt-20 md:pt-24' : '';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signin';
+  const mainPadding = shouldShowNavbar && !isHomePage 
+    ? (isAuthPage ? 'pt-[72px] md:pt-[88px]' : 'pt-20 md:pt-24') 
+    : '';
 
   return (
     <CartProvider>
