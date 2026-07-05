@@ -191,6 +191,36 @@ export default function RoomManagement() {
                 </div>
             </div>
 
+            {/* Today's Available Rooms Quick List (For Receptionist view) */}
+            {user?.role === 'receptionist' && (
+                <div className="bg-emerald-50/50 border border-emerald-100 p-6 rounded-3xl">
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 className="text-lg font-bold text-emerald-950 font-serif">Today's Available Rooms</h3>
+                            <p className="text-xs text-emerald-600 font-medium mt-0.5">Quick reference list for prompt check-ins and walk-in guest assignments.</p>
+                        </div>
+                        <span className="bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-xl border border-emerald-200 shadow-sm">
+                            {(rooms || []).filter(r => r && r.status === 'available' && !r.activeBooking).length} Free Room(s)
+                        </span>
+                    </div>
+                    {(rooms || []).filter(r => r && r.status === 'available' && !r.activeBooking).length === 0 ? (
+                        <p className="text-emerald-800/60 text-sm italic font-medium">All rooms are currently occupied or under maintenance.</p>
+                    ) : (
+                        <div className="flex flex-wrap gap-2.5">
+                            {(rooms || []).filter(r => r && r.status === 'available' && !r.activeBooking).map(r => (
+                                <div 
+                                    key={r._id} 
+                                    className="bg-white border border-emerald-100 hover:border-emerald-300 hover:shadow-sm px-4 py-2.5 rounded-2xl flex flex-col items-center min-w-[70px] transition-all cursor-default select-none"
+                                >
+                                    <span className="text-sm font-black text-emerald-950 font-mono">#{r.roomNumber}</span>
+                                    <span className="text-[9px] font-extrabold uppercase text-emerald-600 mt-0.5 tracking-wider">{r.type}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
 
             <div className="grid grid-cols-3 gap-4">
                 {Object.entries(counts).map(([key, count]) => {
