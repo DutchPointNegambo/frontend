@@ -3,7 +3,8 @@ import {
     Package, Truck, Plus, Search, History, CheckCircle2,
     XCircle, Boxes, Activity, HandCoins, ShieldAlert,
     Layers, ArrowRight, BedDouble, Utensils, Settings,
-    Wine, Monitor, Calendar, ShieldCheck, Tag, Save, Eye, Clock, Info
+    Wine, Monitor, Calendar, ShieldCheck, Tag, Save, Eye, Clock, Info,
+    ChevronUp, ChevronDown, AlertTriangle, RefreshCw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { 
@@ -80,6 +81,7 @@ const INVENTORY_CATEGORIES = {
         prefix: 'INV',
         examples: 'Miscellaneous items',
         description: 'General items not fitting other categories.',
+        hasWarranty: true,
         suggestedItems: []
     }
 };
@@ -90,6 +92,7 @@ const InventoryManagement = () => {
     const [suppliers, setSuppliers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [alertsExpanded, setAlertsExpanded] = useState(true);
     
     // Refs
     const supplierRef = React.useRef();
@@ -134,7 +137,7 @@ const InventoryManagement = () => {
 
     const generateSKU = (category) => {
         const prefix = INVENTORY_CATEGORIES[category]?.prefix || 'INV';
-        const random = Math.floor(1000 + Math.random() * 9000);
+        const random = Math.floor(100000 + Math.random() * 900000);
         return `${prefix}-${random}`;
     };
 
@@ -214,6 +217,10 @@ const InventoryManagement = () => {
         totalValue: inventory.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0)
     };
 
+    const outOfStockAlerts = inventory.filter(i => i.quantity === 0 || i.status === 'out-of-stock');
+    const expiredAlerts = expired || [];
+    const totalAlerts = outOfStockAlerts.length + expiredAlerts.length;
+
     const filteredInventory = inventory.filter(item => {
         const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             item.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -251,6 +258,110 @@ const InventoryManagement = () => {
                     {activeTab === 'items' ? 'Add Asset' : 'Onboard Supplier'}
                 </button>
             </div>
+
+            {/* Critical Stock Alerts */}
+            {totalAlerts > 0 && (
+                <div className="bg-white rounded-3xl border border-red-100 shadow-xl p-6 relative overflow-hidden transition-all duration-300">
+                    <div className="absolute top-0 left-0 w-32 h-32 bg-red-500/5 rounded-full blur-2xl -ml-16 -mt-16" />
+                    
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shadow-inner">
+                                <ShieldAlert size={24} />
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <h3 className="text-sm font-black text-navy-950 uppercase tracking-wider">Critical Stock Alerts Detected</h3>
+                                    <span className="bg-red-50 text-red-600 border border-red-100 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full">
+                                        {totalAlerts} Alerts
+                                    </span>
+                                </div>
+                                <p className="text-xs font-semibold text-navy-400 mt-1">
+                                    {outOfStockAlerts.length} empty stock item{outOfStockAlerts.length !== 1 ? 's' : ''}. {expiredAlerts.length} expired asset{expiredAlerts.length !== 1 ? 's' : ''}.
+                                </p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => setAlertsExpanded(!alertsExpanded)}
+                            className="flex items-center gap-2 px-4 py-2 border border-navy-200 hover:bg-navy-50 rounded-xl transition-all text-xs font-bold text-navy-600 shadow-sm"
+                        >
+                            {alertsExpanded ? 'Collapse Alerts' : 'Expand Alerts'}
+                            {alertsExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                        </button>
+                    </div>
+
+                    {alertsExpanded && (
+                        <div className="mt-8 space-y-6 pt-6 border-t border-navy-50 relative z-10 animate-in fade-in slide-in-from-top-2 duration-300">
+                            {/* Out of Stock Section */}
+                            {outOfStockAlerts.length > 0 && (
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-1 text-[10px] font-black text-red-500 uppercase tracking-widest">
+                                        <AlertTriangle size={12} />
+                                        <span>Out of Stock ({outOfStockAlerts.length})</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {outOfStockAlerts.map(item => (
+                                            <div key={item._id} className="p-4 bg-red-50/20 border border-red-100 rounded-2xl flex items-center justify-between gap-4">
+                                                <div>
+                                                    <p className="text-xs font-bold text-navy-950">{item.name}</p>
+                                                    <p className="text-[9px] text-navy-400 font-bold uppercase tracking-wider mt-1">
+                                                        {item.sku} · {item.category}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <button 
+                                                        onClick={() => { setSelectedItem(item); setIsDetailsModalOpen(true); }}
+                                                        className="p-2 hover:bg-navy-100/50 rounded-xl text-navy-400 hover:text-navy-900 transition-colors"
+                                                        title="View"
+                                                    >
+                                                        <Eye size={14} />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => { setSelectedItem(item); setIsAdjustModalOpen(true); }}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-[10px] font-bold shadow-md shadow-red-600/10 active:scale-95 transition-all"
+                                                    >
+                                                        <RefreshCw size={10} className="animate-spin-slow" />
+                                                        <span>Restock</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Expired Assets Section */}
+                            {expiredAlerts.length > 0 && (
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-1 text-[10px] font-black text-purple-600 uppercase tracking-widest">
+                                        <Clock size={12} />
+                                        <span>Expired Assets ({expiredAlerts.length})</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {expiredAlerts.map(item => (
+                                            <div key={item._id} className="p-4 bg-purple-50/20 border border-purple-100 rounded-2xl flex items-center justify-between gap-4">
+                                                <div>
+                                                    <p className="text-xs font-bold text-navy-950">{item.name}</p>
+                                                    <p className="text-[9px] text-purple-600 font-bold uppercase tracking-wider mt-1">
+                                                        Expired on {new Date(item.expiryDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                    </p>
+                                                </div>
+                                                <button 
+                                                    onClick={() => { setSelectedItem(item); setIsDetailsModalOpen(true); }}
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-[10px] font-bold shadow-md shadow-purple-600/10 active:scale-95 transition-all animate-none"
+                                                >
+                                                    <Eye size={12} />
+                                                    <span>Inspect</span>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Stats Dashboard */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

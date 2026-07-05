@@ -592,7 +592,7 @@ const Home = () => {
                     <div className="group cursor-pointer">
                       <div className="relative aspect-[4/5] overflow-hidden rounded-sm mb-6 shadow-xl">
                         <img
-                          src="https://images.unsplash.com/photo-1549488344-cbb6c34ce08b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+                          src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
                           alt="Romantic Dinner"
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                         />

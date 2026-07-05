@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Mail, Phone, Clock, Trash2, CheckCircle, MessageSquare, Search, Filter, User, CalendarDays } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Mail, Phone, Clock, Trash2, CheckCircle, MessageSquare, Search, Filter, User, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchFeedbacks, updateFeedbackStatus, deleteFeedback } from '../../utils/api';
 import Toast from '../../components/admin_components/Toast';
 import { useToast } from '../../components/admin_components/useToast';
@@ -15,51 +15,67 @@ export default function FeedbackManagement() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [total, setTotal] = useState(0);
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(1);
+    const [limit, setLimit] = useState(10);
+    const [counts, setCounts] = useState({ all: 0, new: 0, read: 0, responded: 0 });
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    
     const { toast, showToast, clearToast } = useToast();
 
-    useEffect(() => { load(); }, []);
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 400);
+        return () => clearTimeout(handler);
+    }, [search]);
 
-    const load = async () => {
+    const load = useCallback(async (p = 1) => {
         setLoading(true);
         try {
-            const data = await fetchFeedbacks();
-            setFeedbacks(Array.isArray(data) ? data : []);
+            const params = { page: p, limit: limit };
+            if (filterStatus && filterStatus !== 'all') params.status = filterStatus;
+            if (debouncedSearch) params.search = debouncedSearch.trim();
+            
+            const data = await fetchFeedbacks(params);
+            setFeedbacks(Array.isArray(data.contacts) ? data.contacts : []);
+            setTotal(data.total || 0);
+            setPage(data.page || 1);
+            setPages(data.pages || 1);
+            if (data.counts) {
+                setCounts(data.counts);
+            }
         } catch (e) {
             showToast(e.message, 'error');
         } finally {
             setLoading(false);
         }
-    };
+    }, [debouncedSearch, filterStatus, limit, showToast]);
+
+    useEffect(() => {
+        load(1);
+    }, [load]);
 
     const handleStatusUpdate = async (id, status) => {
         try {
-            const updated = await updateFeedbackStatus(id, status);
-            setFeedbacks(prev => prev.map(f => f._id === id ? updated : f));
-            showToast(`Marked as ${status}`);
+            await updateFeedbackStatus(id, status);
+            showToast(`Marked as ${status}`, 'success');
+            load(page);
         } catch (e) {
             showToast(e.message, 'error');
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Delete this message?')) return;
         try {
             await deleteFeedback(id);
-            setFeedbacks(prev => prev.filter(f => f._id !== id));
-            showToast('Message deleted');
+            showToast('Message deleted', 'success');
+            load(1);
         } catch (e) {
             showToast(e.message, 'error');
         }
     };
-
-    const filtered = feedbacks.filter(f => {
-        const matchesSearch = f.name.toLowerCase().includes(search.toLowerCase()) || 
-                             f.email.toLowerCase().includes(search.toLowerCase()) ||
-                             f.subject.toLowerCase().includes(search.toLowerCase()) ||
-                             f.message.toLowerCase().includes(search.toLowerCase());
-        const matchesStatus = filterStatus === 'all' || f.status === filterStatus;
-        return matchesSearch && matchesStatus;
-    });
 
     return (
         <div className="space-y-6">
@@ -68,7 +84,7 @@ export default function FeedbackManagement() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-navy-900">Guest Feedback & Inquiries</h1>
-                    <p className="text-navy-400 text-sm mt-0.5">{feedbacks.length} messages total</p>
+                    <p className="text-navy-400 text-sm mt-0.5">{counts.all} messages total</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="relative">
@@ -85,23 +101,22 @@ export default function FeedbackManagement() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-                <button onClick={() => setFilterStatus('all')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'all' ? 'bg-navy-900 text-white shadow-lg' : 'bg-white text-navy-600 border border-navy-100 hover:bg-navy-50'}`}>All</button>
-                <button onClick={() => setFilterStatus('new')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'new' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white text-blue-600 border border-blue-100 hover:bg-blue-50'}`}>New</button>
-                <button onClick={() => setFilterStatus('read')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'read' ? 'bg-navy-500 text-white shadow-lg' : 'bg-white text-navy-600 border border-navy-100 hover:bg-navy-50'}`}>Read</button>
-                <button onClick={() => setFilterStatus('responded')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'responded' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white text-emerald-600 border border-emerald-100 hover:bg-emerald-50'}`}>Responded</button>
+                <button onClick={() => setFilterStatus('all')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'all' ? 'bg-navy-900 text-white shadow-lg' : 'bg-white text-navy-600 border border-navy-100 hover:bg-navy-50'}`}>All ({counts.all})</button>
+                <button onClick={() => setFilterStatus('new')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'new' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white text-blue-600 border border-blue-100 hover:bg-blue-50'}`}>New ({counts.new})</button>
+                <button onClick={() => setFilterStatus('read')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterStatus === 'read' ? 'bg-navy-500 text-white shadow-lg' : 'bg-white text-navy-600 border border-navy-100 hover:bg-navy-50'}`}>Read ({counts.read})</button>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
                 {loading ? (
                     [1, 2, 3].map(i => <div key={i} className="h-40 bg-white rounded-3xl animate-pulse border border-navy-50" />)
-                ) : filtered.length === 0 ? (
+                ) : feedbacks.length === 0 ? (
                     <div className="bg-white rounded-3xl p-16 text-center border-2 border-dashed border-navy-100">
                         <MessageSquare size={48} className="mx-auto text-navy-200 mb-3" />
                         <h3 className="text-navy-900 font-bold">No messages found</h3>
                         <p className="text-navy-400 text-sm mt-1">Guest inquiries from the Contact page will appear here.</p>
                     </div>
                 ) : (
-                    filtered.map(f => (
+                    feedbacks.map(f => (
                         <div key={f._id} className={`bg-white rounded-3xl p-6 shadow-sm border transition-all hover:shadow-md ${f.status === 'new' ? 'border-blue-200 ring-1 ring-blue-50' : 'border-navy-100'}`}>
                             <div className="flex flex-col lg:flex-row gap-6">
                                 <div className="lg:w-1/4 space-y-3 pr-6 border-r border-navy-50">
@@ -156,11 +171,6 @@ export default function FeedbackManagement() {
                                             <CheckCircle size={14} /> Mark as Read
                                         </button>
                                     )}
-                                    {f.status !== 'responded' && (
-                                        <button onClick={() => handleStatusUpdate(f._id, 'responded')} className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-colors">
-                                            <Clock size={14} /> Responded
-                                        </button>
-                                    )}
                                     <button onClick={() => handleDelete(f._id)} className="w-full flex items-center justify-center gap-2 py-2.5 bg-red-50 text-red-600 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors">
                                         <Trash2 size={14} /> Delete
                                     </button>
@@ -170,6 +180,85 @@ export default function FeedbackManagement() {
                     ))
                 )}
             </div>
+
+            {total > 0 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border border-navy-100 rounded-3xl bg-white gap-4 shadow-sm">
+                    <div className="flex items-center gap-4">
+                        <p className="text-xs text-navy-500 font-medium">Page {page} of {pages} ({total} messages)</p>
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-navy-400">Show:</span>
+                            <select 
+                                value={limit} 
+                                onChange={(e) => setLimit(Number(e.target.value))} 
+                                className="bg-white border border-navy-200 rounded-lg text-xs px-2 py-1 text-navy-600 focus:outline-none"
+                            >
+                                {[5, 10, 20, 50].map(sz => (
+                                    <option key={sz} value={sz}>{sz}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-1 flex-wrap">
+                        <button 
+                            onClick={() => load(1)} 
+                            disabled={page <= 1} 
+                            className="px-2.5 py-1.5 rounded-lg hover:bg-navy-100 text-navy-500 disabled:opacity-30 transition-all text-xs font-bold"
+                        >
+                            First
+                        </button>
+                        <button 
+                            onClick={() => load(page - 1)} 
+                            disabled={page <= 1} 
+                            className="p-1.5 rounded-lg hover:bg-navy-100 text-navy-500 disabled:opacity-30 transition-colors"
+                        >
+                            <ChevronLeft size={16} />
+                        </button>
+                        
+                        {(() => {
+                            const pageNumbers = [];
+                            const maxVisiblePages = 5;
+                            let startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
+                            let endPage = Math.min(pages, startPage + maxVisiblePages - 1);
+
+                            if (endPage - startPage + 1 < maxVisiblePages) {
+                                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                            }
+
+                            for (let i = startPage; i <= endPage; i++) {
+                                pageNumbers.push(i);
+                            }
+                            return pageNumbers;
+                        })().map(p => (
+                            <button
+                                key={p}
+                                onClick={() => load(p)}
+                                className={`w-7 h-7 rounded-lg text-xs font-bold transition-all ${
+                                    page === p
+                                        ? 'bg-navy-900 text-white shadow-sm'
+                                        : 'text-navy-500 hover:bg-navy-50'
+                                }`}
+                            >
+                                {p}
+                            </button>
+                        ))}
+
+                        <button 
+                            onClick={() => load(page + 1)} 
+                            disabled={page >= pages} 
+                            className="p-1.5 rounded-lg hover:bg-navy-100 text-navy-500 disabled:opacity-30 transition-colors"
+                        >
+                            <ChevronRight size={16} />
+                        </button>
+                        <button 
+                            onClick={() => load(pages)} 
+                            disabled={page >= pages} 
+                            className="px-2.5 py-1.5 rounded-lg hover:bg-navy-100 text-navy-500 disabled:opacity-30 transition-all text-xs font-bold"
+                        >
+                            Last
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

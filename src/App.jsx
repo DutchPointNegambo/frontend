@@ -65,16 +65,22 @@ function App() {
   const hideNavbarRoutes = ['/admin', '/addRoom', '/employee', '/receptionist'];
   const shouldShowNavbar = !hideNavbarRoutes.some(route => location.pathname.startsWith(route));
   
+  // Hide WhatsApp floating icon on admin and receptionist panels
+  const hideWhatsAppRoutes = ['/admin', '/receptionist', '/addRoom'];
+  const shouldShowWhatsApp = !hideWhatsAppRoutes.some(route => location.pathname.startsWith(route));
 
   const isHomePage = location.pathname === '/';
-  const mainPadding = shouldShowNavbar && !isHomePage ? 'pt-20 md:pt-24' : '';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signin';
+  const mainPadding = shouldShowNavbar && !isHomePage 
+    ? (isAuthPage ? 'pt-[72px] md:pt-[88px]' : 'pt-20 md:pt-24') 
+    : '';
 
   return (
     <CartProvider>
       <Toaster position="top-center" reverseOrder={false} />
       <ScrollToTop />
       {shouldShowNavbar && <Navbar />}
-      <WhatsAppButton />
+      {shouldShowWhatsApp && <WhatsAppButton />}
       <main className={mainPadding}>
       <Suspense fallback={<div className="h-screen flex items-center justify-center text-navy-500 font-bold">Loading...</div>}>
         <Routes>
@@ -128,6 +134,7 @@ function App() {
             <Route path="dashboard" element={<ReceptionistDashboard />} />
             <Route path="bookings" element={<BookingManagement />} />
             <Route path="rooms" element={<RoomManagement />} />
+            <Route path="orders" element={<OrderManagement />} />
             <Route path="scanner" element={<ReceptionistScanner />} />
             <Route path="profile" element={<ReceptionistProfile />} />
           </Route>

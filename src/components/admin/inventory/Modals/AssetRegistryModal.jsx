@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { XCircle, Activity, Tag, History, Boxes, ShieldAlert, Calendar, ShieldCheck } from 'lucide-react';
+import { XCircle, Activity, Tag, History, Boxes, ShieldAlert, Calendar, ShieldCheck, Image, Camera, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AssetRegistryModal = ({ 
@@ -15,6 +15,19 @@ const AssetRegistryModal = ({
     const [itemCategory, setItemCategory] = useState('Housekeeping');
     const [itemName, setItemName] = useState('');
     const [formSKU, setFormSKU] = useState('');
+    const [imagePreview, setImagePreview] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     useEffect(() => {
         if (selectedItem) {
@@ -23,10 +36,12 @@ const AssetRegistryModal = ({
             setItemCategory(validCat);
             setItemName(selectedItem.name || '');
             setFormSKU(selectedItem.sku || '');
+            setImagePreview(selectedItem.imageUrl || null);
         } else {
             setItemCategory('Housekeeping');
             setItemName('');
             setFormSKU(generateSKU('Housekeeping'));
+            setImagePreview(null);
         }
     }, [selectedItem, isOpen]);
 
@@ -55,8 +70,10 @@ const AssetRegistryModal = ({
                         data.price = Number(data.price) || 0;
                         data.quantity = Number(data.quantity) || 0;
                         data.reorderLevel = Number(data.reorderLevel) || 10;
+                        if (imagePreview) data.imageUrl = imagePreview;
 
                         try {
+                            setIsSubmitting(true);
                             if (selectedItem) {
                                 await updateInventoryItem(selectedItem._id, data);
                                 toast.success('Inventory asset updated');
@@ -66,7 +83,11 @@ const AssetRegistryModal = ({
                             }
                             onClose();
                             loadData();
-                        } catch (err) { toast.error(err.message); }
+                        } catch (err) { 
+                            toast.error(err.message); 
+                        } finally {
+                            setIsSubmitting(false);
+                        }
                     }} className="p-8 space-y-8">
                         
                         {/* Category Selection Grid */}
@@ -260,7 +281,7 @@ const AssetRegistryModal = ({
                         </div>
 
                         {((inventoryCategories[itemCategory] || inventoryCategories['Housekeeping']).hasExpiry || 
-                         (itemCategory === 'Furniture & Equipment' && ['TVs', 'Refrigerators', 'Air conditioners', 'Beds'].includes(itemName))) && (
+                         (inventoryCategories[itemCategory] || {}).hasWarranty) && (
                             <div className="space-y-6 animate-in slide-in-from-top-4 duration-500">
                                 <div className="flex items-center gap-2 pb-2 border-b border-navy-50">
                                     <ShieldAlert size={16} className="text-teal-500" />
@@ -282,7 +303,47 @@ const AssetRegistryModal = ({
                                                 defaultValue={selectedItem?.expiryDate ? new Date(selectedItem.expiryDate).toISOString().split('T')[0] : ''}
                                                 className="w-full px-4 py-2.5 rounded-xl border border-orange-200 bg-white focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 text-sm transition-all" 
                                             />
-                                            <p className="text-[9px] text-orange-600 mt-2 font-medium">System will alert when approaching this date.</p>
+                                            <p className="text-[10px] text-orange-700 mt-2.5 font-bold bg-orange-100/40 p-2 rounded-lg leading-relaxed">
+                                                ⚠️ Notice: Expiry date is critical for perishable food ingredients and bar beverage stock.
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {itemCategory === 'Bar' && (
+                                        <div className="bg-navy-50/50 p-5 rounded-2xl border border-navy-100 animate-in zoom-in-95 duration-500">
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className="w-8 h-8 rounded-lg bg-navy-900 text-white flex items-center justify-center">
+                                                    <Image size={16} />
+                                                </div>
+                                                <p className="text-xs font-bold text-navy-900 uppercase tracking-tight">Bar Item Identification</p>
+                                            </div>
+                                            
+                                            <div 
+                                                className="relative group cursor-pointer" 
+                                                onClick={() => document.getElementById('barImageInput').click()}
+                                            >
+                                                {imagePreview ? (
+                                                    <div className="relative w-full h-32 rounded-xl overflow-hidden border-2 border-navy-200">
+                                                        <img src={imagePreview} alt="Bar item" className="w-full h-full object-cover" />
+                                                        <div className="absolute inset-0 bg-navy-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                            <Upload size={24} className="text-white" />
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-full h-32 rounded-xl border-2 border-dashed border-navy-200 bg-white flex flex-col items-center justify-center gap-2 hover:bg-navy-50 transition-all">
+                                                        <Camera size={24} className="text-navy-400" />
+                                                        <span className="text-[10px] font-bold text-navy-600 uppercase tracking-widest">Upload Visual Asset</span>
+                                                    </div>
+                                                )}
+                                                <input 
+                                                    id="barImageInput"
+                                                    type="file" 
+                                                    accept="image/*"
+                                                    className="hidden" 
+                                                    onChange={handleImageChange}
+                                                />
+                                            </div>
+                                            <p className="text-[9px] text-navy-400 mt-2 font-medium italic">Requirement for premium beverage inventory tracking.</p>
                                         </div>
                                     )}
 
@@ -300,7 +361,9 @@ const AssetRegistryModal = ({
                                                 defaultValue={selectedItem?.warrantyInfo}
                                                 className="w-full px-4 py-3 rounded-xl border border-teal-200 bg-white focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 text-sm transition-all" 
                                             />
-                                            <p className="text-[9px] text-teal-600 mt-2 font-medium">Critical for high-value electrical assets.</p>
+                                            <p className="text-[10px] text-teal-700 mt-2.5 font-bold bg-teal-100/40 p-2 rounded-lg leading-relaxed">
+                                                ℹ️ Optional: Leave blank if this specific good does not have a warranty policy.
+                                            </p>
                                         </div>
                                     )}
                                 </div>
@@ -320,9 +383,10 @@ const AssetRegistryModal = ({
                     <button 
                         form="itemForm"
                         type="submit" 
-                        className="px-8 py-3 rounded-xl bg-navy-900 text-white font-bold shadow-xl shadow-navy-900/20 hover:bg-navy-800 hover:shadow-navy-900/30 active:scale-95 transition-all text-xs"
+                        disabled={isSubmitting}
+                        className="px-8 py-3 rounded-xl bg-navy-900 text-white font-bold shadow-xl shadow-navy-900/20 hover:bg-navy-800 hover:shadow-navy-900/30 active:scale-95 transition-all text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {selectedItem ? 'Save Changes' : 'Save Asset'}
+                        {isSubmitting ? 'Processing...' : (selectedItem ? 'Save Changes' : 'Save Asset')}
                     </button>
                 </div>
             </div>
