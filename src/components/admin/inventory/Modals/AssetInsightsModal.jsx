@@ -30,6 +30,13 @@ const AssetInsightsModal = ({
                 </div>
 
                 <div className="p-8 space-y-8 overflow-y-auto custom-scrollbar">
+                    {selectedItem.imageUrl && (
+                        <div className="relative w-full h-48 rounded-[2rem] overflow-hidden border border-navy-100 shadow-sm group">
+                            <img src={selectedItem.imageUrl} alt={selectedItem.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-navy-900/20 to-transparent" />
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-3 gap-6">
                         <div className="p-4 bg-navy-50 rounded-2xl border border-navy-100">
                             <p className="text-[10px] font-bold text-navy-400 uppercase mb-1">Current Stock</p>
