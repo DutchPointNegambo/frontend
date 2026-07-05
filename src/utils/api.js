@@ -339,6 +339,17 @@ export async function confirmBookingPayment(bookingId, transactionId) {
     return handleResponse(res);
 }
 
+// Fetch PayHere parameters for a pending booking
+export async function fetchPayHereParams(bookingId) {
+    const res = await fetch(`${API_URL}/event-bookings/${bookingId}/payhere-params`, {
+        headers: authHeaders(),
+    });
+    return handleResponse(res);
+}
+
+
+
+
 // Admin: Staff
 export async function fetchStaff(params = {}) {
     const qs = new URLSearchParams(params).toString();
