@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { XCircle, Activity, Tag, History, Boxes, ShieldAlert, Calendar, ShieldCheck, Image, Camera, Upload } from 'lucide-react';
+import { XCircle, Activity, Tag, History, Boxes, ShieldAlert, Calendar, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AssetRegistryModal = ({ 
@@ -309,45 +309,9 @@ const AssetRegistryModal = ({
                                         </div>
                                     )}
 
-                                    {itemCategory === 'Bar' && (
-                                        <div className="bg-navy-50/50 p-5 rounded-2xl border border-navy-100 animate-in zoom-in-95 duration-500">
-                                            <div className="flex items-center gap-3 mb-3">
-                                                <div className="w-8 h-8 rounded-lg bg-navy-900 text-white flex items-center justify-center">
-                                                    <Image size={16} />
-                                                </div>
-                                                <p className="text-xs font-bold text-navy-900 uppercase tracking-tight">Bar Item Identification</p>
-                                            </div>
-                                            
-                                            <div 
-                                                className="relative group cursor-pointer" 
-                                                onClick={() => document.getElementById('barImageInput').click()}
-                                            >
-                                                {imagePreview ? (
-                                                    <div className="relative w-full h-32 rounded-xl overflow-hidden border-2 border-navy-200">
-                                                        <img src={imagePreview} alt="Bar item" className="w-full h-full object-cover" />
-                                                        <div className="absolute inset-0 bg-navy-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                            <Upload size={24} className="text-white" />
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="w-full h-32 rounded-xl border-2 border-dashed border-navy-200 bg-white flex flex-col items-center justify-center gap-2 hover:bg-navy-50 transition-all">
-                                                        <Camera size={24} className="text-navy-400" />
-                                                        <span className="text-[10px] font-bold text-navy-600 uppercase tracking-widest">Upload Visual Asset</span>
-                                                    </div>
-                                                )}
-                                                <input 
-                                                    id="barImageInput"
-                                                    type="file" 
-                                                    accept="image/*"
-                                                    className="hidden" 
-                                                    onChange={handleImageChange}
-                                                />
-                                            </div>
-                                            <p className="text-[9px] text-navy-400 mt-2 font-medium italic">Requirement for premium beverage inventory tracking.</p>
-                                        </div>
-                                    )}
 
-                                    {itemCategory === 'Furniture & Equipment' && ['TVs', 'Refrigerators', 'Air conditioners', 'Beds'].includes(itemName) && (
+
+                                    {itemCategory === 'Furniture & Equipment' && (
                                         <div className="bg-teal-50/50 p-5 rounded-2xl border border-teal-100">
                                             <div className="flex items-center gap-3 mb-3">
                                                 <div className="w-8 h-8 rounded-lg bg-teal-600 text-white flex items-center justify-center">
