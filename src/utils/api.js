@@ -491,8 +491,9 @@ export async function deleteReadNotifications() {
 }
 
 // Admin: Feedbacks/Contacts
-export async function fetchFeedbacks() {
-    const res = await fetch(`${API_URL}/admin/contacts`, { headers: authHeaders() });
+export async function fetchFeedbacks(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/admin/contacts?${qs}`, { headers: authHeaders() });
     return handleResponse(res);
 }
 
