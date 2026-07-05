@@ -101,7 +101,7 @@ export default function EventManagement() {
         }
     };
 
-    const filtered = search
+    const filtered = (search
         ? bookings.filter(b => {
             const guestName = `${b.guestInfo?.firstName || ''} ${b.guestInfo?.lastName || ''}`.toLowerCase();
             const email = b.guestInfo?.email?.toLowerCase() || '';
@@ -109,7 +109,7 @@ export default function EventManagement() {
             const q = search.toLowerCase();
             return guestName.includes(q) || email.includes(q) || ref.includes(q);
         })
-        : bookings;
+        : bookings).filter(b => b.status !== 'pending');
 
     return (
         <div className="space-y-6">
@@ -128,7 +128,7 @@ export default function EventManagement() {
 
             {/* Status filter tabs */}
             <div className="flex gap-1.5 bg-white p-1.5 rounded-2xl border border-navy-100 shadow-sm w-fit flex-wrap">
-                {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(s => (
+                {['all', 'confirmed', 'completed', 'cancelled'].map(s => (
                     <button key={s} onClick={() => setFilterStatus(s)}
                         className={`px-4 py-2 rounded-xl text-xs font-semibold capitalize transition-all ${filterStatus === s ? 'bg-navy-900 text-white shadow-sm' : 'text-navy-500 hover:bg-navy-50'}`}>
                         {s}
@@ -198,7 +198,9 @@ export default function EventManagement() {
                                             <td className="px-5 py-4 capitalize text-sm text-navy-700">{b.eventType}</td>
                                             <td className="px-5 py-4">
                                                 <p className="text-sm text-navy-600">{formatDate(b.eventDate)}</p>
-                                                <p className="text-xs text-navy-400 capitalize">{b.timeSlot === 'day' ? 'Day' : 'Night'}</p>
+                                                {(b.paymentStatus === 'deposit_paid' || b.paymentStatus === 'fully_paid') && (
+                <p className="text-xs text-navy-400 capitalize">{b.timeSlot === 'day' ? 'Day' : 'Night'}</p>
+            )}
                                             </td>
                                             <td className="px-5 py-4 text-sm text-navy-600">{b.guests}</td>
                                             <td className="px-5 py-4 text-right font-bold text-navy-900 font-mono text-sm">{formatCurrency(b.totalAmount)}</td>
@@ -285,10 +287,24 @@ export default function EventManagement() {
                             <div className="bg-navy-50 rounded-xl p-4">
                                 <p className="text-xs font-semibold text-navy-500 uppercase tracking-wide mb-3">Event Details</p>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div><p className="text-navy-400 text-xs mb-0.5">Type</p><p className="font-semibold text-navy-900 capitalize">{selectedBooking.eventType}</p></div>
-                                    <div><p className="text-navy-400 text-xs mb-0.5">Date</p><p className="font-semibold text-navy-900">{formatDate(selectedBooking.eventDate)}</p></div>
-                                    <div><p className="text-navy-400 text-xs mb-0.5">Slot</p><p className="font-semibold text-navy-900 capitalize">{selectedBooking.timeSlot === 'day' ? '☀️ Day' : '🌙 Night'}</p></div>
-                                    <div><p className="text-navy-400 text-xs mb-0.5">Guests</p><p className="font-semibold text-navy-900">{selectedBooking.guests}</p></div>
+                                    <div>
+                                        <p className="text-navy-400 text-xs mb-0.5">Type</p>
+                                        <p className="font-semibold text-navy-900 capitalize">{selectedBooking.eventType}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-navy-400 text-xs mb-0.5">Date</p>
+                                        <p className="font-semibold text-navy-900">{formatDate(selectedBooking.eventDate)}</p>
+                                    </div>
+                                    {(selectedBooking.paymentStatus === 'deposit_paid' || selectedBooking.paymentStatus === 'fully_paid') && (
+                                        <div>
+                                            <p className="text-navy-400 text-xs mb-0.5">Slot</p>
+                                            <p className="font-semibold text-navy-900 capitalize">{selectedBooking.timeSlot === 'day' ? '☀️ Day' : '🌙 Night'}</p>
+                                        </div>
+                                    )}
+                                    <div>
+                                        <p className="text-navy-400 text-xs mb-0.5">Guests</p>
+                                        <p className="font-semibold text-navy-900">{selectedBooking.guests}</p>
+                                    </div>
                                     <div><p className="text-navy-400 text-xs mb-0.5">Decoration</p><p className="font-semibold text-navy-900 capitalize">{selectedBooking.decoration?.name || selectedBooking.decoration || '—'}</p></div>
                                     <div><p className="text-navy-400 text-xs mb-0.5">Food Package</p><p className="font-semibold text-navy-900 capitalize">{selectedBooking.foodPackage?.name || selectedBooking.foodPackage || '—'}</p></div>
                                 </div>
