@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { fetchMyEventBookings } from '../utils/api'
+import { fetchMyEventBookings, fetchPayHereParams } from '../utils/api'
 import Footer from '../components/Footer'
 import { Calendar, Users, MapPin, CreditCard, Download, ExternalLink, PartyPopper, CheckCircle2, Clock, XCircle } from 'lucide-react'
 import jsPDF from 'jspdf'
@@ -20,6 +20,29 @@ const PAYMENT_STATUS = {
 }
 
 export default function MyEvents() {
+  // Helper to handle payment completion
+  const handleCompletePayment = async (booking) => {
+    try {
+      const params = await fetchPayHereParams(booking._id);
+      // Build a form to submit to PayHere (or redirect if URL provided)
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = params.payhereUrl || 'https://sandbox.payhere.lk/pay/checkout'; // fallback
+      Object.entries(params).forEach(([key, value]) => {
+        if (key === 'payhereUrl') return; // skip URL key
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+      document.body.appendChild(form);
+      form.submit();
+    } catch (err) {
+      console.error('Failed to retrieve payment params', err);
+      alert('Unable to start payment. Please try again later.');
+    }
+  };
     const [bookings, setBookings] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -373,6 +396,14 @@ export default function MyEvents() {
                                             >
                                                 <Download size={14} /> Invoice
                                             </button>
+                                            {booking.paymentStatus === 'pending' && (
+                                            <button
+                                                onClick={() => handleCompletePayment(booking)}
+                                                className="mt-4 w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-teal-500 to-blue-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:from-teal-600 hover:to-blue-700 transition-all shadow-lg"
+                                            >
+                                                Complete Payment
+                                            </button>
+                                            )}
                                         </div>
                                     </div>
                                     
