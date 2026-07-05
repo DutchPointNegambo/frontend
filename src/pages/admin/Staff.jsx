@@ -20,7 +20,7 @@ const JOB_TITLES = [
     'Storekeeper'
 ];
 const EMPTY_FORM = { 
-    name: '', email: '', phone: '', jobTitle: '', password: '', 
+    name: '', email: '', phone: '', jobTitle: JOB_TITLES[0], password: '', 
     department: 'Front Desk', status: 'Active', salary: '', hireDate: '',
     nic: '', address: '', dateOfBirth: '', emergencyContact: '', gender: 'Male'
 };
@@ -120,7 +120,7 @@ const Staff = () => {
     };
 
     const validateForm = () => {
-        const fields = ['name', 'email', 'phone', 'jobTitle', 'salary', 'password', 'nic', 'dateOfBirth', 'emergencyContact'];
+        const fields = ['name', 'email', 'phone', 'jobTitle', 'department', 'salary', 'password', 'nic', 'dateOfBirth', 'emergencyContact'];
         let isValid = true;
         fields.forEach(f => {
             if (!validateField(f, form[f])) isValid = false;
@@ -363,7 +363,7 @@ const Staff = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center">
-                                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-100 to-teal-200 flex items-center justify-center text-teal-700 font-bold mr-3 text-sm">
+                                            <div className="w-9 h-9 rounded-full bg-linear-to-br from-teal-100 to-teal-200 flex items-center justify-center text-teal-700 font-bold mr-3 text-sm">
                                                 {emp.name.charAt(0)}
                                             </div>
                                             <div>
@@ -425,7 +425,7 @@ const Staff = () => {
                     </button>
                     <button
                         onClick={() => setScannerOpen(true)}
-                        className="bg-gradient-to-r from-teal-600 to-teal-700 text-white px-4 py-2 rounded-xl flex items-center hover:from-teal-700 hover:to-teal-800 transition-all shadow-lg shadow-teal-500/25 text-sm font-medium"
+                        className="bg-linear-to-r from-teal-600 to-teal-700 text-white px-4 py-2 rounded-xl flex items-center hover:from-teal-700 hover:to-teal-800 transition-all shadow-lg shadow-teal-500/25 text-sm font-medium"
                     >
                         <ScanLine size={16} className="mr-2" />
                         Scan QR Code
@@ -522,7 +522,7 @@ const Staff = () => {
                                     <tr key={record._id} className="hover:bg-navy-50/50 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center">
-                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-100 to-teal-200 flex items-center justify-center text-teal-700 font-bold mr-3 text-xs">
+                                                <div className="w-8 h-8 rounded-full bg-linear-to-br from-teal-100 to-teal-200 flex items-center justify-center text-teal-700 font-bold mr-3 text-xs">
                                                     {(record.employee?.name || '?').charAt(0)}
                                                 </div>
                                                 <div>
@@ -709,9 +709,9 @@ const Staff = () => {
 
             {/* Add / Edit Staff Modal */}
             {modalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-200 p-4">
                     <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-                        <div className="flex items-center justify-between p-5 border-b border-navy-100 flex-shrink-0">
+                        <div className="flex items-center justify-between p-5 border-b border-navy-100 shrink-0">
                             <h2 className="text-xl font-bold text-navy-900">{editingStaff ? 'Edit Employee' : 'Add New Employee'}</h2>
                             <button onClick={() => setModalOpen(false)} className="p-2 hover:bg-navy-50 rounded-xl text-navy-400"><X size={18} /></button>
                         </div>
@@ -790,7 +790,7 @@ const Staff = () => {
             {scannerOpen && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
-                        <div className="bg-gradient-to-r from-navy-900 to-navy-800 px-6 py-4 flex items-center justify-between">
+                        <div className="bg-linear-to-r from-navy-900 to-navy-800 px-6 py-4 flex items-center justify-between">
                             <div>
                                 <h3 className="text-white font-bold text-lg">QR Attendance Scanner</h3>
                                 <p className="text-teal-400 text-xs font-medium">Scan employee badge to record attendance</p>
@@ -808,7 +808,7 @@ const Staff = () => {
 
             {/* Delete Confirmation Modal */}
             {isDeleteModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-200 p-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 flex flex-col items-center text-center space-y-4 animate-in zoom-in duration-200">
                         <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
                             <AlertTriangle size={24} />
