@@ -110,7 +110,6 @@ export default function EventManagement() {
         }
     };
 
-<<<<<<< HEAD
     const filtered = (search
         ? bookings.filter(b => {
             const guestName = `${b.guestInfo?.firstName || ''} ${b.guestInfo?.lastName || ''}`.toLowerCase();
@@ -118,11 +117,9 @@ export default function EventManagement() {
             const ref = b.bookingRef?.toLowerCase() || '';
             const q = search.toLowerCase();
             return guestName.includes(q) || email.includes(q) || ref.includes(q);
-        })
-        : bookings).filter(b => b.status !== 'pending');
-=======
-    const filtered = bookings || [];
->>>>>>> 96b75396f6ad24d402312d78858185d7f36cee0a
+          })
+        : bookings
+    ).filter(b => b.status !== 'pending');
 
     return (
         <div className="space-y-6">
